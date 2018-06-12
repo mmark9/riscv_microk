@@ -20,10 +20,10 @@ AS=$(HOST)-as
 
 # Declaring some options for building
 CFLAGS=-O0 #-g
-CFLAGS:=$(CFLAGS) -std=gnu99 -ffreestanding -fbuiltin -Wall -Wextra
+CFLAGS:=$(CFLAGS) -std=gnu99 -ffreestanding -fbuiltin -Wall -Wextra -mabi=ilp32
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 CPPFLAGS:=-D_kernel_code -I$(INCLUDE_DIR)
-LIBFLAGS:=-nostdlib -lgcc
+LIBFLAGS:=-nostdlib
 #ASFLAGS:=-gstabs+
 
 C_SRC_FILES=$(shell find . -type f -name "*.c")
