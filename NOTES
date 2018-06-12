@@ -1,0 +1,10 @@
+Memory map for SPIKE boards: https://github.com/riscv/riscv-qemu/blob/riscv-all/hw/riscv/spike.c#L51-L53
+
+kernel elfs should be loaded into DRAM
+
+Kernel boot assembly should have halt/infinite loop at the end to avoid PC from going out of bounds 
+
+Example launch using qemu:
+qemu-system-riscv32 -nographic -smp 1 -m 128M -kernel /home/miguelm/projects/sphinx/release/sphinx_riscv32.elf
+This will launch the kernel with one Core and 128 Megabytes of memory.
+After launch it will be stuck in an infinite loop
