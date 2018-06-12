@@ -1,7 +1,0 @@
-Quit
-+quit
-+target remote localhost:12345
-localhost:12345: Connection timed out.
-+layout split
-+set width 80
-+set height 24
