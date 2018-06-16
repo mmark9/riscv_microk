@@ -19,12 +19,12 @@ CC=$(HOST)-gcc
 AS=$(HOST)-as
 
 # Declaring some options for building
-CFLAGS=-O0 #-g
+CFLAGS=-O0 -gdwarf-4
 CFLAGS:=$(CFLAGS) -std=gnu99 -ffreestanding -fbuiltin -Wall -Wextra -mabi=ilp32
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
 CPPFLAGS:=-D_kernel_code -I$(INCLUDE_DIR)
 LIBFLAGS:=-nostdlib
-#ASFLAGS:=-gstabs+
+ASFLAGS:=-mabi=ilp32
 
 C_SRC_FILES=$(shell find . -type f -name "*.c")
 ASM_SRC_FILES=$(shell find . -type f -name "*.S")
@@ -53,10 +53,7 @@ $(IMAGE_NAME): ${LINKER_SCRIPT} $(ALL_OBJS)
 	$(CC) -c $< -o $@ $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS)
 	mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
 
-%.o: %.S
-	$(AS) $< -o $@ $(ASFLAGS)
-
-%.S.o: %.s
+%.S.o: %.S
 	$(AS) $< -o $@ $(ASFLAGS)
 
 install: install-headers install-kernel
