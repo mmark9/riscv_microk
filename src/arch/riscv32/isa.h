@@ -1,7 +1,6 @@
 #ifndef SRC_ARCH_RISCV32_ISA_H_
 #define SRC_ARCH_RISCV32_ISA_H_
 
-
 typedef struct {
 	// Extensions[0-25] (WARL)
 	unsigned int atomic_ext:1;            //A
@@ -36,14 +35,121 @@ typedef struct {
 	unsigned int isa_width:2;
 } misa_register_t;
 
-misa_register_t get_machine_isa_register_value() {
-	misa_register_t ret_val;
-	asm volatile ("csrr t0, misa\n\t"
-			  "sw t0, %0"
-			  : "=m" (ret_val)
-			  :
-			  );
-	return ret_val;
+typedef struct {
+	unsigned int offset:7;
+	unsigned int blank:25;
+} mvendorid_register_t;
+
+typedef struct {
+	unsigned int architecture_id:32;
+} marchid_register_t;
+
+typedef struct {
+	unsigned int implementation_id:32;
+} mimpid_register_t;
+
+typedef struct {
+	unsigned int hart_id:32;
+} mhartid_register_t;
+
+typedef struct {
+	// Global Interrupt Flags per privilege mode (per Hart)
+	unsigned int user_interrupt_enabled:1;
+	unsigned int supervisor_interrupt_enabled:1;
+	unsigned int not_used_1:1;
+	unsigned int machine_interrupt_enabled:1;
+	// Prior to trap Interrupt Flags per privilege mode (per Hart)
+	unsigned int user_before_trap_interrupt_enabled:1;
+	unsigned int supervisor_before_trap_interrupt_enabled:1;
+	unsigned int not_used_2:1;
+	unsigned int machine_before_trap_interrupt_enabled:1;
+	unsigned int supervisor_prev_privilege_mode:1;
+	unsigned int not_used_3:2;
+	unsigned int machine_prev_privilege_mode:2;
+	// Extension Context Status
+	unsigned int fpu_status:2;
+	unsigned int additional_usr_mode_ext_status:2;
+	// Memory Privilege
+	unsigned int modify_privilege_enabled:1;
+	unsigned int supervisor_user_memory_access_enabled:1;
+	unsigned int make_excutable_readable_enabled:1;
+	// Virtualization Support
+	unsigned int trap_virtual_memory_enabled:1;
+	unsigned int interrutpt_time_enabled:1;
+	unsigned int trap_sret_enabled:1;
+	// Ignored
+	unsigned int not_used_4:8;
+} mstatus_register_t;
+
+typedef struct {
+	// 0 = Direct = All exceptions set pc to Base
+	// 1 = Vectored = Asynchronous interrupts set pc to BASE+4xcause
+	unsigned int mode:2;
+	// Note: base address must be aligned on 4-byte boundary
+	unsigned int base:30;
+} mtvec_register_t;
+
+typedef struct {
+	unsigned int user_software_interrupt_delegated:1;
+	unsigned int supervisor_software_interrupt_delegated:1;
+	unsigned int reserved_1:1;
+	unsigned int machine_software_interrupt_delegated:1;
+	unsigned int user_timer_interrupt_delegated:1;
+	unsigned int supervisor_timer_interrupt_delegated:1;
+	unsigned int reserved_2:1;
+	unsigned int machine_timer_interrupt_delegated:1;
+} mideleg_register_t;
+
+typedef struct {
+	unsigned int instruction_address_missaligned_delegated:1;
+	unsigned int instruction_fault_delegated:1;
+	unsigned int illegal_instruction_delegated:1;
+	unsigned int break_point_delegated:1;
+	unsigned int load_address_misaligned_delegated:1;
+	unsigned int load_access_fault_delegated:1;
+	unsigned int store_amo_address_misaligned_delegated:1;
+	unsigned int store_amo_access_fault_delegated:1;
+	unsigned int enviornment_call_from_u_mode_delegated:1;
+	unsigned int enviornment_call_from_s_mode_delegated:1;
+	unsigned int reserved_1:1;
+	unsigned int enviornment_call_from_m_mode_delegated:1;
+	unsigned int instruction_page_fault_delegated:1;
+	unsigned int load_page_fault_delegated:1;
+	unsigned int reserved_2:1;
+	unsigned int store_amo_page_fault:1;
+} medeleg_register_t;
+
+// TODO: continue defining register layouts
+typedef struct {
+
+};
+
+// TODO: use python script to generate pseudo enum
+// Pseudo enum
+struct {
+	unsigned short misa;
+	unsigned short mvendorid;
+} CSR_ID = {
+		.misa = 0x300,
+		.mvendorid = 0x301
+};
+
+// TODO: use python script to generate read calls
+void read_csr_register(unsigned int csr_id, void* reg_out) {
+	switch(csr_id) {
+	case 0:
+		asm volatile ("csrr t0, misa\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
+		break;
+	case 1:
+		asm volatile ("csrr t0, mvendorid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
+		break;
+	}
+}
+
+int get_core_vendor_id() {
+	mvendorid_register_t reg;
+	read_csr_register(1, &reg);
+	return reg.offset ^ 0x80;
 }
 
 #endif /* SRC_ARCH_RISCV32_ISA_H_ */

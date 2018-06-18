@@ -3,7 +3,8 @@
 
 void print_architecture_string() {
 	printf("Architecture detected: ");
-	misa_register_t misa = get_machine_isa_register_value();
+	misa_register_t misa;
+	read_csr_register(0, &misa);
 	int isa_width = -1;
 	switch (misa.isa_width) {
 	case 1:
