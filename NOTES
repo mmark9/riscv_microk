@@ -1,10 +1,25 @@
-Memory map for SPIKE boards: https://github.com/riscv/riscv-qemu/blob/riscv-all/hw/riscv/spike.c#L51-L53
+Virt board memory map:
+
+static const struct MemmapEntry {
+    hwaddr base;
+    hwaddr size;
+} virt_memmap[] = {
+    [VIRT_DEBUG] =    {        0x0,      0x100 },
+    [VIRT_MROM] =     {     0x1000,    0x11000 },
+    [VIRT_TEST] =     {   0x100000,     0x1000 },
+    [VIRT_CLINT] =    {  0x2000000,    0x10000 },
+    [VIRT_PLIC] =     {  0xc000000,  0x4000000 },
+    [VIRT_UART0] =    { 0x10000000,      0x100 },
+    [VIRT_VIRTIO] =   { 0x10001000,     0x1000 },
+    [VIRT_DRAM] =     { 0x80000000,        0x0 },
+};
+
 
 kernel elfs should be loaded into DRAM
 
 Kernel boot assembly should have halt/infinite loop at the end to avoid PC from going out of bounds 
 
 Example launch using qemu:
-qemu-system-riscv32 -nographic -smp 1 -m 128M -kernel /home/miguelm/projects/sphinx/release/sphinx_riscv32.elf
-This will launch the kernel with one Core and 128 Megabytes of memory.
+qemu-system-riscv32 -machine virt -nographic -smp 1 -m 128M -kernel release/sphinx_riscv32.elf
+This will launch the kernel with one Core and 128 Megabytes of memory on a virtio enabled board.
 After launch it will be stuck in an infinite loop
