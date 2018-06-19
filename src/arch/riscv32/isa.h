@@ -1,6 +1,8 @@
 #ifndef SRC_ARCH_RISCV32_ISA_H_
 #define SRC_ARCH_RISCV32_ISA_H_
 
+#include "csr.h"
+
 typedef struct {
 	// Extensions[0-25] (WARL)
 	unsigned int atomic_ext:1;            //A
@@ -119,36 +121,10 @@ typedef struct {
 	unsigned int store_amo_page_fault:1;
 } medeleg_register_t;
 
-// TODO: continue defining register layouts
-typedef struct {
-
-};
-
-// TODO: use python script to generate pseudo enum
-// Pseudo enum
-struct {
-	unsigned short misa;
-	unsigned short mvendorid;
-} CSR_ID = {
-		.misa = 0x300,
-		.mvendorid = 0x301
-};
-
-// TODO: use python script to generate read calls
-void read_csr_register(unsigned int csr_id, void* reg_out) {
-	switch(csr_id) {
-	case 0:
-		asm volatile ("csrr t0, misa\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case 1:
-		asm volatile ("csrr t0, mvendorid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	}
-}
 
 int get_core_vendor_id() {
 	mvendorid_register_t reg;
-	read_csr_register(1, &reg);
+	read_csr_register(CSR_MVENDORID, &reg);
 	return reg.offset ^ 0x80;
 }
 
