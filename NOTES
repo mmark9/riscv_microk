@@ -23,3 +23,6 @@ Example launch using qemu:
 qemu-system-riscv32 -machine virt -nographic -smp 1 -m 128M -kernel release/sphinx_riscv32.elf
 This will launch the kernel with one Core and 128 Megabytes of memory on a virtio enabled board.
 After launch it will be stuck in an infinite loop
+
+If you get "Register 3921 is not available" when debugging with GDB, disable compressed breakpoints
+Type "set riscv use_compressed_breakpoint off" while in GDB

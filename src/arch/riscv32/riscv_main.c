@@ -1,12 +1,15 @@
 #include "isa.h"
+#include "csr.h"
 #include "print.h"
 
-void print_architecture_string() {
+
+void riscv_print_architecture_string() {
 	printf("Architecture detected: ");
 	misa_register_t misa;
-	read_csr_register(CSR_MISA, &misa);
+	misa.value = 0;
+	riscv_read_csr_register(CSR_MISA, &misa);
 	int isa_width = -1;
-	switch (misa.isa_width) {
+	switch (misa.fields.isa_width) {
 	case 1:
 		isa_width = 32;
 		break;
@@ -21,34 +24,34 @@ void print_architecture_string() {
 	int buf_index = 0;
 	if (isa_width == -1) {
 		printf("\nUnknown RISCV architecture! misa MXL reports %d",
-				misa.isa_width);
+				misa.fields.isa_width);
 	} else {
 		//  RV [32, 64, 128] I, M, A, F, D, G, Q, L, C, B, J, T, P, V, N
-		if (misa.base_isa_ext) {
+		if (misa.fields.base_isa_ext) {
 			arch_buffer[buf_index++] = 'I';
 		}
-		if (misa.int_mul_div_ext) {
+		if (misa.fields.int_mul_div_ext) {
 			arch_buffer[buf_index++] = 'M';
 		}
-		if (misa.atomic_ext) {
+		if (misa.fields.atomic_ext) {
 			arch_buffer[buf_index++] = 'A';
 		}
-		if (misa.single_prec_float_ext) {
+		if (misa.fields.single_prec_float_ext) {
 			arch_buffer[buf_index++] = 'F';
 		}
-		if (misa.double_prec_float_ext) {
+		if (misa.fields.double_prec_float_ext) {
 			arch_buffer[buf_index++] = 'D';
 		}
-		if (misa.additional_ext) {
+		if (misa.fields.additional_ext) {
 			arch_buffer[buf_index++] = 'G';
 		}
-		if (misa.quad_prec_float_ext) {
+		if (misa.fields.quad_prec_float_ext) {
 			arch_buffer[buf_index++] = 'Q';
 		}
-		if (misa.compressed_ext) {
+		if (misa.fields.compressed_ext) {
 			arch_buffer[buf_index++] = 'C';
 		}
-		if (misa.user_int_ext) {
+		if (misa.fields.user_int_ext) {
 			arch_buffer[buf_index++] = 'N';
 		}
 		arch_buffer[buf_index++] = '\0';
@@ -56,7 +59,14 @@ void print_architecture_string() {
 	}
 }
 
-void hello_main() {
-	print_architecture_string();
+int sum(int a, int b) {
+	return a + b;
+}
+
+void riscv_main() {
+	riscv_print_architecture_string();
+	int a,b;
+	int r = sum(a, b);
+	riscv_machine_mode_do_setup();
 }
 

@@ -1,3 +1,4 @@
+
 #ifndef SRC_ARCH_RISCV32_CSR_H_
 #define SRC_ARCH_RISCV32_CSR_H_
 
@@ -459,674 +460,357 @@
 // DRW - Debug scratch register.
 #define CSR_DSCRATCH 0x7B2
 
-void read_csr_register(unsigned short csr_id, void* reg_out) {
-	switch (csr_id) {
-	case CSR_USTATUS:
-		asm volatile ("csrr t0, ustatus\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UIE:
-		asm volatile ("csrr t0, uie\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UTVEC:
-		asm volatile ("csrr t0, utvec\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_USCRATCH:
-		asm volatile ("csrr t0, uscratch\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UEPC:
-		asm volatile ("csrr t0, uepc\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UCAUSE:
-		asm volatile ("csrr t0, ucause\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UTVAL:
-		asm volatile ("csrr t0, utval\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_UIP:
-		asm volatile ("csrr t0, uip\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_FFLAGS:
-		asm volatile ("csrr t0, fflags\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_FRM:
-		asm volatile ("csrr t0, frm\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_FCSR:
-		asm volatile ("csrr t0, fcsr\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_CYCLE:
-		asm volatile ("csrr t0, cycle\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TIME:
-		asm volatile ("csrr t0, time\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_INSTRET:
-		asm volatile ("csrr t0, instret\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER3:
-		asm volatile ("csrr t0, hpmcounter3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER4:
-		asm volatile ("csrr t0, hpmcounter4\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER5:
-		asm volatile ("csrr t0, hpmcounter5\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER6:
-		asm volatile ("csrr t0, hpmcounter6\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER7:
-		asm volatile ("csrr t0, hpmcounter7\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER8:
-		asm volatile ("csrr t0, hpmcounter8\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER9:
-		asm volatile ("csrr t0, hpmcounter9\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER10:
-		asm volatile ("csrr t0, hpmcounter10\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER11:
-		asm volatile ("csrr t0, hpmcounter11\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER12:
-		asm volatile ("csrr t0, hpmcounter12\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER13:
-		asm volatile ("csrr t0, hpmcounter13\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER14:
-		asm volatile ("csrr t0, hpmcounter14\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER15:
-		asm volatile ("csrr t0, hpmcounter15\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER16:
-		asm volatile ("csrr t0, hpmcounter16\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER17:
-		asm volatile ("csrr t0, hpmcounter17\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER18:
-		asm volatile ("csrr t0, hpmcounter18\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER19:
-		asm volatile ("csrr t0, hpmcounter19\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER20:
-		asm volatile ("csrr t0, hpmcounter20\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER21:
-		asm volatile ("csrr t0, hpmcounter21\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER22:
-		asm volatile ("csrr t0, hpmcounter22\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER23:
-		asm volatile ("csrr t0, hpmcounter23\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER24:
-		asm volatile ("csrr t0, hpmcounter24\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER25:
-		asm volatile ("csrr t0, hpmcounter25\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER26:
-		asm volatile ("csrr t0, hpmcounter26\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER27:
-		asm volatile ("csrr t0, hpmcounter27\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER28:
-		asm volatile ("csrr t0, hpmcounter28\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER29:
-		asm volatile ("csrr t0, hpmcounter29\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER30:
-		asm volatile ("csrr t0, hpmcounter30\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER31:
-		asm volatile ("csrr t0, hpmcounter31\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_CYCLEH:
-		asm volatile ("csrr t0, cycleh\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TIMEH:
-		asm volatile ("csrr t0, timeh\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_INSTRETH:
-		asm volatile ("csrr t0, instreth\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER3H:
-		asm volatile ("csrr t0, hpmcounter3h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER4H:
-		asm volatile ("csrr t0, hpmcounter4h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER5H:
-		asm volatile ("csrr t0, hpmcounter5h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER6H:
-		asm volatile ("csrr t0, hpmcounter6h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER7H:
-		asm volatile ("csrr t0, hpmcounter7h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER8H:
-		asm volatile ("csrr t0, hpmcounter8h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER9H:
-		asm volatile ("csrr t0, hpmcounter9h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER10H:
-		asm volatile ("csrr t0, hpmcounter10h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER11H:
-		asm volatile ("csrr t0, hpmcounter11h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER12H:
-		asm volatile ("csrr t0, hpmcounter12h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER13H:
-		asm volatile ("csrr t0, hpmcounter13h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER14H:
-		asm volatile ("csrr t0, hpmcounter14h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER15H:
-		asm volatile ("csrr t0, hpmcounter15h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER16H:
-		asm volatile ("csrr t0, hpmcounter16h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER17H:
-		asm volatile ("csrr t0, hpmcounter17h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER18H:
-		asm volatile ("csrr t0, hpmcounter18h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER19H:
-		asm volatile ("csrr t0, hpmcounter19h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER20H:
-		asm volatile ("csrr t0, hpmcounter20h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER21H:
-		asm volatile ("csrr t0, hpmcounter21h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER22H:
-		asm volatile ("csrr t0, hpmcounter22h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER23H:
-		asm volatile ("csrr t0, hpmcounter23h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER24H:
-		asm volatile ("csrr t0, hpmcounter24h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER25H:
-		asm volatile ("csrr t0, hpmcounter25h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER26H:
-		asm volatile ("csrr t0, hpmcounter26h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER27H:
-		asm volatile ("csrr t0, hpmcounter27h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER28H:
-		asm volatile ("csrr t0, hpmcounter28h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER29H:
-		asm volatile ("csrr t0, hpmcounter29h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER30H:
-		asm volatile ("csrr t0, hpmcounter30h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_HPMCOUNTER31H:
-		asm volatile ("csrr t0, hpmcounter31h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SSTATUS:
-		asm volatile ("csrr t0, sstatus\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SEDELEG:
-		asm volatile ("csrr t0, sedeleg\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SIDELEG:
-		asm volatile ("csrr t0, sideleg\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SIE:
-		asm volatile ("csrr t0, sie\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_STVEC:
-		asm volatile ("csrr t0, stvec\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SCOUNTEREN:
-		asm volatile ("csrr t0, scounteren\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SSCRATCH:
-		asm volatile ("csrr t0, sscratch\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SEPC:
-		asm volatile ("csrr t0, sepc\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SCAUSE:
-		asm volatile ("csrr t0, scause\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_STVAL:
-		// TODO: figure out why it doesn't like this
-		// asm volatile ("csrr t0, stval\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SIP:
-		asm volatile ("csrr t0, sip\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_SATP:
-		asm volatile ("csrr t0, satp\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MVENDORID:
-		asm volatile ("csrr t0, mvendorid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MARCHID:
-		asm volatile ("csrr t0, marchid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MIMPID:
-		asm volatile ("csrr t0, mimpid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHARTID:
-		asm volatile ("csrr t0, mhartid\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MSTATUS:
-		asm volatile ("csrr t0, mstatus\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MISA:
-		asm volatile ("csrr t0, misa\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MEDELEG:
-		asm volatile ("csrr t0, medeleg\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MIDELEG:
-		asm volatile ("csrr t0, mideleg\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MIE:
-		asm volatile ("csrr t0, mie\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MTVEC:
-		asm volatile ("csrr t0, mtvec\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MCOUNTEREN:
-		asm volatile ("csrr t0, mcounteren\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MSCRATCH:
-		asm volatile ("csrr t0, mscratch\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MEPC:
-		asm volatile ("csrr t0, mepc\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MCAUSE:
-		asm volatile ("csrr t0, mcause\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MTVAL:
-		// TODO: figure out why it doesn't like this
-		//asm volatile ("csrr t0, mtval\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MIP:
-		asm volatile ("csrr t0, mip\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPCFG0:
-		asm volatile ("csrr t0, pmpcfg0\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPCFG1:
-		asm volatile ("csrr t0, pmpcfg1\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPCFG2:
-		asm volatile ("csrr t0, pmpcfg2\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPCFG3:
-		asm volatile ("csrr t0, pmpcfg3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR0:
-		asm volatile ("csrr t0, pmpaddr0\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR1:
-		asm volatile ("csrr t0, pmpaddr1\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR2:
-		asm volatile ("csrr t0, pmpaddr2\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR3:
-		asm volatile ("csrr t0, pmpaddr3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR4:
-		asm volatile ("csrr t0, pmpaddr4\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR5:
-		asm volatile ("csrr t0, pmpaddr5\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR6:
-		asm volatile ("csrr t0, pmpaddr6\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR7:
-		asm volatile ("csrr t0, pmpaddr7\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR8:
-		asm volatile ("csrr t0, pmpaddr8\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR9:
-		asm volatile ("csrr t0, pmpaddr9\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR10:
-		asm volatile ("csrr t0, pmpaddr10\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR11:
-		asm volatile ("csrr t0, pmpaddr11\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR12:
-		asm volatile ("csrr t0, pmpaddr12\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR13:
-		asm volatile ("csrr t0, pmpaddr13\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR14:
-		asm volatile ("csrr t0, pmpaddr14\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_PMPADDR15:
-		asm volatile ("csrr t0, pmpaddr15\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MCYCLE:
-		asm volatile ("csrr t0, mcycle\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MINSTRET:
-		asm volatile ("csrr t0, minstret\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER3:
-		asm volatile ("csrr t0, mhpmcounter3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER4:
-		asm volatile ("csrr t0, mhpmcounter4\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER5:
-		asm volatile ("csrr t0, mhpmcounter5\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER6:
-		asm volatile ("csrr t0, mhpmcounter6\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER7:
-		asm volatile ("csrr t0, mhpmcounter7\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER8:
-		asm volatile ("csrr t0, mhpmcounter8\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER9:
-		asm volatile ("csrr t0, mhpmcounter9\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER10:
-		asm volatile ("csrr t0, mhpmcounter10\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER11:
-		asm volatile ("csrr t0, mhpmcounter11\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER12:
-		asm volatile ("csrr t0, mhpmcounter12\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER13:
-		asm volatile ("csrr t0, mhpmcounter13\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER14:
-		asm volatile ("csrr t0, mhpmcounter14\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER15:
-		asm volatile ("csrr t0, mhpmcounter15\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER16:
-		asm volatile ("csrr t0, mhpmcounter16\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER17:
-		asm volatile ("csrr t0, mhpmcounter17\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER18:
-		asm volatile ("csrr t0, mhpmcounter18\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER19:
-		asm volatile ("csrr t0, mhpmcounter19\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER20:
-		asm volatile ("csrr t0, mhpmcounter20\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER21:
-		asm volatile ("csrr t0, mhpmcounter21\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER22:
-		asm volatile ("csrr t0, mhpmcounter22\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER23:
-		asm volatile ("csrr t0, mhpmcounter23\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER24:
-		asm volatile ("csrr t0, mhpmcounter24\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER25:
-		asm volatile ("csrr t0, mhpmcounter25\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER26:
-		asm volatile ("csrr t0, mhpmcounter26\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER27:
-		asm volatile ("csrr t0, mhpmcounter27\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER28:
-		asm volatile ("csrr t0, mhpmcounter28\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER29:
-		asm volatile ("csrr t0, mhpmcounter29\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER30:
-		asm volatile ("csrr t0, mhpmcounter30\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER31:
-		asm volatile ("csrr t0, mhpmcounter31\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MCYCLEH:
-		asm volatile ("csrr t0, mcycleh\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MINSTRETH:
-		asm volatile ("csrr t0, minstreth\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER3H:
-		asm volatile ("csrr t0, mhpmcounter3h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER4H:
-		asm volatile ("csrr t0, mhpmcounter4h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER5H:
-		asm volatile ("csrr t0, mhpmcounter5h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER6H:
-		asm volatile ("csrr t0, mhpmcounter6h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER7H:
-		asm volatile ("csrr t0, mhpmcounter7h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER8H:
-		asm volatile ("csrr t0, mhpmcounter8h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER9H:
-		asm volatile ("csrr t0, mhpmcounter9h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER10H:
-		asm volatile ("csrr t0, mhpmcounter10h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER11H:
-		asm volatile ("csrr t0, mhpmcounter11h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER12H:
-		asm volatile ("csrr t0, mhpmcounter12h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER13H:
-		asm volatile ("csrr t0, mhpmcounter13h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER14H:
-		asm volatile ("csrr t0, mhpmcounter14h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER15H:
-		asm volatile ("csrr t0, mhpmcounter15h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER16H:
-		asm volatile ("csrr t0, mhpmcounter16h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER17H:
-		asm volatile ("csrr t0, mhpmcounter17h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER18H:
-		asm volatile ("csrr t0, mhpmcounter18h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER19H:
-		asm volatile ("csrr t0, mhpmcounter19h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER20H:
-		asm volatile ("csrr t0, mhpmcounter20h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER21H:
-		asm volatile ("csrr t0, mhpmcounter21h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER22H:
-		asm volatile ("csrr t0, mhpmcounter22h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER23H:
-		asm volatile ("csrr t0, mhpmcounter23h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER24H:
-		asm volatile ("csrr t0, mhpmcounter24h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER25H:
-		asm volatile ("csrr t0, mhpmcounter25h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER26H:
-		asm volatile ("csrr t0, mhpmcounter26h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER27H:
-		asm volatile ("csrr t0, mhpmcounter27h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER28H:
-		asm volatile ("csrr t0, mhpmcounter28h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER29H:
-		asm volatile ("csrr t0, mhpmcounter29h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER30H:
-		asm volatile ("csrr t0, mhpmcounter30h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMCOUNTER31H:
-		asm volatile ("csrr t0, mhpmcounter31h\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT3:
-		asm volatile ("csrr t0, mhpmevent3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT4:
-		asm volatile ("csrr t0, mhpmevent4\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT5:
-		asm volatile ("csrr t0, mhpmevent5\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT6:
-		asm volatile ("csrr t0, mhpmevent6\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT7:
-		asm volatile ("csrr t0, mhpmevent7\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT8:
-		asm volatile ("csrr t0, mhpmevent8\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT9:
-		asm volatile ("csrr t0, mhpmevent9\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT10:
-		asm volatile ("csrr t0, mhpmevent10\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT11:
-		asm volatile ("csrr t0, mhpmevent11\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT12:
-		asm volatile ("csrr t0, mhpmevent12\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT13:
-		asm volatile ("csrr t0, mhpmevent13\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT14:
-		asm volatile ("csrr t0, mhpmevent14\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT15:
-		asm volatile ("csrr t0, mhpmevent15\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT16:
-		asm volatile ("csrr t0, mhpmevent16\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT17:
-		asm volatile ("csrr t0, mhpmevent17\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT18:
-		asm volatile ("csrr t0, mhpmevent18\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT19:
-		asm volatile ("csrr t0, mhpmevent19\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT20:
-		asm volatile ("csrr t0, mhpmevent20\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT21:
-		asm volatile ("csrr t0, mhpmevent21\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT22:
-		asm volatile ("csrr t0, mhpmevent22\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT23:
-		asm volatile ("csrr t0, mhpmevent23\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT24:
-		asm volatile ("csrr t0, mhpmevent24\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT25:
-		asm volatile ("csrr t0, mhpmevent25\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT26:
-		asm volatile ("csrr t0, mhpmevent26\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT27:
-		asm volatile ("csrr t0, mhpmevent27\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT28:
-		asm volatile ("csrr t0, mhpmevent28\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT29:
-		asm volatile ("csrr t0, mhpmevent29\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT30:
-		asm volatile ("csrr t0, mhpmevent30\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_MHPMEVENT31:
-		asm volatile ("csrr t0, mhpmevent31\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TSELECT:
-		asm volatile ("csrr t0, tselect\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TDATA1:
-		asm volatile ("csrr t0, tdata1\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TDATA2:
-		asm volatile ("csrr t0, tdata2\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_TDATA3:
-		asm volatile ("csrr t0, tdata3\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_DCSR:
-		asm volatile ("csrr t0, dcsr\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_DPC:
-		asm volatile ("csrr t0, dpc\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	case CSR_DSCRATCH:
-		asm volatile ("csrr t0, dscratch\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
-		break;
-	}
-}
+// Machine ISA Register
+typedef union {
+	unsigned int value;
+	struct {
+		// Extensions[0-25] (WARL)
+		unsigned int atomic_ext:1;            //A
+		unsigned int reserved_0:1;            //B
+		unsigned int compressed_ext:1;        //C
+		unsigned int double_prec_float_ext:1; //D
+		unsigned int rv32e_base_isa:1;        //E
+		unsigned int single_prec_float_ext:1; //F
+		unsigned int additional_ext:1;        //G
+		unsigned int reserved_1:1;            //H
+		unsigned int base_isa_ext:1;          //I
+		unsigned int reserved_2:1;            //J
+		unsigned int reserved_3:1;            //K
+		unsigned int reserved_4:1;            //L
+		unsigned int int_mul_div_ext:1;       //M
+		unsigned int user_int_ext:1;          //N
+		unsigned int reserved_5:1;            //O
+		unsigned int reserved_6:1;            //P
+		unsigned int quad_prec_float_ext:1;   //Q
+		unsigned int reserved_7:1;            //R
+		unsigned int supervisor_mode_ext:1;   //S
+		unsigned int reserved_8:1;            //T
+		unsigned int user_mode_ext:1;         //U
+		unsigned int reserved_9:1;            //V
+		unsigned int reserved_A:1;            //W
+		unsigned int non_standard_ext:1;      //X
+		unsigned int reserved_B:1;            //Y
+		unsigned int reserved_C:1;            //Z
+		// Ignored Field[26-29] (WIRI)
+		unsigned int ignore:4;
+		// ISA width[30-31] (WARL)
+		unsigned int isa_width:2;
+	} fields;
+} misa_register_t;
+
+// Machine Vendor ID Register
+
+
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int offset:7;
+		unsigned int blank:25;
+	} fields;
+} mvendorid_register_t;;
+
+// Machine Architecture ID Register
+typedef struct {
+	unsigned int architecture_id:32;
+} marchid_register_t;
+
+// Machine Implementation ID Register
+typedef struct {
+	unsigned int implementation_id:32;
+} mimpid_register_t;
+
+// Hart ID Register - core/hardware thread ID
+typedef struct {
+	unsigned int hart_id:32;
+} mhartid_register_t;
+
+// Machine Status Register
+typedef union {
+	unsigned int value;
+	struct {
+		// Global Interrupt Flags per privilege mode (per Hart)
+		unsigned int user_interrupts_enabled:1;
+		unsigned int supervisor_interrupts_enabled:1;
+		unsigned int reserved_1:1;
+		unsigned int machine_interrupts_enabled:1;
+		// Prior to trap Interrupt Flags per privilege mode (per Hart)
+		unsigned int user_interrupts_enabled_before_trap:1;
+		unsigned int supervisor_interrupts_enabled_before_trap:1;
+		unsigned int reserved_2:1;
+		unsigned int machine_interrupts_enabled_before_trap:1;
+		unsigned int supervisor_privilege_mode_before_trap:1;
+		unsigned int reserved_3:2;
+		unsigned int machine_privilege_mode_before_trap:2;
+		// Extension Context Status
+		unsigned int fpu_status:2;
+		unsigned int additional_user_mode_ext_status:2;
+		// Memory Privilege
+		unsigned int modify_privilege_enabled:1;
+		unsigned int supervisor_user_memory_access_enabled:1;
+		unsigned int make_excutable_readable_enabled:1;
+		// Virtualization Support
+		unsigned int trap_virtual_memory_enabled:1;
+		unsigned int interrutpt_time_enabled:1;
+		unsigned int trap_sret_enabled:1;
+		// Ignored
+		unsigned int reserved_4:8;
+		unsigned sd:1;
+	} fields;
+} mstatus_register_t;
+
+// Machine Exception Delegation Register
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int instruction_address_missaligned_delegated:1;
+		unsigned int instruction_access_fault_delegated:1;
+		unsigned int illegal_instruction_delegated:1;
+		unsigned int break_point_delegated:1;
+		unsigned int load_address_misaligned_delegated:1;
+		unsigned int load_access_fault_delegated:1;
+		unsigned int store_amo_address_misaligned_delegated:1;
+		unsigned int store_amo_access_fault_delegated:1;
+		unsigned int enviornment_call_from_user_mode_delegated:1;
+		unsigned int enviornment_call_from_supervisor_mode_delegated:1;
+		unsigned int reserved_1:1;
+		// ECALLS from machine mode cannot be delegated
+		unsigned int enviornment_call_from_machine_mode_delegated:1;
+		unsigned int instruction_page_fault_delegated:1;
+		unsigned int load_page_fault_delegated:1;
+		unsigned int reserved_2:1;
+		unsigned int store_amo_page_fault_delegated:1;
+		unsigned int reserved_3:16;
+	} fields;
+} medeleg_register_t;
+
+// Machine Interrupt Delegation register
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_software_interrupts_delegated:1;
+		unsigned int supervisor_software_interrupts_delegated:1;
+		unsigned int reserved_1:1;
+		unsigned int machine_software_interrupts_delegated:1;
+		unsigned int user_timer_interrupts_delegated:1;
+		unsigned int supervisor_timer_interrupts_delegated:1;
+		unsigned int reserved_2:1;
+		unsigned int machine_timer_interrupts_delegated:1;
+		unsigned int user_external_interrupts_delegated:1;
+		unsigned int supervisor_external_interrupts_delegated:1;
+		unsigned int reserved_3:1;
+		unsigned int machine_external_interrupts_delegated:1;
+		unsigned int reserved_4:20;
+	} fields;
+} mideleg_register_t;
+
+// Machine interrupt-pending register
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_software_interrupts_pending:1;
+		unsigned int supervisor_software_interrupts_pending:1;
+		unsigned int reserved_1:1;
+		unsigned int machine_software_interrupts_pending:1;
+		unsigned int user_timer_interrupts_pending:1;
+		unsigned int supervisor_timer_interrupts_pending:1;
+		unsigned int reserved_2:1;
+		unsigned int machine_timer_interrupts_pending:1;
+		unsigned int user_external_interrupts_pending:1;
+		unsigned int supervisor_external_interrupts_pending:1;
+		unsigned int reserved_3:1;
+		unsigned int machine_external_interrupts_pending:1;
+		unsigned int reserved_4:20;
+	} fields;
+} mip_register_t;
+
+// Machine interrupt-enable registers
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_software_interrupts_enabled:1;
+		unsigned int supervisor_software_interrupts_enabled:1;
+		unsigned int reserved_1:1;
+		unsigned int machine_software_interrupts_enabled:1;
+		unsigned int user_timer_interrupts_enabled:1;
+		unsigned int supervisor_timer_interrupts_enabled:1;
+		unsigned int reserved_2:1;
+		unsigned int machine_timer_interrupts_enabled:1;
+		unsigned int user_external_interrupts_enabled:1;
+		unsigned int supervisor_external_interrupts_enabledd:1;
+		unsigned int reserved_3:1;
+		unsigned int machine_external_interrupts_enabled:1;
+		unsigned int reserved_4:20;
+	} fields;
+} mie_register_t;
+
+// Machine timer register
+// Note two reads are needed for this
+typedef struct {
+	unsigned long long machine_time:64;
+} mtime_register_t;
+
+// Machine time compare register
+typedef struct {
+	unsigned long long machine_time_compare_register:64;
+} mtimecmp_register_t;
+
+// Hardware performance monitor counter registers
+// Note since these are just 64 bit counters, we can just define one struct
+typedef struct {
+	unsigned long long value:64;
+} hpmc_register_t;
+
+// Hardware performance monitor event register
+// Note since these are just 64 bit counters, we can just define one struct
+typedef struct {
+	unsigned int value:32;
+} hpme_register_t;
+
+// Counter-enable registers (mcounteren and scounteren)
+// m = machine | s = supervisor
+// setting a counter bit in a higher privilege mode
+// register enables access in a lower privilege mode
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int cycle_enabled:1;
+		unsigned int time_enableld:1;
+		unsigned int instret_enabled:1;
+		unsigned int hpm3_enabled:1;
+		unsigned int hpm4_enabled:1;
+		unsigned int hpm5_enabled:1;
+		unsigned int hpm6_enabled:1;
+		unsigned int hpm7_enabled:1;
+		unsigned int hpm8_enabled:1;
+		unsigned int hpm9_enabled:1;
+		unsigned int hpm10_enabled:1;
+		unsigned int hpm11_enabled:1;
+		unsigned int hpm12_enabled:1;
+		unsigned int hpm13_enabled:1;
+		unsigned int hpm14_enabled:1;
+		unsigned int hpm15_enabled:1;
+		unsigned int hpm16_enabled:1;
+		unsigned int hpm17_enabled:1;
+		unsigned int hpm18_enabled:1;
+		unsigned int hpm19_enabled:1;
+		unsigned int hpm20_enabled:1;
+		unsigned int hpm21_enabled:1;
+		unsigned int hpm22_enabled:1;
+		unsigned int hpm23_enabled:1;
+		unsigned int hpm24_enabled:1;
+		unsigned int hpm25_enabled:1;
+		unsigned int hpm26_enabled:1;
+		unsigned int hpm27_enabled:1;
+		unsigned int hpm28_enabled:1;
+		unsigned int hpm29_enabled:1;
+		unsigned int hpm30_enabled:1;
+		unsigned int hpm31_enabled:1;
+	} fields;
+} counteren_register_t;
+
+/**  Generic CSRs  **/
+
+// Trap-Vector Base-Address Register
+typedef union {
+	unsigned int value;
+	struct fields {
+		// 0 = Direct = All exceptions set pc to Base
+		// 1 = Vectored = Asynchronous interrupts set pc to BASE+4xcause
+		unsigned int mode:2;
+		// Note: base address must be aligned on 4-byte boundary
+		unsigned int base:30;
+	} fields;
+} tvec_register_t;
+
+// Scratch Register - Generic
+typedef struct {
+	unsigned int value:32;
+} scratch_register_t;
+
+// Exception Register - Generic
+typedef struct {
+	unsigned int address:32;
+} epc_register_t;
+
+// Trap Cause Register - Generic
+
+
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int exception_code:31;
+		unsigned int was_caused_by_interrupt:1;
+	} fields;
+} tcause_register_t;
+
+
+// Trap Value Register - Generic
+typedef struct {
+	unsigned int value:32;
+} ttval_register_t;
+
+
+/**  Supervisor CSR specific **/
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_interrupts_enabled:1;
+		unsigned int supervisor_interrupts_enabled:1;
+		unsigned int reserved_1:2;
+		unsigned int user_interrupts_enabled_before_trap:1;
+		unsigned int supervisor_interrupts_enabled_before_trap:1;
+		unsigned int reserved_2:2;
+		unsigned int privilege_mode_before_interrupt:1;  // 0 = user 1 = super
+		unsigned int reserved_3:4;
+		// Extension Context Status
+		unsigned int fpu_status:2;
+		unsigned int additional_user_mode_ext_status:2;
+		// Memory Privilege
+		unsigned int reserved_4:1;
+		unsigned int supervisor_user_memory_access_enabled:1;
+		unsigned int make_excutable_readable_enabled:1;
+		// Ignored
+		unsigned int reserved_5:11;
+		unsigned sd:1;
+	} fields;
+} sstatus_register_t;
+
+
+// Supervisor interrupt-pending register
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_software_interrupts_pending:1;
+		unsigned int supervisor_software_interrupts_pending:1;
+		unsigned int reserved_1:2;
+		unsigned int user_timer_interrupts_pending:1;
+		unsigned int supervisor_timer_interrupts_pending:1;
+		unsigned int reserved_2:2;
+		unsigned int user_external_interrupts_pending:1;
+		unsigned int supervisor_external_interrupts_pending:1;
+		unsigned int reserved_4:22;
+	} fields;
+} sip_register_t;
+
+// Supervisor interrupt-enable registers
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int user_software_interrupts_enabled:1;
+		unsigned int supervisor_software_interrupts_enabled:1;
+		unsigned int reserved_1:2;
+		unsigned int user_timer_interrupts_enabled:1;
+		unsigned int supervisor_timer_interrupts_enabled:1;
+		unsigned int reserved_2:2;
+		unsigned int user_external_interrupts_enabled:1;
+		unsigned int supervisor_external_interrupts_enabled:1;
+		unsigned int reserved_4:22;
+	} fields;
+} sie_register_t;
+
+void riscv_set_csr_bits(unsigned short csr_id, unsigned int value);
+void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value);
+void riscv_write_csr(unsigned short csr_id, unsigned int value);
+void riscv_read_csr_register(unsigned short csr_id, void* reg_out);
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */
