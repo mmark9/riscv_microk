@@ -1,37 +1,53 @@
 # Constants for initial memory configuration
 # This is a higher-half kernel that starts at 3.5GB mark
+# TODO: maybe make this configureable somehow
 .equ KERNEL_VIRTUAL_BASE, 0xE0000000
 .equ VIRTUAL_MEMORY_SIZE, 0xFFFFFFFF
-.global KERNEL_LOAD_ADDRESS
-.global KERNEL_VIRTUAL_BASE
+.globl KERNEL_VIRTUAL_BASE
+
 # Constants set by the linker
+.extern LOAD_ADDRESS
+.extern KERNEL_TEXT_BEGIN
+.extern KERNEL_TEXT_END
+.extern KERNEL_RO_DATA_BEGIN
+.extern KERNEL_RO_DATA_END
+.extern KERNEL_DATA_BEGIN
+.extern KERNEL_DATA_END
+.extern KERNEL_BSS_BEGIN
+.extern KERNEL_BSS_END
 .extern KERNEL_VIRTUAL_END
 .extern KERNEL_SIZE_IN_BYTES
 
-# 16 kB stack aligned on 2 byte boundary
-.section .bss
-.align 0x4
-kernel_stack_top:
-.skip 0x4000
-kernel_stack_bottom:
-
+# boot loader page table
+# this should be replaced after getting
+# to the kernel level boot code
 .section .boot_bss, "aw", @nobits
 .align 0xC
-page_table_1:
-    .skip 0x400 * 4, 0x0
 page_directory:
     .skip 0x400 * 4, 0x0
 
+# linker configuration
+# helps the kernel map its pages with the correct
+# attributes
+.section ro_data
+linker_config:
+	.long LOAD_ADDRESS
+	.long KERNEL_TEXT_BEGIN
+	.long KERNEL_TEXT_END
+	.long KERNEL_RO_DATA_BEGIN
+	.long KERNEL_RO_DATA_END
+	.long KERNEL_DATA_BEGIN
+	.long KERNEL_DATA_END
+	.long KERNEL_BSS_BEGIN
+	.long KERNEL_BSS_END
+	.long KERNEL_VIRTUAL_END
+	.long KERNEL_SIZE_IN_BYTES
 
 # constants for table setup
 .equ PAGE_SIZE, 0x1000
-.equ LVL2_TABLE_COUNT, 0x1
 .equ PAGES_PER_TABLE, 0x400
 .equ PAGE_TABLE_SIZE, PAGES_PER_TABLE * PAGE_SIZE
-.equ MAX_PTE_COUNT, LVL2_TABLE_COUNT * PAGES_PER_TABLE
-.equ MAX_PDE_COUNT, MAX_PTE_COUNT / PAGES_PER_TABLE
 .equ KERNEL_PAGE_DIRECTORY_START_INDEX, KERNEL_VIRTUAL_BASE / 0x400000
-#.set MAX_PDE_ENTRY_OFFSET, TABLE_COUNT * 4
 
 .section .boot_text, "ax"
 .globl boot_entry
@@ -50,9 +66,18 @@ boot_entry:
 	xor t5, t5, t5
 	xor t6, t6, t6
 	# what board are we on ?
+	# after this function we get....
+	# a0 = boot hart id
+	# a1 = device tree pointer
+	# a2 = config type: 0 = config string | 1 = device tree
+	# a3 = board load address
 	jal load_riscv_board_config
-	# a3 contains the load address
+	# a4: set it manually
+	la a4, linker_config
 boot_identity_map:
+	# we start by creating
+	# temp mappings
+	# the kernel will create the real mappings later
 	xor s5, s5, s5
 	add s5, s5, a3
 	# 4mb
@@ -71,6 +96,14 @@ higher_half_map:
 	li s9, 0x1
 	jal lvl1_table_setup
 machine_mode_setup:
+	# delegate all exceptions to supervisor
+	li t0, 0xBBFF
+	csrw medeleg, t0
+	# delegate all interrupts to supervisor
+	# (with the exception of Environment Call from M-mode)
+	li t0, 0xBBF
+	csrw mideleg, t0
+
 	# first set machine trap vector
 	# t0 = mtvec buffer; mode set to Direct implicitly
 	# NOTE: base address should be aligned on 4 byte boundary!
@@ -79,25 +112,13 @@ machine_mode_setup:
 	# copy buffer to mtvec
 	csrw mtvec, t0
 
-	# next do minimal software interrupt setup
-	# set mie using t0
-	xor t0, t0, t0
-	# machine + supervisor software enabled
-	addi t0, t0, 0xA
-	csrw mie, t0
-
-	# set minimum for interupt delegations
-	xor t0, t0, t0
-	addi t0, t0, 0xA
-	csrw mideleg, t0
-
-	# enable machine interrupts
-	li t0, 0xA
-	csrs mstatus, t0
+	# ecalls are non-maskable since they are encoded
+	# as illegal instructions; no need to enable interrupts
+	# for this to work
 	ecall
 .align 0x2
 jump_to_supervisor:
-	# reset trapp vector for catching general errors with boot
+	# reset trap vector for catching general errors with boot
 	la t0, trap_boot_exceptions
 	csrw mtvec, t0
 	# check status register
@@ -141,7 +162,7 @@ enable_paging:
 	# set satp to new value to enable paging
 	csrw satp, t0
 	# long jump to start filling TLB
-	la t0, higher_half
+	la t0, kernel_boot
 	jr t0
 
 # *** Paging functions below **
@@ -280,59 +301,10 @@ next_pde:
 
 	beq zero, zero, fill_lvl1_table
 .align 0x2
+# TODO: handle boot exceptions better
 trap_boot_exceptions:
 	csrr t0, mstatus
 	csrr t1, mcause
 	csrr t2, mbadaddr
 	xor zero, zero, zero
-	mret
-
-# *** HIGHER HALF ****
-.section .text
-higher_half:
-	# set up stack
-	la sp, kernel_stack_bottom
-	# call main
-	call riscv_main
-halt:
-	j halt
-	addi zero, zero, 0
-    addi zero, zero, 0
-    addi zero, zero, 0
-    addi zero, zero, 0
-    addi zero, zero, 0
-
-.align 0x4
-.globl asm_machine_trap
-asm_machine_trap:
-	# t0 = mcause
-	# t1 = is_interrupt | 1 = yes / 0 = no
-	# t2 = exception code
-	csrr t6, mstatus # debugging
-	csrr t0, mcause
-	srli t1, t0, 31
-	slli t2, t0, 1
-	srli t2, t2, 1
-
-	# branch on sign bit
-	beqz t1, handle_machine_exception
-handle_machine_interrupt:
-	call riscv_handle_machine_interrupt
-	csrr t0, mepc
-	srli t0, t0, 1
-	addi t0, t0, 4
-	slli t0, t0, 1
-	csrw mepc, t0
-	mret
-handle_machine_exception:
-	call riscv_handle_machine_interrupt
-	# restore regs
-	mret
-
-.align 0x4
-.globl asm_supervisor_trap
-asm_supervisor_trap:
-	call riscv_handle_supervisor_interrupt
-	# TODO: eventually we should check xPP field to
-	# return to the correct privilege level (USER | SUPERVISOR)
-	sret
+	beqz zero, trap_boot_exceptions

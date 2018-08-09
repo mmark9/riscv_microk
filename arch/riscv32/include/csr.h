@@ -808,6 +808,15 @@ typedef union {
 	} fields;
 } sie_register_t;
 
+typedef union {
+	unsigned int value;
+	struct {
+		unsigned int physical_page_number:22;
+		unsigned int address_space_identifier:9;
+		unsigned int mode:1;
+	} fields;
+};
+
 void riscv_set_csr_bits(unsigned short csr_id, unsigned int value);
 void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value);
 void riscv_write_csr(unsigned short csr_id, unsigned int value);

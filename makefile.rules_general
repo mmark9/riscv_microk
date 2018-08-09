@@ -1,0 +1,10 @@
+$(BUILD_DIR)/%.o: %.c
+	mkdir -p $(BUILD_DIR)
+	$(CC) -c $^ -o $@ $(CFLAGS)
+
+$(BUILD_DIR)/%.S.o: %.S
+	mkdir -p $(BUILD_DIR)
+	$(AS) $^ -o $@ $(ASFLAGS)
+
+print-%:
+	@echo $* = $($*)

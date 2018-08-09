@@ -1,79 +1,38 @@
-DEPDIR=.d
-$(shell mkdir -p $(DEPDIR) >/dev/null)
+include makefile.defines
 
 TARGET_ARCH?=riscv32
+HOST?=$(TARGET_ARCH)-unknown-elf
+
 PROJECT_DIR=${shell pwd}
-ARCH_DIR=${PROJECT_DIR}/src/arch/${TARGET_ARCH}
-
-
 DEST_DIR?=${PROJECT_DIR}/release
-PREFIX?=/usr/local
-EXEC_PREFIX?=$(PREFIX)
-BOOT_DIR=$(EXEC_PREFIX)/boot
-INCLUDE_DIR=$(PREFIX)/include
-LIB_DIR=$(PREFIX)/lib
-ASM_DIR?=asm
-
-HOST?=${TARGET_ARCH}-unknown-elf
-CC=$(HOST)-gcc
-AS=$(HOST)-as
-
-# Declaring some options for building
-CFLAGS=-O0 -gdwarf-4
-CFLAGS:=$(CFLAGS) -std=gnu99 -ffreestanding -fbuiltin -Wall -Wextra -mabi=ilp32
-DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.Td
-CPPFLAGS:=-D_kernel_code -I$(INCLUDE_DIR)
-LIBFLAGS:=-nostdlib
-ASFLAGS:=-mabi=ilp32
-
-C_SRC_FILES=$(shell find . -type f -name "*.c")
-ASM_SRC_FILES=$(shell find . -type f -name "*.S")
-KERNEL_OBJS?=$(ASM_SRC_FILES:.S=.S.o)
-KERNEL_OBJS+=$(C_SRC_FILES:.c=.o)
-
-LINKER_SCRIPT=${ARCH_DIR}/linker.ld
-
-ALL_OBJS=\
-$(KERNEL_OBJS) 
 
 IMAGE_NAME = ${DEST_DIR}/sphinx_$(TARGET_ARCH).elf
 
-.PHONY: all clean print install-headers install-kernel install
-.SUFFIXES: .o .S .c .S.o
+LINKER_SCRIPT=$(BUILD_DIR)/linker.ld
 
-.SECONDARY:
+MODULES=$(TARGET_ARCH)
+ALL_OBJS=$(shell find ${BUILD_DIR} -name "*.o" -type f)
+
+VPATH=.
+
+MAIN_OBJS=$(BUILD_DIR)/kernel_boot.S.o $(BUILD_DIR)/kernel_main.o
+export
+
+.PHONY: all $(MODULES)
 
 all: $(IMAGE_NAME)
 
-$(IMAGE_NAME): ${LINKER_SCRIPT} $(ALL_OBJS)
+$(IMAGE_NAME): $(MODULES) $(MAIN_OBJS)
 	$(CC) -T ${LINKER_SCRIPT} -o $@ $(CFLAGS) $(ALL_OBJS) $(LIBFLAGS)
 
-%.o: %.c
-	mkdir -p $(shell dirname $(DEPDIR)/$*.Td)
-	$(CC) -c $< -o $@ $(DEPFLAGS) $(CFLAGS) $(CPPFLAGS)
-	mv -f $(DEPDIR)/$*.Td $(DEPDIR)/$*.d
+$(TARGET_ARCH):
+	cd arch/$(TARGET_ARCH); \
+	make --include-dir=$(PROJECT_DIR)
 
-%.S.o: %.S
-	$(AS) $< -o $@ $(ASFLAGS)
+${LINKER_SCRIPT}: ;
 
-install: install-headers install-kernel
-
-install-kernel:
-	mkdir -p $(DEST_DIR)$(BOOT_DIR)
-	cp $(IMAGE_NAME) $(DEST_DIR)$(BOOT_DIR)
-
-install-headers:
-	mkdir -p $(DEST_DIR)$(INCLUDE_DIR)
-	cp -rfp include/* $(DEST_DIR)$(INCLUDE_DIR)
+include makefile.rules_general
 
 clean:
-	rm -f $(KERNEL_OBJS)
-	rm -rf $(DEPDIR)
+	rm -f $(BUILD_DIR)/*
 	rm -f $(IMAGE_NAME)
-
-print-%:
-	@echo $* = $($*)
-
-$(DEPDIR)/%.d: ;
-
-include $(wildcard $(patsubst %,$(DEPDIR)/%.d,$(basename $(SRCS))))

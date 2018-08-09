@@ -1,4 +1,4 @@
-#include "csr.h"
+#include <csr.h>
 
 // FIXME: attempts to read or modify xtval, xcause registers causes compiler to complain:
 // Error: Instruction csxx requires absolute expression
