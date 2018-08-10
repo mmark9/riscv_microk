@@ -1,7 +1,5 @@
 #include <csr.h>
 
-// FIXME: attempts to read or modify xtval, xcause registers causes compiler to complain:
-// Error: Instruction csxx requires absolute expression
 void riscv_set_csr_bits(unsigned short csr_id, unsigned int value) {
 	switch(csr_id) {
 	case CSR_USTATUS:
@@ -254,10 +252,10 @@ void riscv_set_csr_bits(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrs sepc, %0" : : "r" (value) : );
 		break;
 	case CSR_SCAUSE:
-		//asm volatile ("csrs scause, %0" : : "r" (value) : );
+		asm volatile ("csrs scause, %0" : : "r" (value) : );
 		break;
 	case CSR_STVAL:
-		//asm volatile ("csrs stval, %0" : : "r" (value) : );
+		asm volatile ("csrs sbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_SIP:
 		asm volatile ("csrs sip, %0" : : "r" (value) : );
@@ -305,10 +303,10 @@ void riscv_set_csr_bits(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrs mepc, %0" : : "r" (value) : );
 		break;
 	case CSR_MCAUSE:
-		//asm volatile ("csrs mcause, t0" : : "r" (value) : );
+		asm volatile ("csrs mcause, t0" : : "r" (value) : );
 		break;
 	case CSR_MTVAL:
-		//asm volatile ("csrs mtval, %0" : : "r" (value) : );
+		asm volatile ("csrs mbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_MIP:
 		asm volatile ("csrs mip, %0" : : "r" (value) : );
@@ -927,7 +925,7 @@ void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrc scause, %0" : : "r" (value) : );
 		break;
 	case CSR_STVAL:
-		//asm volatile ("csrc stval, %0" : : "r" (value) : );
+		asm volatile ("csrc sbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_SIP:
 		asm volatile ("csrc sip, %0" : : "r" (value) : );
@@ -978,7 +976,7 @@ void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrc mcause, %0" : : "r" (value) : );
 		break;
 	case CSR_MTVAL:
-		//asm volatile ("csrc mtval, %0" : : "r" (value) : );
+		asm volatile ("csrc mbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_MIP:
 		asm volatile ("csrc mip, %0" : : "r" (value) : );
@@ -1597,7 +1595,7 @@ void riscv_write_csr(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrw scause, %0" : : "r" (value) : );
 		break;
 	case CSR_STVAL:
-		//asm volatile ("csrw stval, %0" : : "r" (value) : );
+		asm volatile ("csrw sbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_SIP:
 		asm volatile ("csrw sip, %0" : : "r" (value) : );
@@ -1648,7 +1646,7 @@ void riscv_write_csr(unsigned short csr_id, unsigned int value) {
 		asm volatile ("csrw mcause, %0" : : "r" (value) : );
 		break;
 	case CSR_MTVAL:
-		//asm volatile ("csrw mtval, %0" : : "r" (value) : );
+		asm volatile ("csrw mbadaddr, %0" : : "r" (value) : );
 		break;
 	case CSR_MIP:
 		asm volatile ("csrw mip, %0" : : "r" (value) : );
@@ -2267,8 +2265,7 @@ void riscv_read_csr_register(unsigned short csr_id, void* reg_out) {
 		asm volatile ("csrr t0, scause\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
 		break;
 	case CSR_STVAL:
-		// TODO: figure out why it doesn't like this
-		//asm volatile ("csrr t0, stval\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
+		asm volatile ("csrr t0, sbadaddr\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
 		break;
 	case CSR_SIP:
 		asm volatile ("csrr t0, sip\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
@@ -2319,8 +2316,7 @@ void riscv_read_csr_register(unsigned short csr_id, void* reg_out) {
 		asm volatile ("csrr t0, mcause\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
 		break;
 	case CSR_MTVAL:
-		// TODO: figure out why it doesn't like this
-		//asm volatile ("csrr t0, mtval\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
+		asm volatile ("csrr t0, mbadaddr\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");
 		break;
 	case CSR_MIP:
 		asm volatile ("csrr t0, mip\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");

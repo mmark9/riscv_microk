@@ -26,3 +26,5 @@ After launch it will be stuck in an infinite loop
 
 If you get "Register 3921 is not available" when debugging with GDB, disable compressed breakpoints
 Type "set riscv use_compressed_breakpoint off" while in GDB
+
+mtval/stval are still called mbadaddr/sbadaddr in the assembler; they are slow to update this
