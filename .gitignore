@@ -70,3 +70,6 @@ dkms.conf
 # Build stuff
 release/*
 build/*
+
+# cLion
+.idea/*
