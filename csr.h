@@ -1,6 +1,7 @@
-
 #ifndef SRC_ARCH_RISCV32_CSR_H_
 #define SRC_ARCH_RISCV32_CSR_H_
+
+#include <stdint.h>
 
 /** User Trap Setup **/
 // URW - User status register.
@@ -462,364 +463,364 @@
 
 // Machine ISA Register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
 		// Extensions[0-25] (WARL)
-		unsigned int atomic_ext:1;            //A
-		unsigned int reserved_0:1;            //B
-		unsigned int compressed_ext:1;        //C
-		unsigned int double_prec_float_ext:1; //D
-		unsigned int rv32e_base_isa:1;        //E
-		unsigned int single_prec_float_ext:1; //F
-		unsigned int additional_ext:1;        //G
-		unsigned int reserved_1:1;            //H
-		unsigned int base_isa_ext:1;          //I
-		unsigned int reserved_2:1;            //J
-		unsigned int reserved_3:1;            //K
-		unsigned int reserved_4:1;            //L
-		unsigned int int_mul_div_ext:1;       //M
-		unsigned int user_int_ext:1;          //N
-		unsigned int reserved_5:1;            //O
-		unsigned int reserved_6:1;            //P
-		unsigned int quad_prec_float_ext:1;   //Q
-		unsigned int reserved_7:1;            //R
-		unsigned int supervisor_mode_ext:1;   //S
-		unsigned int reserved_8:1;            //T
-		unsigned int user_mode_ext:1;         //U
-		unsigned int reserved_9:1;            //V
-		unsigned int reserved_A:1;            //W
-		unsigned int non_standard_ext:1;      //X
-		unsigned int reserved_B:1;            //Y
-		unsigned int reserved_C:1;            //Z
+		uint32_t atomic_ext:1;            //A
+		uint32_t reserved_0:1;            //B
+		uint32_t compressed_ext:1;        //C
+		uint32_t double_prec_float_ext:1; //D
+		uint32_t rv32e_base_isa:1;        //E
+		uint32_t single_prec_float_ext:1; //F
+		uint32_t additional_ext:1;        //G
+		uint32_t reserved_1:1;            //H
+		uint32_t base_isa_ext:1;          //I
+		uint32_t reserved_2:1;            //J
+		uint32_t reserved_3:1;            //K
+		uint32_t reserved_4:1;            //L
+		uint32_t int_mul_div_ext:1;       //M
+		uint32_t user_int_ext:1;          //N
+		uint32_t reserved_5:1;            //O
+		uint32_t reserved_6:1;            //P
+		uint32_t quad_prec_float_ext:1;   //Q
+		uint32_t reserved_7:1;            //R
+		uint32_t supervisor_mode_ext:1;   //S
+		uint32_t reserved_8:1;            //T
+		uint32_t user_mode_ext:1;         //U
+		uint32_t reserved_9:1;            //V
+		uint32_t reserved_A:1;            //W
+		uint32_t non_standard_ext:1;      //X
+		uint32_t reserved_B:1;            //Y
+		uint32_t reserved_C:1;            //Z
 		// Ignored Field[26-29] (WIRI)
-		unsigned int ignore:4;
+		uint32_t ignore:4;
 		// ISA width[30-31] (WARL)
-		unsigned int isa_width:2;
+		uint32_t isa_width:2;
 	} fields;
-} misa_register_t;
+} misa_csr_t;
 
 // Machine Vendor ID Register
 
 
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int offset:7;
-		unsigned int blank:25;
+		uint32_t offset:7;
+		uint32_t blank:25;
 	} fields;
-} mvendorid_register_t;;
+} mvendorid_csr_t;;
 
 // Machine Architecture ID Register
 typedef struct {
-	unsigned int architecture_id:32;
-} marchid_register_t;
+	uint32_t architecture_id:32;
+} marchid_csr_t;
 
 // Machine Implementation ID Register
 typedef struct {
-	unsigned int implementation_id:32;
-} mimpid_register_t;
+	uint32_t implementation_id:32;
+} mimpid_csr_t;
 
 // Hart ID Register - core/hardware thread ID
 typedef struct {
-	unsigned int hart_id:32;
-} mhartid_register_t;
+	uint32_t hart_id:32;
+} mhartid_csr_t;
 
 // Machine Status Register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
 		// Global Interrupt Flags per privilege mode (per Hart)
-		unsigned int user_interrupts_enabled:1;
-		unsigned int supervisor_interrupts_enabled:1;
-		unsigned int reserved_1:1;
-		unsigned int machine_interrupts_enabled:1;
+		uint32_t user_interrupts_enabled:1;
+		uint32_t supervisor_interrupts_enabled:1;
+		uint32_t reserved_1:1;
+		uint32_t machine_interrupts_enabled:1;
 		// Prior to trap Interrupt Flags per privilege mode (per Hart)
-		unsigned int user_interrupts_enabled_before_trap:1;
-		unsigned int supervisor_interrupts_enabled_before_trap:1;
-		unsigned int reserved_2:1;
-		unsigned int machine_interrupts_enabled_before_trap:1;
-		unsigned int supervisor_privilege_mode_before_trap:1;
-		unsigned int reserved_3:2;
-		unsigned int machine_privilege_mode_before_trap:2;
+		uint32_t user_interrupts_enabled_before_trap:1;
+		uint32_t supervisor_interrupts_enabled_before_trap:1;
+		uint32_t reserved_2:1;
+		uint32_t machine_interrupts_enabled_before_trap:1;
+		uint32_t supervisor_privilege_mode_before_trap:1;
+		uint32_t reserved_3:2;
+		uint32_t machine_privilege_mode_before_trap:2;
 		// Extension Context Status
-		unsigned int fpu_status:2;
-		unsigned int additional_user_mode_ext_status:2;
+		uint32_t fpu_status:2;
+		uint32_t additional_user_mode_ext_status:2;
 		// Memory Privilege
-		unsigned int modify_privilege_enabled:1;
-		unsigned int supervisor_user_memory_access_enabled:1;
-		unsigned int make_excutable_readable_enabled:1;
+		uint32_t modify_privilege_enabled:1;
+		uint32_t supervisor_user_memory_access_enabled:1;
+		uint32_t make_excutable_readable_enabled:1;
 		// Virtualization Support
-		unsigned int trap_virtual_memory_enabled:1;
-		unsigned int interrutpt_time_enabled:1;
-		unsigned int trap_sret_enabled:1;
+		uint32_t trap_virtual_memory_enabled:1;
+		uint32_t interrutpt_time_enabled:1;
+		uint32_t trap_sret_enabled:1;
 		// Ignored
-		unsigned int reserved_4:8;
+		uint32_t reserved_4:8;
 		unsigned sd:1;
 	} fields;
-} mstatus_register_t;
+} mstatus_csr_t;
 
 // Machine Exception Delegation Register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int instruction_address_missaligned_delegated:1;
-		unsigned int instruction_access_fault_delegated:1;
-		unsigned int illegal_instruction_delegated:1;
-		unsigned int break_point_delegated:1;
-		unsigned int load_address_misaligned_delegated:1;
-		unsigned int load_access_fault_delegated:1;
-		unsigned int store_amo_address_misaligned_delegated:1;
-		unsigned int store_amo_access_fault_delegated:1;
-		unsigned int enviornment_call_from_user_mode_delegated:1;
-		unsigned int enviornment_call_from_supervisor_mode_delegated:1;
-		unsigned int reserved_1:1;
+		uint32_t instruction_address_missaligned_delegated:1;
+		uint32_t instruction_access_fault_delegated:1;
+		uint32_t illegal_instruction_delegated:1;
+		uint32_t break_point_delegated:1;
+		uint32_t load_address_misaligned_delegated:1;
+		uint32_t load_access_fault_delegated:1;
+		uint32_t store_amo_address_misaligned_delegated:1;
+		uint32_t store_amo_access_fault_delegated:1;
+		uint32_t enviornment_call_from_user_mode_delegated:1;
+		uint32_t enviornment_call_from_supervisor_mode_delegated:1;
+		uint32_t reserved_1:1;
 		// ECALLS from machine mode cannot be delegated
-		unsigned int enviornment_call_from_machine_mode_delegated:1;
-		unsigned int instruction_page_fault_delegated:1;
-		unsigned int load_page_fault_delegated:1;
-		unsigned int reserved_2:1;
-		unsigned int store_amo_page_fault_delegated:1;
-		unsigned int reserved_3:16;
+		uint32_t enviornment_call_from_machine_mode_delegated:1;
+		uint32_t instruction_page_fault_delegated:1;
+		uint32_t load_page_fault_delegated:1;
+		uint32_t reserved_2:1;
+		uint32_t store_amo_page_fault_delegated:1;
+		uint32_t reserved_3:16;
 	} fields;
-} medeleg_register_t;
+} medeleg_csr_t;
 
 // Machine Interrupt Delegation register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_software_interrupts_delegated:1;
-		unsigned int supervisor_software_interrupts_delegated:1;
-		unsigned int reserved_1:1;
-		unsigned int machine_software_interrupts_delegated:1;
-		unsigned int user_timer_interrupts_delegated:1;
-		unsigned int supervisor_timer_interrupts_delegated:1;
-		unsigned int reserved_2:1;
-		unsigned int machine_timer_interrupts_delegated:1;
-		unsigned int user_external_interrupts_delegated:1;
-		unsigned int supervisor_external_interrupts_delegated:1;
-		unsigned int reserved_3:1;
-		unsigned int machine_external_interrupts_delegated:1;
-		unsigned int reserved_4:20;
+		uint32_t user_software_interrupts_delegated:1;
+		uint32_t supervisor_software_interrupts_delegated:1;
+		uint32_t reserved_1:1;
+		uint32_t machine_software_interrupts_delegated:1;
+		uint32_t user_timer_interrupts_delegated:1;
+		uint32_t supervisor_timer_interrupts_delegated:1;
+		uint32_t reserved_2:1;
+		uint32_t machine_timer_interrupts_delegated:1;
+		uint32_t user_external_interrupts_delegated:1;
+		uint32_t supervisor_external_interrupts_delegated:1;
+		uint32_t reserved_3:1;
+		uint32_t machine_external_interrupts_delegated:1;
+		uint32_t reserved_4:20;
 	} fields;
-} mideleg_register_t;
+} mideleg_csr_t;
 
 // Machine interrupt-pending register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_software_interrupts_pending:1;
-		unsigned int supervisor_software_interrupts_pending:1;
-		unsigned int reserved_1:1;
-		unsigned int machine_software_interrupts_pending:1;
-		unsigned int user_timer_interrupts_pending:1;
-		unsigned int supervisor_timer_interrupts_pending:1;
-		unsigned int reserved_2:1;
-		unsigned int machine_timer_interrupts_pending:1;
-		unsigned int user_external_interrupts_pending:1;
-		unsigned int supervisor_external_interrupts_pending:1;
-		unsigned int reserved_3:1;
-		unsigned int machine_external_interrupts_pending:1;
-		unsigned int reserved_4:20;
+		uint32_t user_software_interrupts_pending:1;
+		uint32_t supervisor_software_interrupts_pending:1;
+		uint32_t reserved_1:1;
+		uint32_t machine_software_interrupts_pending:1;
+		uint32_t user_timer_interrupts_pending:1;
+		uint32_t supervisor_timer_interrupts_pending:1;
+		uint32_t reserved_2:1;
+		uint32_t machine_timer_interrupts_pending:1;
+		uint32_t user_external_interrupts_pending:1;
+		uint32_t supervisor_external_interrupts_pending:1;
+		uint32_t reserved_3:1;
+		uint32_t machine_external_interrupts_pending:1;
+		uint32_t reserved_4:20;
 	} fields;
-} mip_register_t;
+} mip_csr_t;
 
 // Machine interrupt-enable registers
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_software_interrupts_enabled:1;
-		unsigned int supervisor_software_interrupts_enabled:1;
-		unsigned int reserved_1:1;
-		unsigned int machine_software_interrupts_enabled:1;
-		unsigned int user_timer_interrupts_enabled:1;
-		unsigned int supervisor_timer_interrupts_enabled:1;
-		unsigned int reserved_2:1;
-		unsigned int machine_timer_interrupts_enabled:1;
-		unsigned int user_external_interrupts_enabled:1;
-		unsigned int supervisor_external_interrupts_enabledd:1;
-		unsigned int reserved_3:1;
-		unsigned int machine_external_interrupts_enabled:1;
-		unsigned int reserved_4:20;
+		uint32_t user_software_interrupts_enabled:1;
+		uint32_t supervisor_software_interrupts_enabled:1;
+		uint32_t reserved_1:1;
+		uint32_t machine_software_interrupts_enabled:1;
+		uint32_t user_timer_interrupts_enabled:1;
+		uint32_t supervisor_timer_interrupts_enabled:1;
+		uint32_t reserved_2:1;
+		uint32_t machine_timer_interrupts_enabled:1;
+		uint32_t user_external_interrupts_enabled:1;
+		uint32_t supervisor_external_interrupts_enabledd:1;
+		uint32_t reserved_3:1;
+		uint32_t machine_external_interrupts_enabled:1;
+		uint32_t reserved_4:20;
 	} fields;
-} mie_register_t;
+} mie_csr_t;
 
 // Machine timer register
 // Note two reads are needed for this
 typedef struct {
 	unsigned long long machine_time:64;
-} mtime_register_t;
+} mtime_csr_t;
 
 // Machine time compare register
 typedef struct {
 	unsigned long long machine_time_compare_register:64;
-} mtimecmp_register_t;
+} mtimecmp_csr_t;
 
 // Hardware performance monitor counter registers
 // Note since these are just 64 bit counters, we can just define one struct
 typedef struct {
 	unsigned long long value:64;
-} hpmc_register_t;
+} hpmc_csr_t;
 
 // Hardware performance monitor event register
 // Note since these are just 64 bit counters, we can just define one struct
 typedef struct {
-	unsigned int value:32;
-} hpme_register_t;
+	uint32_t value:32;
+} hpme_csr_t;
 
 // Counter-enable registers (mcounteren and scounteren)
 // m = machine | s = supervisor
 // setting a counter bit in a higher privilege mode
 // register enables access in a lower privilege mode
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int cycle_enabled:1;
-		unsigned int time_enableld:1;
-		unsigned int instret_enabled:1;
-		unsigned int hpm3_enabled:1;
-		unsigned int hpm4_enabled:1;
-		unsigned int hpm5_enabled:1;
-		unsigned int hpm6_enabled:1;
-		unsigned int hpm7_enabled:1;
-		unsigned int hpm8_enabled:1;
-		unsigned int hpm9_enabled:1;
-		unsigned int hpm10_enabled:1;
-		unsigned int hpm11_enabled:1;
-		unsigned int hpm12_enabled:1;
-		unsigned int hpm13_enabled:1;
-		unsigned int hpm14_enabled:1;
-		unsigned int hpm15_enabled:1;
-		unsigned int hpm16_enabled:1;
-		unsigned int hpm17_enabled:1;
-		unsigned int hpm18_enabled:1;
-		unsigned int hpm19_enabled:1;
-		unsigned int hpm20_enabled:1;
-		unsigned int hpm21_enabled:1;
-		unsigned int hpm22_enabled:1;
-		unsigned int hpm23_enabled:1;
-		unsigned int hpm24_enabled:1;
-		unsigned int hpm25_enabled:1;
-		unsigned int hpm26_enabled:1;
-		unsigned int hpm27_enabled:1;
-		unsigned int hpm28_enabled:1;
-		unsigned int hpm29_enabled:1;
-		unsigned int hpm30_enabled:1;
-		unsigned int hpm31_enabled:1;
+		uint32_t cycle_enabled:1;
+		uint32_t time_enableld:1;
+		uint32_t instret_enabled:1;
+		uint32_t hpm3_enabled:1;
+		uint32_t hpm4_enabled:1;
+		uint32_t hpm5_enabled:1;
+		uint32_t hpm6_enabled:1;
+		uint32_t hpm7_enabled:1;
+		uint32_t hpm8_enabled:1;
+		uint32_t hpm9_enabled:1;
+		uint32_t hpm10_enabled:1;
+		uint32_t hpm11_enabled:1;
+		uint32_t hpm12_enabled:1;
+		uint32_t hpm13_enabled:1;
+		uint32_t hpm14_enabled:1;
+		uint32_t hpm15_enabled:1;
+		uint32_t hpm16_enabled:1;
+		uint32_t hpm17_enabled:1;
+		uint32_t hpm18_enabled:1;
+		uint32_t hpm19_enabled:1;
+		uint32_t hpm20_enabled:1;
+		uint32_t hpm21_enabled:1;
+		uint32_t hpm22_enabled:1;
+		uint32_t hpm23_enabled:1;
+		uint32_t hpm24_enabled:1;
+		uint32_t hpm25_enabled:1;
+		uint32_t hpm26_enabled:1;
+		uint32_t hpm27_enabled:1;
+		uint32_t hpm28_enabled:1;
+		uint32_t hpm29_enabled:1;
+		uint32_t hpm30_enabled:1;
+		uint32_t hpm31_enabled:1;
 	} fields;
-} counteren_register_t;
+} counteren_csr_t;
 
 /**  Generic CSRs  **/
 
 // Trap-Vector Base-Address Register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct fields {
 		// 0 = Direct = All exceptions set pc to Base
 		// 1 = Vectored = Asynchronous interrupts set pc to BASE+4xcause
-		unsigned int mode:2;
+		uint32_t mode:2;
 		// Note: base address must be aligned on 4-byte boundary
-		unsigned int base:30;
+		uint32_t base:30;
 	} fields;
-} tvec_register_t;
+} tvec_csr_t;
 
 // Scratch Register - Generic
 typedef struct {
-	unsigned int value:32;
-} scratch_register_t;
+	uint32_t value:32;
+} scratch_csr_t;
 
 // Exception Register - Generic
 typedef struct {
-	unsigned int address:32;
-} epc_register_t;
+	uint32_t address:32;
+} epc_csr_t;
 
 // Trap Cause Register - Generic
 
 
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int exception_code:31;
-		unsigned int was_caused_by_interrupt:1;
+		uint32_t exception_code:31;
+		uint32_t was_caused_by_interrupt:1;
 	} fields;
-} tcause_register_t;
+} tcause_csr_t;
 
 
 // Trap Value Register - Generic
 typedef struct {
-	unsigned int value:32;
-} ttval_register_t;
+	uint32_t value:32;
+} ttval_csr_t;
 
 
 /**  Supervisor CSR specific **/
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_interrupts_enabled:1;
-		unsigned int supervisor_interrupts_enabled:1;
-		unsigned int reserved_1:2;
-		unsigned int user_interrupts_enabled_before_trap:1;
-		unsigned int supervisor_interrupts_enabled_before_trap:1;
-		unsigned int reserved_2:2;
-		unsigned int privilege_mode_before_interrupt:1;  // 0 = user 1 = super
-		unsigned int reserved_3:4;
+		uint32_t user_interrupts_enabled:1;
+		uint32_t supervisor_interrupts_enabled:1;
+		uint32_t reserved_1:2;
+		uint32_t user_interrupts_enabled_before_trap:1;
+		uint32_t supervisor_interrupts_enabled_before_trap:1;
+		uint32_t reserved_2:2;
+		uint32_t privilege_mode_before_interrupt:1;  // 0 = user 1 = super
+		uint32_t reserved_3:4;
 		// Extension Context Status
-		unsigned int fpu_status:2;
-		unsigned int additional_user_mode_ext_status:2;
+		uint32_t fpu_status:2;
+		uint32_t additional_user_mode_ext_status:2;
 		// Memory Privilege
-		unsigned int reserved_4:1;
-		unsigned int supervisor_user_memory_access_enabled:1;
-		unsigned int make_excutable_readable_enabled:1;
+		uint32_t reserved_4:1;
+		uint32_t supervisor_user_memory_access_enabled:1;
+		uint32_t make_excutable_readable_enabled:1;
 		// Ignored
-		unsigned int reserved_5:11;
+		uint32_t reserved_5:11;
 		unsigned sd:1;
 	} fields;
-} sstatus_register_t;
+} sstatus_csr_t;
 
 
 // Supervisor interrupt-pending register
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_software_interrupts_pending:1;
-		unsigned int supervisor_software_interrupts_pending:1;
-		unsigned int reserved_1:2;
-		unsigned int user_timer_interrupts_pending:1;
-		unsigned int supervisor_timer_interrupts_pending:1;
-		unsigned int reserved_2:2;
-		unsigned int user_external_interrupts_pending:1;
-		unsigned int supervisor_external_interrupts_pending:1;
-		unsigned int reserved_4:22;
+		uint32_t user_software_interrupts_pending:1;
+		uint32_t supervisor_software_interrupts_pending:1;
+		uint32_t reserved_1:2;
+		uint32_t user_timer_interrupts_pending:1;
+		uint32_t supervisor_timer_interrupts_pending:1;
+		uint32_t reserved_2:2;
+		uint32_t user_external_interrupts_pending:1;
+		uint32_t supervisor_external_interrupts_pending:1;
+		uint32_t reserved_4:22;
 	} fields;
-} sip_register_t;
+} sip_csr_t;
 
 // Supervisor interrupt-enable registers
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int user_software_interrupts_enabled:1;
-		unsigned int supervisor_software_interrupts_enabled:1;
-		unsigned int reserved_1:2;
-		unsigned int user_timer_interrupts_enabled:1;
-		unsigned int supervisor_timer_interrupts_enabled:1;
-		unsigned int reserved_2:2;
-		unsigned int user_external_interrupts_enabled:1;
-		unsigned int supervisor_external_interrupts_enabled:1;
-		unsigned int reserved_4:22;
+		uint32_t user_software_interrupts_enabled:1;
+		uint32_t supervisor_software_interrupts_enabled:1;
+		uint32_t reserved_1:2;
+		uint32_t user_timer_interrupts_enabled:1;
+		uint32_t supervisor_timer_interrupts_enabled:1;
+		uint32_t reserved_2:2;
+		uint32_t user_external_interrupts_enabled:1;
+		uint32_t supervisor_external_interrupts_enabled:1;
+		uint32_t reserved_4:22;
 	} fields;
-} sie_register_t;
+} sie_csr_t;
 
 typedef union {
-	unsigned int value;
+	uint32_t value;
 	struct {
-		unsigned int physical_page_number:22;
-		unsigned int address_space_identifier:9;
-		unsigned int mode:1;
+		uint32_t physical_page_number:22;
+		uint32_t address_space_identifier:9;
+		uint32_t mode:1;
 	} fields;
-};
+} stvec_csr_t;
 
-void riscv_set_csr_bits(unsigned short csr_id, unsigned int value);
-void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value);
-void riscv_write_csr(unsigned short csr_id, unsigned int value);
-void riscv_read_csr_register(unsigned short csr_id, void* reg_out);
+void riscv_set_csr_bits(uint16_t csr_id, uint32_t value);
+void riscv_clear_csr_bits(uint16_t csr_id, uint32_t value);
+void riscv_write_csr(uint16_t csr_id, uint32_t value);
+void riscv_read_csr_register(uint16_t csr_id, void* reg_out);
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */
