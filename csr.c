@@ -1,6 +1,6 @@
-#include <csr.h>
+#include "csr.h"
 
-void riscv_set_csr_bits(unsigned short csr_id, unsigned int value) {
+void riscv_set_csr_bits(uint16_t csr_id, uint32_t value) {
 	switch(csr_id) {
 	case CSR_USTATUS:
 		asm volatile ("csrs ustatus, %0" : : "r" (value) : );
@@ -670,7 +670,7 @@ void riscv_set_csr_bits(unsigned short csr_id, unsigned int value) {
 	}
 }
 
-void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value) {
+void riscv_clear_csr_bits(uint16_t csr_id, uint32_t value) {
 	switch(csr_id) {
 	case CSR_USTATUS:
 		asm volatile ("csrc ustatus, %0" : : "r" (value) : );
@@ -1340,7 +1340,7 @@ void riscv_clear_csr_bits(unsigned short csr_id, unsigned int value) {
 	}
 }
 
-void riscv_write_csr(unsigned short csr_id, unsigned int value) {
+void riscv_write_csr(uint16_t csr_id, uint32_t value) {
 	switch(csr_id) {
 	case CSR_USTATUS:
 		asm volatile ("csrw ustatus, %0" : : "r" (value) : );
@@ -2010,7 +2010,7 @@ void riscv_write_csr(unsigned short csr_id, unsigned int value) {
 	}
 }
 
-void riscv_read_csr_register(unsigned short csr_id, void* reg_out) {
+void riscv_read_csr_register(uint16_t csr_id, uint32_t* reg_out) {
 	switch (csr_id) {
 	case CSR_USTATUS:
 		asm volatile ("csrr t0, ustatus\n\tsw t0, %0" : "=m" (*reg_out) : : "memory");

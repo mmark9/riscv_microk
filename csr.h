@@ -812,15 +812,24 @@ typedef union {
 typedef union {
 	uint32_t value;
 	struct {
-		uint32_t physical_page_number:22;
-		uint32_t address_space_identifier:9;
-		uint32_t mode:1;
+		uint32_t base:30;
+		uint32_t mode:2;
 	} fields;
 } stvec_csr_t;
+
+typedef union {
+    uint32_t value;
+    struct {
+        uint32_t physical_page_number:22;
+        uint32_t address_space_id:9;
+        uint32_t mode:1;
+    } fields;
+} satp_csr_t;
+
 
 void riscv_set_csr_bits(uint16_t csr_id, uint32_t value);
 void riscv_clear_csr_bits(uint16_t csr_id, uint32_t value);
 void riscv_write_csr(uint16_t csr_id, uint32_t value);
-void riscv_read_csr_register(uint16_t csr_id, void* reg_out);
+void riscv_read_csr_register(uint16_t csr_id, uint32_t* reg_out);
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */
