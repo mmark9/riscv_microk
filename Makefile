@@ -5,7 +5,7 @@ BUILD_MODE?=debug
 # TODO: make this configurable
 ASFLAGS?=-mabi=ilp32
 CFLAGS:=-O0 -std=gnu99 \
-	-ffreestanding -fbuiltin -Wall -Wextra
+	-ffreestanding -fbuiltin -Wall -Wextra -I ./
 ifeq ($(BUILD_MODE),debug)
 CFLAGS:=$(CFLAGS) -gdwarf-4
 endif
@@ -29,24 +29,24 @@ AS=$(HOST)-as
 PROJECT_DIR=${shell pwd}
 DEST_DIR?=${PROJECT_DIR}/release
 
-IMAGE_NAME = ${DEST_DIR}/sal_os$(TARGET_ARCH).elf
+IMAGE_NAME = ${DEST_DIR}/sal_os_$(TARGET_ARCH).elf
 
-LINKER_SCRIPT=$(BUILD_DIR)/linker.ld
+LINKER_SCRIPT=linker.ld
 
-MODULES=$(TARGET_ARCH)
-ALL_OBJS=$(shell find ${BUILD_DIR} -name "*.o" -type f)
+VPATH=. asm/
 
-VPATH=.
-
-MAIN_OBJS=$(BUILD_DIR)/kernel_boot.S.o $(BUILD_DIR)/kernel_main.o
-export
+OBJS:=$(patsubst %.c,${BUILD_DIR}/%.o, $(wildcard ./*.c))
+ASM_OBJS:=$(patsubst %.S,%.S.o, $(wildcard asm/*.S))
+ASM_OBJS:=$(notdir ${ASM_OBJS})
+ASM_OBJS:=$(patsubst %.S.o, ${BUILD_DIR}/%.S.o, ${ASM_OBJS})
+# export
 
 .PHONY: all $(MODULES)
 
 all: $(IMAGE_NAME)
 
-$(IMAGE_NAME): $(MODULES) $(MAIN_OBJS)
-	$(CC) -T ${LINKER_SCRIPT} -o $@ $(CFLAGS) $(ALL_OBJS) $(LIBFLAGS) -static-libgcc -lgcc
+$(IMAGE_NAME): $(OBJS) $(ASM_OBJS)
+	$(CC) -T ${LINKER_SCRIPT} -o $@ $(CFLAGS) $(ASM_OBJS) $(OBJS) $(LIBFLAGS) -static-libgcc -lgcc
 
 ${LINKER_SCRIPT}: ;
 
