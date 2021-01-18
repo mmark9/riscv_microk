@@ -20,7 +20,7 @@ kernel elfs should be loaded into DRAM
 Kernel boot assembly should have halt/infinite loop at the end to avoid PC from going out of bounds 
 
 Example launch using qemu:
-qemu-system-riscv32 -machine virt -nographic -smp 1 -m 128M -kernel release/sphinx_riscv32.elf
+qemu-system-riscv32 -machine virt -nographic -smp 1 -m 128M -kernel release/sal_os_riscv32.elf
 This will launch the kernel with one Core and 128 Megabytes of memory on a virtio enabled board.
 After launch it will be stuck in an infinite loop
 
