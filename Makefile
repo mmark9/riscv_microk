@@ -1,23 +1,5 @@
 # build modes = normal/debug
 BUILD_MODE?=debug
-
-# Compile flags
-# TODO: make this configurable
-ASFLAGS?=-mabi=ilp32
-CFLAGS:=-O0 -std=gnu99 \
-	-ffreestanding -fbuiltin -Wall -Wextra -I ./
-ifeq ($(BUILD_MODE),debug)
-CFLAGS:=$(CFLAGS) -gdwarf-4
-endif
-LIBFLAGS:=-nostdlib
-
-# output directory
-ifeq ($(BUILD_MODE),debug)
-BUILD_DIR:=$(shell pwd)/build/debug
-else
-BUILD_DIR:=$(shell pwd)/build/normal
-endif
-
 PREFIX=/opt/riscv/bin
 TARGET_ARCH?=riscv32
 HOST?=$(PREFIX)/$(TARGET_ARCH)-unknown-elf
@@ -27,33 +9,49 @@ CC=$(HOST)-gcc
 AS=$(HOST)-as
 OBJCOPY=$(HOST)-objcopy
 
-# OpenSBI
+# Compile flags
+ASFLAGS?=-mabi=ilp32
+CFLAGS:=-O0 -std=gnu99 \
+	-ffreestanding -fbuiltin -Wall -Wextra -I ./
+ifeq ($(BUILD_MODE),debug)
+	CFLAGS:=$(CFLAGS) -gdwarf-4
+endif
+LIBFLAGS:=-nostdlib
+
+# Directories
+ifeq ($(BUILD_MODE),debug)
+	BUILD_DIR:=$(shell pwd)/build/debug
+else
+	BUILD_DIR:=$(shell pwd)/build/normal
+endif
+
+PROJECT_DIR=$(shell pwd)
+DEST_DIR?=$(PROJECT_DIR)/release
+
+# Misc.
+VPATH=. asm/
+LINKER_SCRIPT=linker.ld
+
+# Output files
 OPEN_SBI_PATH=opensbi
 OPEN_SBI_BUILD_PATH=$(OPEN_SBI_PATH)/build/platform/generic/firmware
 OPEN_SBI_PAYLOAD=$(DEST_DIR)/sal_os_$(TARGET_ARCH)_osbi_payload.elf
+KERNEL_IMAGE_ELF = $(DEST_DIR)/sal_os_$(TARGET_ARCH).elf
+KERNEL_IMAGE_BINARY = $(DEST_DIR)/sal_os_$(TARGET_ARCH).bin
 
-PROJECT_DIR=${shell pwd}
-DEST_DIR?=${PROJECT_DIR}/release
-
-KERNEL_IMAGE_ELF = ${DEST_DIR}/sal_os_$(TARGET_ARCH).elf
-KERNEL_IMAGE_BINARY = ${DEST_DIR}/sal_os_$(TARGET_ARCH).bin
-
-LINKER_SCRIPT=linker.ld
-
-VPATH=. asm/
-
-OBJS:=$(patsubst %.c,${BUILD_DIR}/%.o, $(wildcard ./*.c))
+# Build objects
+OBJS:=$(patsubst %.c,$(BUILD_DIR)/%.o, $(wildcard ./*.c))
 ASM_OBJS:=$(patsubst %.S,%.S.o, $(wildcard asm/*.S))
-ASM_OBJS:=$(notdir ${ASM_OBJS})
-ASM_OBJS:=$(patsubst %.S.o, ${BUILD_DIR}/%.S.o, ${ASM_OBJS})
-# export
+ASM_OBJS:=$(notdir $(ASM_OBJS))
+ASM_OBJS:=$(patsubst %.S.o, $(BUILD_DIR)/%.S.o, $(ASM_OBJS))
+
 
 .PHONY: all $(MODULES)
 
 all: $(KERNEL_IMAGE_ELF) $(KERNEL_IMAGE_BINARY) $(OPEN_SBI_PAYLOAD)
 
 $(KERNEL_IMAGE_ELF): $(OBJS) $(ASM_OBJS)
-	$(CC) -T ${LINKER_SCRIPT} -o $@ $(CFLAGS) $(ASM_OBJS) $(OBJS) $(LIBFLAGS) -static-libgcc -lgcc
+	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(ASM_OBJS) $(OBJS) $(LIBFLAGS) -static-libgcc -lgcc
 
 $(KERNEL_IMAGE_BINARY): $(KERNEL_IMAGE_ELF)
 	$(OBJCOPY) -O binary $^ $@
@@ -64,7 +62,7 @@ $(OPEN_SBI_PAYLOAD): $(KERNEL_IMAGE_BINARY)
 	cp $(OPEN_SBI_BUILD_PATH)/fw_payload.elf $@
 
 
-${LINKER_SCRIPT}: ;
+$(LINKER_SCRIPT): ;
 
 clean:
 	rm -f $(BUILD_DIR)/*
