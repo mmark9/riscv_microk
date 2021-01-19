@@ -4,7 +4,7 @@ ENTRY(boot_entry)
 SECTIONS
 {
         
-	LOAD_ADDRESS = 0x80000000;
+    LOAD_ADDRESS = 0x80400000;
     
     . = LOAD_ADDRESS;
     BOOT_LOADER_TEXT_BEGIN = .;

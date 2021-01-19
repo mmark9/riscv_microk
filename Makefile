@@ -25,11 +25,18 @@ HOST?=$(PREFIX)/$(TARGET_ARCH)-unknown-elf
 # toolchain params
 CC=$(HOST)-gcc
 AS=$(HOST)-as
+OBJCOPY=$(HOST)-objcopy
+
+# OpenSBI
+OPEN_SBI_PATH=opensbi
+OPEN_SBI_BUILD_PATH=$(OPEN_SBI_PATH)/build/platform/generic/firmware
+OPEN_SBI_PAYLOAD=$(DEST_DIR)/sal_os_$(TARGET_ARCH)_osbi_payload.elf
 
 PROJECT_DIR=${shell pwd}
 DEST_DIR?=${PROJECT_DIR}/release
 
-IMAGE_NAME = ${DEST_DIR}/sal_os_$(TARGET_ARCH).elf
+KERNEL_IMAGE_ELF = ${DEST_DIR}/sal_os_$(TARGET_ARCH).elf
+KERNEL_IMAGE_BINARY = ${DEST_DIR}/sal_os_$(TARGET_ARCH).bin
 
 LINKER_SCRIPT=linker.ld
 
@@ -43,16 +50,27 @@ ASM_OBJS:=$(patsubst %.S.o, ${BUILD_DIR}/%.S.o, ${ASM_OBJS})
 
 .PHONY: all $(MODULES)
 
-all: $(IMAGE_NAME)
+all: $(KERNEL_IMAGE_ELF) $(KERNEL_IMAGE_BINARY) $(OPEN_SBI_PAYLOAD)
 
-$(IMAGE_NAME): $(OBJS) $(ASM_OBJS)
+$(KERNEL_IMAGE_ELF): $(OBJS) $(ASM_OBJS)
 	$(CC) -T ${LINKER_SCRIPT} -o $@ $(CFLAGS) $(ASM_OBJS) $(OBJS) $(LIBFLAGS) -static-libgcc -lgcc
+
+$(KERNEL_IMAGE_BINARY): $(KERNEL_IMAGE_ELF)
+	$(OBJCOPY) -O binary $^ $@
+
+$(OPEN_SBI_PAYLOAD): export CROSS_COMPILE = $(HOST)-
+$(OPEN_SBI_PAYLOAD): $(KERNEL_IMAGE_BINARY)
+	make -C $(OPEN_SBI_PATH) PLATFORM=generic FW_PAYLOAD=y FW_PAYLOAD_PATH=$<
+	cp $(OPEN_SBI_BUILD_PATH)/fw_payload.elf $@
+
 
 ${LINKER_SCRIPT}: ;
 
 clean:
 	rm -f $(BUILD_DIR)/*
-	rm -f $(IMAGE_NAME)
+	rm -f $(KERNEL_IMAGE_ELF)
+	rm -f $(KERNEL_IMAGE_BINARY)
+	rm -f $(OPEN_SBI_PAYLOAD)
 
 $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(BUILD_DIR)
