@@ -1,10 +1,12 @@
 #include "csr.h"
+#include "sbi_relay.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
 extern void halt_system(void);
 
-typedef enum {
+enum trap_cause {
     INSTRUCTION_ADDRESS_MISALIGNED = 0,
     INSTRUCTION_ACCESS_FAULT,
     ILLEGAL_INSTRUCTION,
@@ -25,9 +27,9 @@ typedef enum {
     USER_EXTERNAL_INTERRUPT,
     SUPERVISOR_EXTERNAL_INTERRUPT,
     RESERVED_OR_UNKNOWN
-} trap_cause_t;
+};
 
-trap_cause_t trap_read_cause(tcause_csr_t cause_reg) {
+enum trap_cause trap_read_cause(tcause_csr_t cause_reg) {
     if (cause_reg.fields.was_caused_by_interrupt) {
         switch (cause_reg.fields.exception_code) {
             case 0:
@@ -94,7 +96,7 @@ uint32_t supervisor_handle_interrupt(void) {
     tcause_csr_t scause;
     riscv_read_csr_register(CSR_SEPC, &sepc);
     riscv_read_csr_register(CSR_SCAUSE, &scause.value);
-    trap_cause_t tcause = trap_read_cause(scause);
+    enum trap_cause tcause = trap_read_cause(scause);
     if (tcause == SUPERVISOR_TIMER_INTERRUPT) {
         return sepc;
     } else {

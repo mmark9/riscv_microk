@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef enum {
+enum sbi_err {
     SBI_SUCCESS = 0,
     SBI_ERR_FAILED,
     SBI_ERR_NOT_SUPPORTED,
@@ -11,34 +11,39 @@ typedef enum {
     SBI_ERR_DENIED,
     SBI_ERR_INVALID_ADDRESS,
     SBI_ERR_ALREADY_AVAILABLE
-} sbi_err_t;
+};
 
-typedef enum {
+enum sbi_reset_type {
     SBI_SHUTDOWN = 0,
     SBI_COLD_REBOOT,
     SBI_WARM_REBOOT
-} sbi_reset_type_t;
+};
 
-typedef enum {
+enum sbi_reset_reason {
     SBI_RESET_NO_REASON = 0,
     SBI_RESET_SYSTEM_FAILURE
-} sbi_reset_reason_t;
+};
 
-typedef enum {
+enum sbi_hart_status {
     SBI_HART_STARTED = 0,
     SBI_HART_STOPPED,
     SBI_START_PENDING,
     SBI_STOP_PENDING
-} sbi_hart_status_t;
+};
 
-typedef enum {
+enum sbi_impl_ids {
     SBI_BERKLEY_BOOT_LOADER = 0,
     SBI_OPEN_SBI,
     SBI_XVISOR,
     SBI_KVM,
     SBI_RUSTSBI,
     SBI_DIOSIX
-} sbi_impl_ids_t;
+};
+
+struct sbiret {
+    int32_t error;
+    int32_t value;
+};
 
 struct sbiret sbi_relay_get_spec_version(void);
 struct sbiret sbi_relay_get_impl_id(void);
