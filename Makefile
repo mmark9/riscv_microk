@@ -41,9 +41,9 @@ KERNEL_IMAGE_BINARY = $(DEST_DIR)/sal_os_$(TARGET_ARCH).bin
 
 # Build objects
 OBJS:=$(patsubst %.c,$(BUILD_DIR)/%.o, $(wildcard ./*.c))
-ASM_OBJS:=$(patsubst %.S,%.S.o, $(wildcard asm/*.S))
+ASM_OBJS:=$(patsubst %.s,%.s.o, $(wildcard asm/*.s))
 ASM_OBJS:=$(notdir $(ASM_OBJS))
-ASM_OBJS:=$(patsubst %.S.o, $(BUILD_DIR)/%.S.o, $(ASM_OBJS))
+ASM_OBJS:=$(patsubst %.s.o, $(BUILD_DIR)/%.s.o, $(ASM_OBJS))
 
 
 .PHONY: all $(MODULES)
@@ -74,7 +74,7 @@ $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(BUILD_DIR)
 	$(CC) -c $^ -o $@ $(CFLAGS)
 
-$(BUILD_DIR)/%.S.o: %.S
+$(BUILD_DIR)/%.s.o: %.s
 	mkdir -p $(BUILD_DIR)
 	$(AS) $^ -o $@ $(ASFLAGS)
 
