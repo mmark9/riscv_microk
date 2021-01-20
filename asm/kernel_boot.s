@@ -6,7 +6,7 @@
 # a3 = load address
 # a4 = linker_load_config
 
-.section bss
+.section .bss
 .align 0x4
 kernel_stack_top:
 .skip 0x4000
