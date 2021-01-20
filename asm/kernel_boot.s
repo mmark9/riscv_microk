@@ -18,8 +18,10 @@ kernel_boot:
     # setup supercisor trap handler
     # set trap vector to supervisor handler
 	# should we disable interrupts here?
-	la t4, supervisor_handle_interrupt
+	la t4, supervisor_trap
     csrw stvec, t4
+    li t4, 34
+    csrw sie, t4
 	# set up stack
 	la sp, kernel_stack_bottom
 	# call main
@@ -28,8 +30,16 @@ halt:
 	j halt
 
 supervisor_trap:
-    csrr t0, mstatus
-	csrr t1, mcause
-	csrr t2, mbadaddr
+    # mask out the current interrupt
+    csrr t0, sstatus
+	csrr t1, scause
+	csrr t2, sbadaddr
     call supervisor_handle_interrupt
-    mret
+    csrw sepc, a0 # a0 stores the next pc
+    sret
+
+.globl halt_system
+halt_system:
+    nop
+    nop
+    j halt_system
