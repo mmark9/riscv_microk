@@ -3,7 +3,7 @@
 # TODO: maybe make this configureable somehow
 .equ KERNEL_VIRTUAL_BASE, 0xE0000000
 .equ VIRTUAL_MEMORY_SIZE, 0xFFFFFFFF
-.equ KERNEL_LOAD_ADDRESS, 0x80000000
+.equ KERNEL_LOAD_ADDRESS, 0x80400000
 .globl KERNEL_VIRTUAL_BASE
 
 # Constants set by the linker
