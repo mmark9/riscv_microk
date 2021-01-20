@@ -110,6 +110,11 @@ void kernel_main(
 		void* config_ptr,
 		int32_t config_type) {
     // loop for now....
+    struct sbiret impl_id = sbi_relay_get_impl_id();
+    struct sbiret march_id = sbi_relay_get_marchid();
+    struct sbiret vendor_id = sbi_relay_get_mvendorid();
+    struct sbiret shutdown_ret = sbi_relay_system_reset(SBI_SHUTDOWN,
+            SBI_RESET_NO_REASON);
     while (true) {
         continue;
     }
