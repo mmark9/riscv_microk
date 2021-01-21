@@ -29,9 +29,9 @@ enum trap_cause {
     RESERVED_OR_UNKNOWN
 };
 
-enum trap_cause trap_read_cause(tcause_csr_t cause_reg) {
-    if (cause_reg.fields.was_caused_by_interrupt) {
-        switch (cause_reg.fields.exception_code) {
+enum trap_cause trap_read_cause(uint32_t scause_reg) {
+    if (scause_interrupt(scause_reg)) {
+        switch (scause_except_code(scause_reg)) {
             case 0:
                 return USER_SOFTWARE_INTERRUPT;
             case 1:
@@ -53,7 +53,7 @@ enum trap_cause trap_read_cause(tcause_csr_t cause_reg) {
                 return RESERVED_OR_UNKNOWN;
         }
     } else {
-        switch (cause_reg.fields.exception_code) {
+        switch (scause_except_code(scause_reg)) {
             case 0:
                 return INSTRUCTION_ADDRESS_MISALIGNED;
             case 1:
@@ -92,17 +92,7 @@ enum trap_cause trap_read_cause(tcause_csr_t cause_reg) {
 }
 
 uint32_t supervisor_handle_interrupt(void) {
-    uint32_t sepc = 0;
-    tcause_csr_t scause;
-    riscv_read_csr_register(CSR_SEPC, &sepc);
-    riscv_read_csr_register(CSR_SCAUSE, &scause.value);
-    enum trap_cause tcause = trap_read_cause(scause);
-    if (tcause == SUPERVISOR_TIMER_INTERRUPT) {
-        return sepc;
-    } else {
-        sepc = (uint32_t) &halt_system;
-        return sepc;
-    }
+    return 0;
 }
 
 void kernel_main(
@@ -110,6 +100,18 @@ void kernel_main(
 		void* config_ptr,
 		int32_t config_type) {
     // loop for now....
+
+    uint32_t sstatus = sstatus_r_csr();
+    uint32_t uie = sstatus_uie(sstatus);
+    uint32_t sie = sstatus_sie(sstatus);
+    uint32_t upie = sstatus_upie(sstatus);
+    uint32_t spie = sstatus_spie(sstatus);
+    uint32_t spp = sstatus_spp(sstatus);
+    uint32_t fs = sstatus_fs(sstatus);
+    uint32_t xs = sstatus_xs(sstatus);
+    uint32_t sum = sstatus_sum(sstatus);
+    uint32_t mxr = sstatus_mxr(sstatus);
+    uint32_t sd = sstatus_sd(sstatus);
     struct sbiret impl_id = sbi_relay_get_impl_id();
     struct sbiret march_id = sbi_relay_get_marchid();
     struct sbiret vendor_id = sbi_relay_get_mvendorid();

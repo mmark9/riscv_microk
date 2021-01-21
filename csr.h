@@ -3,833 +3,236 @@
 
 #include <stdint.h>
 
-/** User Trap Setup **/
-// URW - User status register.
-#define CSR_USTATUS 0x000
-// URW - User interrupt-enable register.
-#define CSR_UIE 0x004
-// URW - User trap handler base address.
-#define CSR_UTVEC 0x005
-/** User Trap Handling **/
-// URW - Scratch register for user trap handlers.
-#define CSR_USCRATCH 0x040
-// URW - User exception program counter.
-#define CSR_UEPC 0x041
-// URW - User trap cause.
-#define CSR_UCAUSE 0x042
-// URW - User bad address or instruction.
-#define CSR_UTVAL 0x043
-// URW - User interrupt pending.
-#define CSR_UIP 0x044
-/** User Floating-Point CSRs **/
-// URW - Floating-Point Accrued Exceptions.
-#define CSR_FFLAGS 0x001
-// URW - Floating-Point Dynamic Rounding Mode.
-#define CSR_FRM 0x002
-// URW - Floating-Point Control and Status Register (frm + fflags).
-#define CSR_FCSR 0x003
-/** User Counter/Timers **/
-// URO - Cycle counter for RDCYCLE instruction.
-#define CSR_CYCLE 0xC00
-// URO - Timer for RDTIME instruction.
-#define CSR_TIME 0xC01
-// URO - Instructions-retired counter for RDINSTRET instruction.
-#define CSR_INSTRET 0xC02
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER3 0xC03
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER4 0xC04
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER5 0xC05
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER6 0xC06
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER7 0xC07
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER8 0xC08
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER9 0xC09
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER10 0xC0A
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER11 0xC0B
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER12 0xC0C
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER13 0xC0D
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER14 0xC0E
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER15 0xC0F
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER16 0xC10
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER17 0xC11
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER18 0xC12
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER19 0xC13
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER20 0xC14
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER21 0xC15
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER22 0xC16
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER23 0xC17
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER24 0xC18
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER25 0xC19
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER26 0xC1A
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER27 0xC1B
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER28 0xC1C
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER29 0xC1D
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER30 0xC1E
-// URO - Performance-monitoring counter.
-#define CSR_HPMCOUNTER31 0xC1F
-// URO - Upper 32 bits of cycle, RV32I only.
-#define CSR_CYCLEH 0xC80
-// URO - Upper 32 bits of time, RV32I only.
-#define CSR_TIMEH 0xC81
-// URO - Upper 32 bits of instret, RV32I only.
-#define CSR_INSTRETH 0xC82
-// URO - Upper 32 bits of hpmcounter3, RV32I only.
-#define CSR_HPMCOUNTER3H 0xC83
-// URO - Upper 32 bits of hpmcounter4, RV32I only.
-#define CSR_HPMCOUNTER4H 0xC84
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER5H 0xC85
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER6H 0xC86
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER7H 0xC87
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER8H 0xC88
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER9H 0xC89
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER10H 0xC8A
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER11H 0xC8B
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER12H 0xC8C
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER13H 0xC8D
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER14H 0xC8E
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER15H 0xC8F
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER16H 0xC90
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER17H 0xC91
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER18H 0xC92
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER19H 0xC93
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER20H 0xC94
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER21H 0xC95
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER22H 0xC96
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER23H 0xC97
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER24H 0xC98
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER25H 0xC99
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER26H 0xC9A
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER27H 0xC9B
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER28H 0xC9C
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER29H 0xC9D
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER30H 0xC9E
-// URO - upper 32 bits of hpmcounter31, RV32I only.
-#define CSR_HPMCOUNTER31H 0xC9F
-/** Supervisor Trap Setup **/
-// SRW - Supervisor status register.
-#define CSR_SSTATUS 0x100
-// SRW - Supervisor exception delegation register.
-#define CSR_SEDELEG 0x102
-// SRW - Supervisor interrupt delegation register.
-#define CSR_SIDELEG 0x103
-// SRW - Supervisor interrupt-enable register.
-#define CSR_SIE 0x104
-// SRW - Supervisor trap handler base address.
-#define CSR_STVEC 0x105
-// SRW - Supervisor counter enable.
-#define CSR_SCOUNTEREN 0x106
-/** Supervisor Trap Handling **/
-// SRW - Scratch register for supervisor trap handlers.
-#define CSR_SSCRATCH 0x140
-// SRW - Supervisor exception program counter.
-#define CSR_SEPC 0x141
-// SRW - Supervisor trap cause.
-#define CSR_SCAUSE 0x142
-// SRW - Supervisor bad address or instruction.
-#define CSR_STVAL 0x143
-// SRW - Supervisor interrupt pending.
-#define CSR_SIP 0x144
-/** Supervisor Protection and Translation **/
-// SRW - Supervisor address translation and protection.
-#define CSR_SATP 0x180
-/** Machine Information Registers **/
-// MRO - Vendor ID.
-#define CSR_MVENDORID 0xF11
-// MRO - Architecture ID.
-#define CSR_MARCHID 0xF12
-// MRO - Implementation ID.
-#define CSR_MIMPID 0xF13
-// MRO - Hardware thread ID.
-#define CSR_MHARTID 0xF14
-/** Machine Trap Setup **/
-// MRW - Machine status register.
-#define CSR_MSTATUS 0x300
-// MRW - ISA and extensions
-#define CSR_MISA 0x301
-// MRW - Machine exception delegation register.
-#define CSR_MEDELEG 0x302
-// MRW - Machine interrupt delegation register.
-#define CSR_MIDELEG 0x303
-// MRW - Machine interrupt-enable register.
-#define CSR_MIE 0x304
-// MRW - Machine trap-handler base address.
-#define CSR_MTVEC 0x305
-// MRW - Machine counter enable.
-#define CSR_MCOUNTEREN 0x306
-/** Machine Trap Handling **/
-// MRW - Scratch register for machine trap handlers.
-#define CSR_MSCRATCH 0x340
-// MRW - Machine exception program counter.
-#define CSR_MEPC 0x341
-// MRW - Machine trap cause.
-#define CSR_MCAUSE 0x342
-// MRW - Machine bad address or instruction.
-#define CSR_MTVAL 0x343
-// MRW - Machine interrupt pending.
-#define CSR_MIP 0x344
-/** Machine Protection and Translation **/
-// MRW - Physical memory protection configuration.
-#define CSR_PMPCFG0 0x3A0
-// MRW - Physical memory protection configuration, RV32 only.
-#define CSR_PMPCFG1 0x3A1
-// MRW - Physical memory protection configuration.
-#define CSR_PMPCFG2 0x3A2
-// MRW - Physical memory protection configuration, RV32 only.
-#define CSR_PMPCFG3 0x3A3
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR0 0x3B0
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR1 0x3B1
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR2 0x3B2
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR3 0x3B3
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR4 0x3B4
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR5 0x3B5
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR6 0x3B6
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR7 0x3B7
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR8 0x3B8
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR9 0x3B9
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR10 0x3BA
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR11 0x3BB
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR12 0x3BC
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR13 0x3BD
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR14 0x3BE
-// MRW - Physical memory protection address register.
-#define CSR_PMPADDR15 0x3BF
-/** Machine Counter/Timers **/
-// MRW - Machine cycle counter.
-#define CSR_MCYCLE 0xB00
-// MRW - Machine instructions-retired counter.
-#define CSR_MINSTRET 0xB02
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER3 0xB03
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER4 0xB04
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER5 0xB05
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER6 0xB06
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER7 0xB07
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER8 0xB08
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER9 0xB09
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER10 0xB0A
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER11 0xB0B
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER12 0xB0C
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER13 0xB0D
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER14 0xB0E
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER15 0xB0F
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER16 0xB10
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER17 0xB11
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER18 0xB12
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER19 0xB13
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER20 0xB14
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER21 0xB15
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER22 0xB16
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER23 0xB17
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER24 0xB18
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER25 0xB19
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER26 0xB1A
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER27 0xB1B
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER28 0xB1C
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER29 0xB1D
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER30 0xB1E
-// MRW - Machine performance-monitoring counter.
-#define CSR_MHPMCOUNTER31 0xB1F
-// MRW - Upper 32 bits of mcycle, RV32I only.
-#define CSR_MCYCLEH 0xB80
-// MRW - Upper 32 bits of minstret, RV32I only.
-#define CSR_MINSTRETH 0xB82
-// MRW - Upper 32 bits of mhpmcounter3, RV32I only.
-#define CSR_MHPMCOUNTER3H 0xB83
-// MRW - Upper 32 bits of mhpmcounter4, RV32I only.
-#define CSR_MHPMCOUNTER4H 0xB84
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER5H 0xB85
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER6H 0xB86
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER7H 0xB87
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER8H 0xB88
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER9H 0xB89
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER10H 0xB8A
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER11H 0xB8B
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER12H 0xB8C
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER13H 0xB8D
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER14H 0xB8E
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER15H 0xB8F
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER16H 0xB90
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER17H 0xB91
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER18H 0xB92
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER19H 0xB93
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER20H 0xB94
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER21H 0xB95
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER22H 0xB96
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER23H 0xB97
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER24H 0xB98
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER25H 0xB99
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER26H 0xB9A
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER27H 0xB9B
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER28H 0xB9C
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER29H 0xB9D
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER30H 0xB9E
-// MRW - Upper 32 bits of mhpmcounter31, RV32I only.
-#define CSR_MHPMCOUNTER31H 0xB9F
-/** Machine Counter Setup **/
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT3 0x323
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT4 0x324
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT5 0x325
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT6 0x326
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT7 0x327
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT8 0x328
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT9 0x329
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT10 0x32A
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT11 0x32B
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT12 0x32C
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT13 0x32D
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT14 0x32E
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT15 0x32F
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT16 0x330
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT17 0x331
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT18 0x332
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT19 0x333
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT20 0x334
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT21 0x335
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT22 0x336
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT23 0x337
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT24 0x338
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT25 0x339
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT26 0x33A
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT27 0x33B
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT28 0x33C
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT29 0x33D
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT30 0x33E
-// MRW - Machine performance-monitoring event selector.
-#define CSR_MHPMEVENT31 0x33F
-/** Debug/Trace Registers (shared with Debug Mode) **/
-// MRW - Debug/Trace trigger register select.
-#define CSR_TSELECT 0x7A0
-// MRW - First Debug/Trace trigger data register.
-#define CSR_TDATA1 0x7A1
-// MRW - Second Debug/Trace trigger data register.
-#define CSR_TDATA2 0x7A2
-// MRW - Third Debug/Trace trigger data register.
-#define CSR_TDATA3 0x7A3
-/** Debug Mode Registers **/
-// DRW - Debug control and status register.
-#define CSR_DCSR 0x7B0
-// DRW - Debug PC.
-#define CSR_DPC 0x7B1
-// DRW - Debug scratch register.
-#define CSR_DSCRATCH 0x7B2
+#define field_mask(n_bits, pos) (uint32_t)(((1U << (uint32_t)n_bits) - 1) << (uint32_t)pos)
+#define clear_field(x, n_bits, pos) ~field_mask(n_bits, pos) & x
+#define extract_field(x, n_bits, pos) (field_mask(n_bits, pos) & x) >> (uint32_t)pos
+#define set_field(x, n_bits, val, pos) clear_field(x, n_bits, pos) \
+            | ((field_mask(n_bits, 0) & val) << (uint32_t)pos)
 
-// Machine ISA Register
-typedef union {
-	uint32_t value;
-	struct {
-		// Extensions[0-25] (WARL)
-		uint32_t atomic_ext:1;            //A
-		uint32_t reserved_0:1;            //B
-		uint32_t compressed_ext:1;        //C
-		uint32_t double_prec_float_ext:1; //D
-		uint32_t rv32e_base_isa:1;        //E
-		uint32_t single_prec_float_ext:1; //F
-		uint32_t additional_ext:1;        //G
-		uint32_t reserved_1:1;            //H
-		uint32_t base_isa_ext:1;          //I
-		uint32_t reserved_2:1;            //J
-		uint32_t reserved_3:1;            //K
-		uint32_t reserved_4:1;            //L
-		uint32_t int_mul_div_ext:1;       //M
-		uint32_t user_int_ext:1;          //N
-		uint32_t reserved_5:1;            //O
-		uint32_t reserved_6:1;            //P
-		uint32_t quad_prec_float_ext:1;   //Q
-		uint32_t reserved_7:1;            //R
-		uint32_t supervisor_mode_ext:1;   //S
-		uint32_t reserved_8:1;            //T
-		uint32_t user_mode_ext:1;         //U
-		uint32_t reserved_9:1;            //V
-		uint32_t reserved_A:1;            //W
-		uint32_t non_standard_ext:1;      //X
-		uint32_t reserved_B:1;            //Y
-		uint32_t reserved_C:1;            //Z
-		// Ignored Field[26-29] (WIRI)
-		uint32_t ignore:4;
-		// ISA width[30-31] (WARL)
-		uint32_t isa_width:2;
-	} fields;
-} misa_csr_t;
+#define misa_ext(x) extract_field(x, 26, 0)
+#define misa_mxl(x) extract_field(x, 2, 29)
+#define misa_ext_A(x) extract_field(misa_ext(x), 1, 0)
+#define misa_ext_B(x) extract_field(misa_ext(x), 1, 1)
+#define misa_ext_C(x) extract_field(misa_ext(x), 1, 2)
+#define misa_ext_D(x) extract_field(misa_ext(x), 1, 3)
+#define misa_ext_E(x) extract_field(misa_ext(x), 1, 4)
+#define misa_ext_F(x) extract_field(misa_ext(x), 1, 5)
+#define misa_ext_G(x) extract_field(misa_ext(x), 1, 6)
+#define misa_ext_H(x) extract_field(misa_ext(x), 1, 7)
+#define misa_ext_I(x) extract_field(misa_ext(x), 1, 8)
+#define misa_ext_J(x) extract_field(misa_ext(x), 1, 9)
+#define misa_ext_K(x) extract_field(misa_ext(x), 1, 10)
+#define misa_ext_L(x) extract_field(misa_ext(x), 1, 11)
+#define misa_ext_M(x) extract_field(misa_ext(x), 1, 12)
+#define misa_ext_N(x) extract_field(misa_ext(x), 1, 13
+#define misa_ext_O(x) extract_field(misa_ext(x), 1, 14)
+#define misa_ext_P(x) extract_field(misa_ext(x), 1, 15)
+#define misa_ext_Q(x) extract_field(misa_ext(x), 1, 16)
+#define misa_ext_R(x) extract_field(misa_ext(x), 1, 17)
+#define misa_ext_S(x) extract_field(misa_ext(x), 1, 18)
+#define misa_ext_T(x) extract_field(misa_ext(x), 1, 19)
+#define misa_ext_U(x) extract_field(misa_ext(x), 1, 20)
+#define misa_ext_V(x) extract_field(misa_ext(x), 1, 21)
+#define misa_ext_W(x) extract_field(misa_ext(x), 1, 22)
+#define misa_ext_X(x) extract_field(misa_ext(x), 1, 23)
+#define misa_ext_Y(x) extract_field(misa_ext(x), 1, 24)
+#define misa_ext_Z(x) extract_field(misa_ext(x), 1, 25)
+uint32_t misa_r_csr(void);
+#define mvendorid_offset(x) extract_field(x, 7, 0)
+#define mvendorid_bank(x) extract_field(x, 25, 7)
+uint32_t mvendorid_r_csr(void);
+uint32_t marchid_r_csr(void);
+uint32_t mimpid_r_csr(void);
+uint32_t mhartid_r_csr(void);
+#define mstatus_uie(x) extract_field(x, 1, 0)
+#define mstatus_sie(x) extract_field(x, 1, 1)
+#define mstatus_mie(x) extract_field(x, 1, 3)
+#define mstatus_upie(x) extract_field(x, 1, 4)
+#define mstatus_spie(x) extract_field(x, 1, 5)
+#define mstatus_mpie(x) extract_field(x, 1, 7)
+#define mstatus_spp(x) extract_field(x, 1, 8)
+#define mstatus_mpp(x) extract_field(x, 2, 11)
+#define mstatus_fs(x) extract_field(x, 2, 13)
+#define mstatus_xs(x) extract_field(x, 2, 15)
+#define mstatus_mprv(x) extract_field(x, 1, 17)
+#define mstatus_sum(x) extract_field(x, 1, 18)
+#define mstatus_mxr(x) extract_field(x, 1, 19)
+#define mstatus_tvm(x) extract_field(x, 1, 20)
+#define mstatus_tw(x) extract_field(x, 1, 21)
+#define mstatus_tsr(x) extract_field(x, 1, 22)
+#define mstatus_sd(x) extract_field(x, 1, 31)
 
-// Machine Vendor ID Register
+#define mstatus_set_uie(x, val) set_field(x, 1, val, 0)
+#define mstatus_set_sie(x, val) set_field(x, 1, val, 1)
+#define mstatus_set_mie(x, val) set_field(x, 1, val, 3)
+#define mstatus_set_mprv(x, val) set_field(x, 1, val, 17)
+#define mstatus_set_tvm(x, val) set_field(x, 1, val, 20)
+uint32_t mstatus_r_csr(void);
+void mstatus_w_csr(void);
+#define mtvec_mode(x) extract_field(x, 2, 0)
+#define mtvec_base(x) extract_field(x, 30, 2)
+uint32_t mtvec_r_csr(void);
+void mtvec_w_csr(uint32_t val);
+#define medeleg_ins_misaligned(x) extract_field(x, 1, 0)
+#define medeleg_ins_access_fault(x) extract_field(x, 1, 1)
+#define medeleg_illegal_ins(x) extract_field(x, 1, 2)
+#define medeleg_breakpoint(x) extract_field(x, 1, 3)
+#define medeleg_load_addr_misaligned(x) extract_field(x, 1, 4)
+#define medeleg_load_access_fault(x) extract_field(x, 1, 5)
+#define medeleg_store_amo_add_misaligned(x) extract_field(x, 1, 6)
+#define medeleg_store_amo_access_fault(x) extract_field(x, 1, 7)
+#define medeleg_ecall_from_u_mode(x) extract_field(x, 1, 8)
+#define medeleg_ecall_from_s_mode(x) extract_field(x, 1, 9)
+#define medeleg_e_call_from_m_mode(x) extract_field(x, 1, 11)
+#define medeleg_ins_page_fault(x) extract_field(x, 1, 12)
+#define medeleg_load_page_fault(x) extract_field(x, 1, 13)
+#define medeleg_store_amo_page_fault(x) extract_field(x, 1, 15)
 
+#define medeleg_set_ins_misaligned(x, val) set_field(x, 1, val, 0)
+#define medeleg_set_ins_access_fault(x, val) set_field(x, 1, val, 1)
+#define medeleg_set_illegal_ins(x, val) set_field(x, 1, val, 2)
+#define medeleg_set_breakpoint(x, val) set_field(x, 1, val, 3)
+#define medeleg_set_load_addr_misaligned(x, val) set_field(x, 1, val, 4)
+#define medeleg_set_load_access_fault(x, val) set_field(x, 1, val, 5)
+#define medeleg_set_store_amo_add_misaligned(x, val) set_field(x, 1, val, 6)
+#define medeleg_set_store_amo_access_fault(x, val) set_field(x, 1, val, 7)
+#define medeleg_set_ecall_from_u_mode(x, val) set_field(x, 1, val, 8)
+#define medeleg_set_ecall_from_s_mode(x, val) set_field(x, 1, val, 9)
+#define medeleg_set_e_call_from_m_mode(x, val) set_field(x, 1, val, 11)
+#define medeleg_set_ins_page_fault(x, val) set_field(x, 1, val, 12)
+#define medeleg_set_load_page_fault(x, val) set_field(x, 1, val, 13)
+#define medeleg_set_store_amo_page_fault(x, val) set_field(x, 1, val, 14)
+uint32_t medeleg_r_csr(void);
+void medeleg_w_csr(uint32_t val);
+#define mip_usip(x) extract_field(x, 1, 0)
+#define mip_ssip(x) extract_field(x, 1, 1)
+#define mip_msip(x) extract_field(x, 1, 3)
+#define mip_utip(x) extract_field(x, 1, 4)
+#define mip_stip(x) extract_field(x, 1, 5)
+#define mip_mtip(x) extract_field(x, 1, 7)
+#define mip_ueip(x) extract_field(x, 1, 8)
+#define mip_seip(x) extract_field(x, 1, 9)
+#define mip_meip(x) extract_field(x, 1, 11)
 
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t offset:7;
-		uint32_t blank:25;
-	} fields;
-} mvendorid_csr_t;;
+#define mip_set_usip(x, val) set_field(x, 1, val, 0)
+#define mip_set_ssip(x, val) set_field(x, 1, val, 1)
+#define mip_set_msip(x, val) set_field(x, 1, val, 3)
+#define mip_set_utip(x, val) set_field(x, 1, val, 4)
+#define mip_set_stip(x, val) set_field(x, 1, val, 5)
+#define mip_set_mtip(x, val) set_field(x, 1, val, 7)
+#define mip_set_ueip(x, val) set_field(x, 1, val, 8)
+#define mip_set_seip(x, val) set_field(x, 1, val, 9)
+#define mip_set_meip(x, val) set_field(x, 1, val, 11)
+uint32_t mip_r_csr(void);
+uint32_t mip_w_csr(void);
+#define mideleg_usip(x) mip_usip(x)
+#define mideleg_ssip(x) mip_ssip(x)
+#define mideleg_msip(x) mip_msip(x)
+#define mideleg_utip(x) mip_utip(x)
+#define mideleg_stip(x) mip_stip(x)
+#define mideleg_mtip(x) mip_mtip(x)
+#define mideleg_ueip(x) mip_ueip(x)
+#define mideleg_seip(x) mip_seip(x)
+#define mideleg_meip(x) mip_meip(x)
 
-// Machine Architecture ID Register
-typedef struct {
-	uint32_t architecture_id:32;
-} marchid_csr_t;
+#define mideleg_set_usip(x, val) mip_set_usip(x, val)
+#define mideleg_set_ssip(x, val) mip_set_ssip(x, val)
+#define mideleg_set_msip(x, val) mip_set_msip(x, val)
+#define mideleg_set_utip(x, val) mip_set_utip(x, val)
+#define mideleg_set_stip(x, val) mip_set_stip(x, val)
+#define mideleg_set_mtip(x, val) mip_set_mtip(x, val)
+#define mideleg_set_ueip(x, val) mip_set_ueip(x, val)
+#define mideleg_set_seip(x, val) mip_set_seip(x, val)
+#define mideleg_set_meip(x, val) mip_set_meip(x, val)
+uint32_t mideleg_r_csr(void);
+void mideleg_w_csr(uint32_t val);
+#define mie_usie(x) extract_field(x, 1, 0)
+#define mie_ssie(x) extract_field(x, 1, 1)
+#define mie_msie(x) extract_field(x, 1, 3)
+#define mie_utie(x) extract_field(x, 1, 4)
+#define mie_stie(x) extract_field(x, 1, 5)
+#define mie_mtie(x) extract_field(x, 1, 7)
+#define mie_ueie(x) extract_field(x, 1, 8)
+#define mie_seie(x) extract_field(x, 1, 9)
+#define mie_meie(x) extract_field(x, 1, 11)
 
-// Machine Implementation ID Register
-typedef struct {
-	uint32_t implementation_id:32;
-} mimpid_csr_t;
+#define mie_set_usie(x, val) set_field(x, 1, val, 0)
+#define mie_set_ssie(x, val) set_field(x, 1, val, 1)
+#define mie_set_msie(x, val) set_field(x, 1, val, 3)
+#define mie_set_utie(x, val) set_field(x, 1, val, 4)
+#define mie_set_stie(x, val) set_field(x, 1, val, 5)
+#define mie_set_mtie(x, val) set_field(x, 1, val, 7)
+#define mie_set_ueie(x, val) set_field(x, 1, val, 8)
+#define mie_set_seie(x, val) set_field(x, 1, val, 9)
+#define mie_set_meie(x, val) set_field(x, 1, val, 11)
+uint32_t mie_r_csr(void);
+void mie_w_csr(uint32_t val);
+void mtime_w_csr(void);
+uint64_t mtime_r_csr(void);
+uint64_t mtime_cmp_r_csr(void);
+void mtime_cmp_w_csr(uint64_t val);
+uint64_t mscratch_r_csr(void);
+void mscratch_w_csr(uint32_t val);
+uint32_t mepc_r_csr(void);
+// TODO: abstraction for mapping exception code to enum
+#define mcause_except_code(x) extract_field(x, 31, 0)
+#define mcause_interrupt(x) extract_field(x, 1, 31)
+uint32_t mcause_r_csr(void);
+uint32_t mtval_r_csr(void);
+// TODO: Add Hardware performance counter CSRs
 
-// Hart ID Register - core/hardware thread ID
-typedef struct {
-	uint32_t hart_id:32;
-} mhartid_csr_t;
+// Supervisor CSRs
+#define sstatus_uie(x) extract_field(x, 1, 0)
+#define sstatus_sie(x) extract_field(x, 1, 1)
+#define sstatus_upie(x) extract_field(x, 1, 4)
+#define sstatus_spie(x) extract_field(x, 1, 5)
+#define sstatus_spp(x) extract_field(x, 1, 8)
+#define sstatus_fs(x) extract_field(x, 2, 13)
+#define sstatus_xs(x) extract_field(x, 2, 15)
+#define sstatus_sum(x) extract_field(x, 1, 18)
+#define sstatus_mxr(x) extract_field(x, 1, 19)
+#define sstatus_sd(x) extract_field(x, 1, 31)
 
-// Machine Status Register
-typedef union {
-	uint32_t value;
-	struct {
-		// Global Interrupt Flags per privilege mode (per Hart)
-		uint32_t user_interrupts_enabled:1;
-		uint32_t supervisor_interrupts_enabled:1;
-		uint32_t reserved_1:1;
-		uint32_t machine_interrupts_enabled:1;
-		// Prior to trap Interrupt Flags per privilege mode (per Hart)
-		uint32_t user_interrupts_enabled_before_trap:1;
-		uint32_t supervisor_interrupts_enabled_before_trap:1;
-		uint32_t reserved_2:1;
-		uint32_t machine_interrupts_enabled_before_trap:1;
-		uint32_t supervisor_privilege_mode_before_trap:1;
-		uint32_t reserved_3:2;
-		uint32_t machine_privilege_mode_before_trap:2;
-		// Extension Context Status
-		uint32_t fpu_status:2;
-		uint32_t additional_user_mode_ext_status:2;
-		// Memory Privilege
-		uint32_t modify_privilege_enabled:1;
-		uint32_t supervisor_user_memory_access_enabled:1;
-		uint32_t make_excutable_readable_enabled:1;
-		// Virtualization Support
-		uint32_t trap_virtual_memory_enabled:1;
-		uint32_t interrutpt_time_enabled:1;
-		uint32_t trap_sret_enabled:1;
-		// Ignored
-		uint32_t reserved_4:8;
-		unsigned sd:1;
-	} fields;
-} mstatus_csr_t;
+#define sstatus_set_uie(x) extract_field(x, 1, 0)
+#define sstatus_set_sie(x) extract_field(x, 1, 1)
+#define sstatus_set_upie(x) extract_field(x, 1, 4)
+#define sstatus_set_spie(x) extract_field(x, 1, 5)
+#define sstatus_set_spp(x) extract_field(x, 1, 8)
+#define sstatus_set_fs(x) extract_field(x, 2, 13)
+#define sstatus_set_xs(x) extract_field(x, 2, 15)
+#define sstatus_set_sum(x) extract_field(x, 1, 18)
+#define sstatus_set_mxr(x) extract_field(x, 1, 19)
+#define sstatus_set_sd(x) extract_field(x, 1, 31)
 
-// Machine Exception Delegation Register
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t instruction_address_missaligned_delegated:1;
-		uint32_t instruction_access_fault_delegated:1;
-		uint32_t illegal_instruction_delegated:1;
-		uint32_t break_point_delegated:1;
-		uint32_t load_address_misaligned_delegated:1;
-		uint32_t load_access_fault_delegated:1;
-		uint32_t store_amo_address_misaligned_delegated:1;
-		uint32_t store_amo_access_fault_delegated:1;
-		uint32_t enviornment_call_from_user_mode_delegated:1;
-		uint32_t enviornment_call_from_supervisor_mode_delegated:1;
-		uint32_t reserved_1:1;
-		// ECALLS from machine mode cannot be delegated
-		uint32_t enviornment_call_from_machine_mode_delegated:1;
-		uint32_t instruction_page_fault_delegated:1;
-		uint32_t load_page_fault_delegated:1;
-		uint32_t reserved_2:1;
-		uint32_t store_amo_page_fault_delegated:1;
-		uint32_t reserved_3:16;
-	} fields;
-} medeleg_csr_t;
+uint32_t sstatus_r_csr(void);
+void sstatus_w_csr(uint32_t val);
+#define stvec_mode(x) extract_field(x, 2, 0)
+#define stvec_base(x) extract_field(x, 30, 2)
+uint32_t stvec_r_csr(void);
+// TODO: supervisor performance counters
+void stvec_w_csr(uint32_t val);
+uint32_t sscratch_r_csr(void);
+void sscratch_w_csr(uint32_t val);
+uint32_t sepc_r_csr(void);
+void sepc_w_csr(uint32_t val);
 
-// Machine Interrupt Delegation register
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_software_interrupts_delegated:1;
-		uint32_t supervisor_software_interrupts_delegated:1;
-		uint32_t reserved_1:1;
-		uint32_t machine_software_interrupts_delegated:1;
-		uint32_t user_timer_interrupts_delegated:1;
-		uint32_t supervisor_timer_interrupts_delegated:1;
-		uint32_t reserved_2:1;
-		uint32_t machine_timer_interrupts_delegated:1;
-		uint32_t user_external_interrupts_delegated:1;
-		uint32_t supervisor_external_interrupts_delegated:1;
-		uint32_t reserved_3:1;
-		uint32_t machine_external_interrupts_delegated:1;
-		uint32_t reserved_4:20;
-	} fields;
-} mideleg_csr_t;
+#define scause_except_code(x) extract_field(x, 31, 0)
+#define scause_interrupt(x) extract_field(x, 1, 31)
+// TODO: map supervisor exception codes to enum
+uint32_t scause_r_csr(void);
+void scause_w_csr(uint32_t val);
 
-// Machine interrupt-pending register
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_software_interrupts_pending:1;
-		uint32_t supervisor_software_interrupts_pending:1;
-		uint32_t reserved_1:1;
-		uint32_t machine_software_interrupts_pending:1;
-		uint32_t user_timer_interrupts_pending:1;
-		uint32_t supervisor_timer_interrupts_pending:1;
-		uint32_t reserved_2:1;
-		uint32_t machine_timer_interrupts_pending:1;
-		uint32_t user_external_interrupts_pending:1;
-		uint32_t supervisor_external_interrupts_pending:1;
-		uint32_t reserved_3:1;
-		uint32_t machine_external_interrupts_pending:1;
-		uint32_t reserved_4:20;
-	} fields;
-} mip_csr_t;
+uint32_t stval_r_csr(void);
+void stval_w_csr(uint32_t val);
 
-// Machine interrupt-enable registers
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_software_interrupts_enabled:1;
-		uint32_t supervisor_software_interrupts_enabled:1;
-		uint32_t reserved_1:1;
-		uint32_t machine_software_interrupts_enabled:1;
-		uint32_t user_timer_interrupts_enabled:1;
-		uint32_t supervisor_timer_interrupts_enabled:1;
-		uint32_t reserved_2:1;
-		uint32_t machine_timer_interrupts_enabled:1;
-		uint32_t user_external_interrupts_enabled:1;
-		uint32_t supervisor_external_interrupts_enabledd:1;
-		uint32_t reserved_3:1;
-		uint32_t machine_external_interrupts_enabled:1;
-		uint32_t reserved_4:20;
-	} fields;
-} mie_csr_t;
+#define satp_ppn(x) extract_field(x, 22, 0)
+#define satp_asid(x) extract_field(x, 9, 22)
+#define satp_mode(x) extract_field(x, 1, 31)
 
-// Machine timer register
-// Note two reads are needed for this
-typedef struct {
-	unsigned long long machine_time:64;
-} mtime_csr_t;
-
-// Machine time compare register
-typedef struct {
-	unsigned long long machine_time_compare_register:64;
-} mtimecmp_csr_t;
-
-// Hardware performance monitor counter registers
-// Note since these are just 64 bit counters, we can just define one struct
-typedef struct {
-	unsigned long long value:64;
-} hpmc_csr_t;
-
-// Hardware performance monitor event register
-// Note since these are just 64 bit counters, we can just define one struct
-typedef struct {
-	uint32_t value:32;
-} hpme_csr_t;
-
-// Counter-enable registers (mcounteren and scounteren)
-// m = machine | s = supervisor
-// setting a counter bit in a higher privilege mode
-// register enables access in a lower privilege mode
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t cycle_enabled:1;
-		uint32_t time_enableld:1;
-		uint32_t instret_enabled:1;
-		uint32_t hpm3_enabled:1;
-		uint32_t hpm4_enabled:1;
-		uint32_t hpm5_enabled:1;
-		uint32_t hpm6_enabled:1;
-		uint32_t hpm7_enabled:1;
-		uint32_t hpm8_enabled:1;
-		uint32_t hpm9_enabled:1;
-		uint32_t hpm10_enabled:1;
-		uint32_t hpm11_enabled:1;
-		uint32_t hpm12_enabled:1;
-		uint32_t hpm13_enabled:1;
-		uint32_t hpm14_enabled:1;
-		uint32_t hpm15_enabled:1;
-		uint32_t hpm16_enabled:1;
-		uint32_t hpm17_enabled:1;
-		uint32_t hpm18_enabled:1;
-		uint32_t hpm19_enabled:1;
-		uint32_t hpm20_enabled:1;
-		uint32_t hpm21_enabled:1;
-		uint32_t hpm22_enabled:1;
-		uint32_t hpm23_enabled:1;
-		uint32_t hpm24_enabled:1;
-		uint32_t hpm25_enabled:1;
-		uint32_t hpm26_enabled:1;
-		uint32_t hpm27_enabled:1;
-		uint32_t hpm28_enabled:1;
-		uint32_t hpm29_enabled:1;
-		uint32_t hpm30_enabled:1;
-		uint32_t hpm31_enabled:1;
-	} fields;
-} counteren_csr_t;
-
-/**  Generic CSRs  **/
-
-// Trap-Vector Base-Address Register
-typedef union {
-	uint32_t value;
-	struct fields {
-		// 0 = Direct = All exceptions set pc to Base
-		// 1 = Vectored = Asynchronous interrupts set pc to BASE+4xcause
-		uint32_t mode:2;
-		// Note: base address must be aligned on 4-byte boundary
-		uint32_t base:30;
-	} fields;
-} tvec_csr_t;
-
-// Scratch Register - Generic
-typedef struct {
-	uint32_t value:32;
-} scratch_csr_t;
-
-// Exception Register - Generic
-typedef struct {
-	uint32_t address:32;
-} epc_csr_t;
-
-// Trap Cause Register - Generic
-
-
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t exception_code:31;
-		uint32_t was_caused_by_interrupt:1;
-	} fields;
-} tcause_csr_t;
-
-
-// Trap Value Register - Generic
-typedef struct {
-	uint32_t value:32;
-} ttval_csr_t;
-
-
-/**  Supervisor CSR specific **/
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_interrupts_enabled:1;
-		uint32_t supervisor_interrupts_enabled:1;
-		uint32_t reserved_1:2;
-		uint32_t user_interrupts_enabled_before_trap:1;
-		uint32_t supervisor_interrupts_enabled_before_trap:1;
-		uint32_t reserved_2:2;
-		uint32_t privilege_mode_before_interrupt:1;  // 0 = user 1 = super
-		uint32_t reserved_3:4;
-		// Extension Context Status
-		uint32_t fpu_status:2;
-		uint32_t additional_user_mode_ext_status:2;
-		// Memory Privilege
-		uint32_t reserved_4:1;
-		uint32_t supervisor_user_memory_access_enabled:1;
-		uint32_t make_excutable_readable_enabled:1;
-		// Ignored
-		uint32_t reserved_5:11;
-		unsigned sd:1;
-	} fields;
-} sstatus_csr_t;
-
-
-// Supervisor interrupt-pending register
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_software_interrupts_pending:1;
-		uint32_t supervisor_software_interrupts_pending:1;
-		uint32_t reserved_1:2;
-		uint32_t user_timer_interrupts_pending:1;
-		uint32_t supervisor_timer_interrupts_pending:1;
-		uint32_t reserved_2:2;
-		uint32_t user_external_interrupts_pending:1;
-		uint32_t supervisor_external_interrupts_pending:1;
-		uint32_t reserved_4:22;
-	} fields;
-} sip_csr_t;
-
-// Supervisor interrupt-enable registers
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t user_software_interrupts_enabled:1;
-		uint32_t supervisor_software_interrupts_enabled:1;
-		uint32_t reserved_1:2;
-		uint32_t user_timer_interrupts_enabled:1;
-		uint32_t supervisor_timer_interrupts_enabled:1;
-		uint32_t reserved_2:2;
-		uint32_t user_external_interrupts_enabled:1;
-		uint32_t supervisor_external_interrupts_enabled:1;
-		uint32_t reserved_4:22;
-	} fields;
-} sie_csr_t;
-
-typedef union {
-	uint32_t value;
-	struct {
-		uint32_t base:30;
-		uint32_t mode:2;
-	} fields;
-} stvec_csr_t;
-
-typedef union {
-    uint32_t value;
-    struct {
-        uint32_t physical_page_number:22;
-        uint32_t address_space_id:9;
-        uint32_t mode:1;
-    } fields;
-} satp_csr_t;
-
-
-void riscv_set_csr_bits(uint16_t csr_id, uint32_t value);
-void riscv_clear_csr_bits(uint16_t csr_id, uint32_t value);
-void riscv_write_csr(uint16_t csr_id, uint32_t value);
-void riscv_read_csr_register(uint16_t csr_id, uint32_t* reg_out);
+#define satp_set_ppn(x, val) set_field(x, 22, val, 0)
+#define satp_set_asid(x, val) set_field(x, 9, val, 22)
+#define satp_set_mode(x, val) set_field(x, 1, val, 31)
+uint32_t satp_r_csr(void);
+void satp_w_csr(uint32_t val);
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */
