@@ -193,16 +193,16 @@ uint32_t mtval_r_csr(void);
 #define sstatus_mxr(x) extract_field(x, 1, 19)
 #define sstatus_sd(x) extract_field(x, 1, 31)
 
-#define sstatus_set_uie(x) extract_field(x, 1, 0)
-#define sstatus_set_sie(x) extract_field(x, 1, 1)
-#define sstatus_set_upie(x) extract_field(x, 1, 4)
-#define sstatus_set_spie(x) extract_field(x, 1, 5)
-#define sstatus_set_spp(x) extract_field(x, 1, 8)
-#define sstatus_set_fs(x) extract_field(x, 2, 13)
-#define sstatus_set_xs(x) extract_field(x, 2, 15)
-#define sstatus_set_sum(x) extract_field(x, 1, 18)
-#define sstatus_set_mxr(x) extract_field(x, 1, 19)
-#define sstatus_set_sd(x) extract_field(x, 1, 31)
+#define sstatus_set_uie(x, val) set_field(x, 1, val, 0)
+#define sstatus_set_sie(x, val) set_field(x, 1, val, 1)
+#define sstatus_set_upie(x, val) set_field(x, 1, val, 4)
+#define sstatus_set_spie(x, val) set_field(x, 1, val, 5)
+#define sstatus_set_spp(x, val) set_field(x, 1, val, 8)
+#define sstatus_set_fs(x, val) set_field(x, 2, val, 13)
+#define sstatus_set_xs(x, val) set_field(x, 2, val, 15)
+#define sstatus_set_sum(x, val) set_field(x, 1, val, 18)
+#define sstatus_set_mxr(x, val) set_field(x, 1, val, 19)
+#define sstatus_set_sd(x, val) set_field(x, 1, val, 31)
 
 uint32_t sstatus_r_csr(void);
 void sstatus_w_csr(uint32_t val);
@@ -234,5 +234,26 @@ void stval_w_csr(uint32_t val);
 #define satp_set_mode(x, val) set_field(x, 1, val, 31)
 uint32_t satp_r_csr(void);
 void satp_w_csr(uint32_t val);
+#define sie_usie(x) extract_field(x, 1, 0)
+#define sie_ssie(x) extract_field(x, 1, 1)
+#define sie_utie(x) extract_field(x, 1, 4)
+#define sie_stie(x) extract_field(x, 1, 5)
+#define sie_ueie(x) extract_field(x, 1, 8)
+#define sie_seie(x) extract_field(x, 1, 9)
+
+#define sie_set_usie(x, val) set_field(x, 1, val, 0)
+#define sie_set_ssie(x, val) set_field(x, 1, val, 1)
+#define sie_set_utie(x, val) set_field(x, 1, val, 4)
+#define sie_set_stie(x, val) set_field(x, 1, val, 5)
+#define sie_set_ueie(x, val) set_field(x, 1, val, 8)
+#define sie_set_seie(x, val) set_field(x, 1, val, 9)
+
+uint32_t sie_r_csr(void);
+void sie_w_csr(uint32_t val);
+void sie_s_csr(uint32_t val);
+void sie_c_csr(uint32_t val);
+
+uint64_t time_r_csr(void);
+uint64_t cycle_r_csr(void);
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */
