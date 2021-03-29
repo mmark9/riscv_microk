@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-void load_context(RegisterGroup*);
+void load_context(RegisterGroup*, uint32_t);
 
 
 int sched_spawn_thread(void* entry_pc, void* args) {
@@ -15,8 +15,7 @@ int sched_spawn_thread(void* entry_pc, void* args) {
     KThread thread;
     // TODO: need a unique ID generator
     thread.thread_id = 1;
-    thread.regs.pc = (uint32_t)entry_pc;
-    load_context(&thread.regs);
+    load_context(&thread.regs, (uint32_t)entry_pc);
     // does not return
     return 0;
 }
