@@ -30,6 +30,7 @@ page_directory:
 # linker configuration
 # helps the kernel map its pages with the correct
 # attributes
+.align 0x2
 .section ro_data
 linker_config:
 	.long LOAD_ADDRESS
@@ -50,6 +51,7 @@ linker_config:
 .equ PAGE_TABLE_SIZE, PAGES_PER_TABLE * PAGE_SIZE
 .equ KERNEL_PAGE_DIRECTORY_START_INDEX, KERNEL_VIRTUAL_BASE / 0x400000
 
+.align 0x2
 .section .boot_text, "ax"
 .globl boot_entry
 boot_entry:
@@ -111,7 +113,6 @@ machine_mode_setup:
 	# as illegal instructions; no need to enable interrupts
 	# for this to work
 	ecall
-.align 0x2
 jump_to_supervisor:
 	# reset trap vector for catching general errors with boot
 	la t0, trap_boot_exceptions
