@@ -4,7 +4,8 @@ ENTRY(boot_entry)
 SECTIONS
 {
         
-    LOAD_ADDRESS = 0x80400000;
+    LOAD_ADDRESS = 0x80800000;
+    VIRTUAL_DELTA = KERNEL_VIRTUAL_BASE - LOAD_ADDRESS;
     
     . = LOAD_ADDRESS;
     BOOT_LOADER_TEXT_BEGIN = .;
@@ -24,10 +25,10 @@ SECTIONS
 	}
 	BOOT_LOADER_BSS_END = .;
 	/* Save the physaddr pointer */
-	LMA_PTR = .;
 	
     /* Set VMA to Virtual Base */
-    . = KERNEL_VIRTUAL_BASE + (LMA_PTR - BOOT_LOADER_TEXT_BEGIN);
+    . = KERNEL_VIRTUAL_BASE + (. - BOOT_LOADER_TEXT_BEGIN);
+    LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
     
     KERNEL_TEXT_BEGIN = .;
     /* stage 2 */
@@ -36,27 +37,27 @@ SECTIONS
 		*(.text)
 	}
 	
-	LMA_PTR = LMA_PTR + (. - KERNEL_VIRTUAL_BASE);
+	LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
 	KERNEL_TEXT_END = LMA_PTR - 1;
 	
 	KERNEL_RO_DATA_BEGIN = .;
 	/* Read-only data. */
 	.rodata ALIGN(4K) : AT(LMA_PTR)
 	{
-		*(.rodata)
+		*(.rodata .rodata.*)
 	}
 	
-	LMA_PTR = LMA_PTR + (. - KERNEL_VIRTUAL_BASE);
+	LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
 	KERNEL_RO_DATA_END = LMA_PTR - 1;
 	
 	KERNEL_DATA_BEGIN = LMA_PTR;
 	/* Read-write data (initialized) */
 	.data ALIGN(4K) : AT(LMA_PTR)
 	{
-		*(.data)
+		*(.data .data.*)
 	}
 	
-	LMA_PTR = LMA_PTR + (. - KERNEL_VIRTUAL_BASE);
+	LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
 	KERNEL_DATA_END = LMA_PTR - 1;
 	
 	KERNEL_BSS_BEGIN = LMA_PTR;
@@ -67,7 +68,7 @@ SECTIONS
 		*(.bss)
 	}
 	
-	LMA_PTR = LMA_PTR + (. - KERNEL_VIRTUAL_BASE);
+	LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
 	KERNEL_BSS_END = LMA_PTR - 1;
     KERNEL_VIRTUAL_END = KERNEL_BSS_END;
     KERNEL_SIZE_IN_BYTES = KERNEL_BSS_END - BOOT_LOADER_TEXT_BEGIN;

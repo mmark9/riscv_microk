@@ -36,6 +36,7 @@ LINKER_SCRIPT=linker.ld
 OPEN_SBI_PATH=opensbi
 OPEN_SBI_BUILD_PATH=$(OPEN_SBI_PATH)/build/platform/generic/firmware
 OPEN_SBI_PAYLOAD=$(DEST_DIR)/sal_os_$(TARGET_ARCH)_osbi_payload.elf
+OPEN_SBI_JMP=$(DEST_DIR)/sal_os_$(TARGET_ARCH)_jmp.elf
 KERNEL_IMAGE_ELF = $(DEST_DIR)/sal_os_$(TARGET_ARCH).elf
 KERNEL_IMAGE_BINARY = $(DEST_DIR)/sal_os_$(TARGET_ARCH).bin
 
@@ -47,8 +48,8 @@ ASM_OBJS:=$(patsubst %.s.o, $(BUILD_DIR)/%.s.o, $(ASM_OBJS))
 
 
 .PHONY: all $(MODULES)
-
-all: $(KERNEL_IMAGE_ELF) $(KERNEL_IMAGE_BINARY) $(OPEN_SBI_PAYLOAD)
+# all1: $(KERNEL_IMAGE_ELF) $(KERNEL_IMAGE_BINARY) $(OPEN_SBI_PAYLOAD) $(OPEN_SBI_JMP)
+all: $(KERNEL_IMAGE_ELF) $(OPEN_SBI_JMP)
 
 $(KERNEL_IMAGE_ELF): $(OBJS) $(ASM_OBJS)
 	$(CC) -T $(LINKER_SCRIPT) -o $@ $(CFLAGS) $(ASM_OBJS) $(OBJS) $(LIBFLAGS) -static-libgcc -lgcc
@@ -61,6 +62,10 @@ $(OPEN_SBI_PAYLOAD): $(KERNEL_IMAGE_BINARY)
 	make -C $(OPEN_SBI_PATH) PLATFORM=generic FW_PAYLOAD=y FW_PAYLOAD_PATH=$<
 	cp $(OPEN_SBI_BUILD_PATH)/fw_payload.elf $@
 
+$(OPEN_SBI_JMP): export CROSS_COMPILE = $(HOST)-
+$(OPEN_SBI_JMP): $(KERNEL_IMAGE_ELF)
+	make -C $(OPEN_SBI_PATH) PLATFORM=generic FW_JUMP_ADDR=2155872256 FW_JUMP=y
+	cp $(OPEN_SBI_BUILD_PATH)/fw_jump.elf $@
 
 $(LINKER_SCRIPT): ;
 
@@ -69,6 +74,7 @@ clean:
 	rm -f $(KERNEL_IMAGE_ELF)
 	rm -f $(KERNEL_IMAGE_BINARY)
 	rm -f $(OPEN_SBI_PAYLOAD)
+	rm -f $(OPEN_SBI_JMP)
 
 $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(BUILD_DIR)

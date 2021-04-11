@@ -1,7 +1,43 @@
+#include <stdio.h>
 #include <stdbool.h>
-#include "print.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
 
-volatile unsigned int* const UART0_ADDR = (unsigned int*)0x10000000;
+typedef struct pf_flags_t
+{
+    bool left_justify;
+    bool prepend_plus;
+    bool prepend_space;
+    bool prepend_zero_for_padding;
+    bool use_alternate_form;
+} pf_flags_t;
+
+typedef struct pf_params_t
+{
+    pf_flags_t flags;
+    int width;
+    int precision;
+    char length;
+} pf_params_t;
+
+bool is_specifier_field(char c)
+{
+    return c == 'c' || c == 'd' || c == 'i' || c == 'e' \
+           || c == 'E' || c == 'f' || c == 'g' || c == 'G' \
+           || c == 'o' || c == 'S' || c == 'U' || c == 'x' \
+           || c == 'X' || c == 'p' || c == 'n' || c == '%' || c == 'b';
+}
+
+bool is_flag_field(char c)
+{
+    return c == '-' || c == '+' || c == ' ' || c == '0' || c == '#';
+}
+
+bool is_length_field(char c)
+{
+    return c == 'h' || c == 'l' || c == 'L';
+}
 
 bool is_digit_char(char c)
 {
@@ -45,6 +81,26 @@ int atoi(const char* const str)
     else
     {
         return number;
+    }
+}
+
+int chtoi(char c)
+{
+    if(c >= 48 && c <= 57)
+    {
+        return c - 48;
+    }
+    else if(c >= 65 && c <= 70)
+    {
+        return c - 65 + 10;
+    }
+    else if(c >= 97 && c <= 102)
+    {
+        return c - 97 + 10;
+    }
+    else
+    {
+        return -1;
     }
 }
 
@@ -119,26 +175,6 @@ char* itoa(int integer, int base, char* const buffer, bool use_upper_case)
     }
 }
 
-int chtoi(char c)
-{
-    if(c >= 48 && c <= 57)
-    {
-        return c - 48;
-    }
-    else if(c >= 65 && c <= 70)
-    {
-        return c - 65 + 10;
-    }
-    else if(c >= 97 && c <= 102)
-    {
-        return c - 97 + 10;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
 char* uitoa(unsigned int integer, int base, char* const buffer, bool use_upper_case)
 {
     int buff_len = 0;
@@ -169,75 +205,15 @@ char* uitoa(unsigned int integer, int base, char* const buffer, bool use_upper_c
     return buffer;
 }
 
-int putchar(int ch) {
-	*UART0_ADDR = (unsigned int)ch;
-	return ch;
-}
-
-int puts(const char* str) {
-	int i = 0;
-	for (; *str != '\0'; str++, i++) {
-		*UART0_ADDR = (unsigned int)(*str);
-	}
-	return i;
-}
-
-int strlen(const char* const str)
-{
-    int count = 0;
-    while(str[count] != '\0')
-    {
-        count += 1;
-    }
-    return count;
-}
-
-typedef struct pf_flags_t
-{
-    bool left_justify;
-    bool prepend_plus;
-    bool prepend_space;
-    bool prepend_zero_for_padding;
-    bool use_alternate_form;
-} pf_flags_t;
-
-typedef struct pf_params_t
-{
-    pf_flags_t flags;
-    int width;
-    int precision;
-    char length;
-} pf_params_t;
-
-
-
-bool is_specifier_field(char c)
-{
-    return c == 'c' || c == 'd' || c == 'i' || c == 'e' \
-           || c == 'E' || c == 'f' || c == 'g' || c == 'G' \
-           || c == 'o' || c == 'S' || c == 'U' || c == 'x' \
-           || c == 'X' || c == 'p' || c == 'n' || c == '%' || c == 'b';
-}
-
-bool is_flag_field(char c)
-{
-    return c == '-' || c == '+' || c == ' ' || c == '0' || c == '#';
-}
-
-bool is_length_field(char c)
-{
-    return c == 'h' || c == 'l' || c == 'L';
-}
-
 pf_flags_t get_flags_from_format(const char* const fmt, int* const fmt_index)
 {
     pf_flags_t flags = {
-        .left_justify = false,
-        .prepend_plus = false,
-        .prepend_space = false,
-        .prepend_zero_for_padding = false,
-        .use_alternate_form = false
-        };
+            .left_justify = false,
+            .prepend_plus = false,
+            .prepend_space = false,
+            .prepend_zero_for_padding = false,
+            .use_alternate_form = false
+    };
     char ch;
     while((ch = fmt[*fmt_index]) != '\0')
     {
@@ -565,7 +541,6 @@ int print_uint(unsigned int number, unsigned int base, const pf_params_t* const 
     return write_count;
 }
 
-
 int print_binary(int number, const pf_params_t* const params)
 {
     int write_count = 0;
@@ -606,7 +581,6 @@ int print_binary(int number, const pf_params_t* const params)
     }
     return write_count;
 }
-
 
 int print_string(const char* const str, const pf_params_t* const params)
 {
@@ -679,10 +653,10 @@ int print_specifier_value(const char* const fmt, int* const fmt_index, const pf_
         else if(ch == 'p')
         {
             pf_params_t force_params = {
-                .flags = params->flags,
-                .precision = 0,
-                .width = 0,
-                .length = '\0'
+                    .flags = params->flags,
+                    .precision = 0,
+                    .width = 0,
+                    .length = '\0'
             };
             force_params.flags.use_alternate_form = true;
             unsigned int number = va_arg(*args, unsigned int);
@@ -700,7 +674,6 @@ int print_specifier_value(const char* const fmt, int* const fmt_index, const pf_
     return write_count;
 }
 
-
 int process_format_string(const char* const fmt, int* const fmt_index, va_list* const args)
 {
     pf_flags_t flags = get_flags_from_format(fmt, fmt_index);
@@ -716,8 +689,7 @@ int process_format_string(const char* const fmt, int* const fmt_index, va_list* 
     return write_count;
 }
 
-
-int printf(const char* const fmt, ...)
+int kprintf(const char* const fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
