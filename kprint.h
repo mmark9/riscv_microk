@@ -6,10 +6,10 @@
 #define EOF (-1)
 
 
-int chtoi(char c);
-int printf(const char* const, ...);
-int puts(const char* const);
-int putchar(int);
+int kchtoi(char c);
+int kprintf(const char* const, ...);
+int kputs(const char* const);
+int kputchar(int);
 
 
 #endif /* SRC_ARCH_RISCV32_PRINT_H_ */
