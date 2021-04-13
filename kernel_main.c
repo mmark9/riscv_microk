@@ -25,7 +25,8 @@ extern void halt_system(void);
 extern uint32_t page_directory[1024];
 
 typedef struct {
-    uint32_t load_address;
+    uint32_t firmware_load_address;
+    uint32_t kernel_load_address;
     uint32_t kernel_text_begin;
     uint32_t kernel_text_end;
     uint32_t kernel_ro_data_begin;
@@ -75,10 +76,9 @@ void setup_memory_subsystem(uint32_t load_addr,
     buddy_init_from_range(frame_pool_start, frame_pool_size);
 }
 
-void paging_early_setup(uint32_t load_addr,
-                        uint32_t hh_vaddr,
-                        uint32_t device_tree_addr,
-                        uint32_t kernel_size) {
+void map_kernel_higher_half(uint32_t load_addr,
+                            uint32_t hh_vaddr,
+                            uint32_t kernel_size) {
     uint32_t new_pte = 0;
     uint32_t mb4 = 0x1U << 22U;
     uint32_t num_4mb_mappings = kernel_size >> 22U;
@@ -93,6 +93,10 @@ void paging_early_setup(uint32_t load_addr,
         vaddr_ptr += mb4;
         paddr_ptr += mb4;
     }
+    // tlb flush?
+}
+
+void map_device_tree_area(uint32_t device_tree_addr) {
     // for now we will just map the device tree area 1:1
     uint32_t tree_pde_index = sv32_vpn1(device_tree_addr);
     uint32_t tree_aligned_addr = (device_tree_addr >> 22U) << 22U;
@@ -100,6 +104,21 @@ void paging_early_setup(uint32_t load_addr,
                                         true, false,
                                         false, true);
     page_directory[tree_pde_index] = tree_pte;
+}
+
+void create_early_identity_map(uint32_t firmware_addr, uint32_t map_size) {
+    uint32_t pte = 0;
+    uint32_t mb4 = 0x1 << 22U;
+    uint32_t num_mappings = map_size >> 22U;
+    uint32_t pde_index = sv32_vpn1(firmware_addr);
+    uint32_t aligned_addr = (firmware_addr >> 22U) << 22U;
+    for (uint32_t i = 0, p = pde_index; i < num_mappings; i++,p++) {
+        pte = sv32_kernel_pte(aligned_addr,
+                              true, true,
+                              true, true);
+        page_directory[p] = pte;
+        aligned_addr += mb4;
+    }
     // tlb flush?
 }
 
@@ -125,13 +144,17 @@ void kernel_main(
     kprintf("boot: running on core %d | march_id = %d "
             "| vendor_id = %d | impl_id = %d\n", hart_id,
             march_id.value, vendor_id.value, impl_id.value);
-    // for now assume 8 MiB image size
-    uint32_t kernel_image_size = (0x1 << 22U) * 8;
-    kputs("boot: finalizing kernel image identity mapping..\n");
-    paging_early_setup(linker_config.load_address,
-                       linker_config.kernel_virtual_base,
-                       (uint32_t)config,
-                       kernel_image_size);
+    // for now map 16 MiB
+    uint32_t identity_map_size = (0x1 << 22U) * 8;
+    // map 8 MiB for kernel area initially
+    uint32_t higher_half_map_size = identity_map_size / 2;
+    kputs("boot: setting up early kernel address space.\n");
+    create_early_identity_map(linker_config.firmware_load_address,
+                              identity_map_size);
+    map_device_tree_area((uint32_t)config);
+    map_kernel_higher_half(linker_config.kernel_load_address,
+                           linker_config.kernel_virtual_base,
+                           higher_half_map_size);
     kputs("boot: loading memory config from device tree..\n");
     uint64_t mem_range = memory_range_from_device_tree(config);
     uint32_t mem_base = mem_range >> 32;
@@ -139,18 +162,19 @@ void kernel_main(
     kprintf("boot: memory_start = %p | memory_size = %u\n",
             mem_base, mem_size);
     kputs("boot: initializing memory subsystem...\n");
-    setup_memory_subsystem(linker_config.load_address,
+    setup_memory_subsystem(linker_config.kernel_load_address,
                            mem_base, mem_size,
-                           kernel_image_size);
+                           higher_half_map_size);
     // TODO: make heap setup flexible
     uint32_t kheap_size = (0x1U << 20U); // 1MiB
     uint32_t kheap_start = linker_config.kernel_virtual_base +
-            kernel_image_size - kheap_size;
+            higher_half_map_size - kheap_size;
     kprintf("boot: setting heap @ %p | size = %u bytes\n",
             kheap_start, kheap_size);
     setup_kernel_heap(kheap_start, kheap_size);
     kputs("boot: setting up supervisor level interrupts..\n");
-    //trap_handling_init();
+    setup_trap_handlers();
+    enable_interrupts();
     // at this point we either jump to another thread
     // or just wait for the timer interrupt to fire
     while (true) {

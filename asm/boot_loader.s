@@ -3,6 +3,7 @@
 # TODO: maybe make this configureable somehow
 .equ KERNEL_VIRTUAL_BASE, 0xE0000000
 .equ VIRTUAL_MEMORY_SIZE, 0xFFFFFFFF
+.equ FIRMWARE_LOAD_ADDRESS, 0x80000000
 .equ KERNEL_LOAD_ADDRESS, 0x80800000
 .globl KERNEL_VIRTUAL_BASE
 
@@ -34,6 +35,7 @@ page_directory:
 .align 0x2
 .section .rodata
 linker_config:
+    .long FIRMWARE_LOAD_ADDRESS
 	.long LOAD_ADDRESS
 	.long KERNEL_TEXT_BEGIN
 	.long KERNEL_TEXT_END
@@ -43,6 +45,7 @@ linker_config:
 	.long KERNEL_DATA_END
 	.long KERNEL_BSS_BEGIN
 	.long KERNEL_BSS_END
+	.long KERNEL_VIRTUAL_BASE
 	.long KERNEL_VIRTUAL_END
 	.long KERNEL_SIZE_IN_BYTES
 
@@ -163,11 +166,9 @@ jump_to_higher_half:
     # a0 = boot hart id
     # a1 = device tree pointer or config string
     # a2 = config type: 0 = config string | 1 = device tree
-    # a3 = board load address
-    # a4 = linker config
+    # a3 = linker config
     li a2, 0x1
-    li a3, KERNEL_LOAD_ADDRESS
-    la a4, linker_config
+    la a3, linker_config
     la t0, kernel_boot
 	jr t0
 
