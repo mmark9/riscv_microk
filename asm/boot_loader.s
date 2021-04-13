@@ -3,7 +3,7 @@
 # TODO: maybe make this configureable somehow
 .equ KERNEL_VIRTUAL_BASE, 0xE0000000
 .equ VIRTUAL_MEMORY_SIZE, 0xFFFFFFFF
-.equ KERNEL_LOAD_ADDRESS, 0x80400000
+.equ KERNEL_LOAD_ADDRESS, 0x80800000
 .globl KERNEL_VIRTUAL_BASE
 
 # Constants set by the linker
@@ -24,6 +24,7 @@
 # to the kernel level boot code
 .section .boot_bss, "aw", @nobits
 .align 0xC
+.global page_directory
 page_directory:
     .skip 0x400 * 4, 0x0
 
@@ -31,7 +32,7 @@ page_directory:
 # helps the kernel map its pages with the correct
 # attributes
 .align 0x2
-.section ro_data
+.section .rodata
 linker_config:
 	.long LOAD_ADDRESS
 	.long KERNEL_TEXT_BEGIN
@@ -160,10 +161,12 @@ enable_paging:
 jump_to_higher_half:
     # long jump to start filling TLB
     # a0 = boot hart id
-    # a1 = device tree pointer
+    # a1 = device tree pointer or config string
     # a2 = config type: 0 = config string | 1 = device tree
     # a3 = board load address
     # a4 = linker config
+    li a2, 0x1
+    li a3, KERNEL_LOAD_ADDRESS
     la a4, linker_config
     la t0, kernel_boot
 	jr t0
