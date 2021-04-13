@@ -1,3 +1,4 @@
+#include "system.h"
 #include "devtree.h"
 #include "bit_utils.h"
 #include "page_frame.h"
@@ -271,8 +272,8 @@ bool buddy_split(int32_t order) {
 
 BuddyAllocResult buddy_allocate(int32_t order) {
     // NOTE: we could encode error codes in res
-    // NOTE: might want to relax this assert for testing
-    assert(buddy_state.initialized);
+    // NOTE: might want to relax this kassert for testing
+    kassert(buddy_state.initialized);
     BuddyAllocResult res = {
             .valid = false,
             .order = 0,
@@ -375,11 +376,11 @@ int buddy_memory_range(uint32_t* base_out,
                        DeviceTreeContext* ctx) {
     DeviceTreeProp prop;
     int res = devtree_property("reg", &prop, ctx);
-    assert(res == 0);
+    kassert(res == 0);
     res = devtree_word_at_index(0, &prop, base_out, ctx);
-    assert(res == 0);
+    kassert(res == 0);
     res = devtree_word_at_index(1, &prop, size_out, ctx);
-    assert(res == 0);
+    kassert(res == 0);
     return 0;
 }
 
@@ -393,10 +394,10 @@ void buddy_add_region(uint32_t address, uint32_t order, uint32_t nr_regions) {
 }
 
 void buddy_process_memory_range(uint32_t base_addr, uint32_t region_size) {
-    assert(region_size % FRAME_SIZE == 0);
+    kassert(region_size % FRAME_SIZE == 0);
     uint32_t nr_pages = region_size / FRAME_SIZE;
     // zero page size is invalid
-    assert(nr_pages != 0);
+    kassert(nr_pages != 0);
     int order = MAX_ORDER;
     uint32_t nr_pages_left = nr_pages;
     uint32_t nr_regions = 0;
@@ -424,7 +425,7 @@ void buddy_process_memory_node(DeviceTreeContext* ctx) {
     uint32_t base_addr = 0;
     uint32_t region_size = 0;
     int res = buddy_memory_range(&base_addr, &region_size, ctx);
-    assert(res == 0);
+    kassert(res == 0);
     // we assume that memory can always a multiple of the frame size
     buddy_process_memory_range(base_addr, region_size);
 }
@@ -446,20 +447,20 @@ void buddy_load_devtree_memory_stats(DeviceTreeContext* ctx) {
             buddy_memory_range(&region_addr, &region_size, ctx);
             region_nr_pages = region_size / FRAME_SIZE;
             // memory nodes should declare ranges multiple of a page
-            assert((region_size % FRAME_SIZE) == 0);
+            kassert((region_size % FRAME_SIZE) == 0);
             buddy_state.nr_pages_total += region_nr_pages;
             min_base_addr = region_addr < min_base_addr ? region_addr : min_base_addr;
             devtree_move_to_root(ctx);
         }
     }
-    assert(min_base_addr != UINT32_MAX);
+    kassert(min_base_addr != UINT32_MAX);
     buddy_state.base_addr = min_base_addr;
     buddy_state.base_memory_set = true;
 }
 
 void buddy_init_from_dev_tree(DeviceTreeContext* ctx) {
     buddy_reset();
-    assert(!buddy_state.initialized);
+    kassert(!buddy_state.initialized);
     uint32_t node_count = devtree_child_node_count(ctx);
     for (uint32_t i = 0; i < node_count; i++) {
         if (streq_node(devtree_child_name(i, ctx), "memory")) {
