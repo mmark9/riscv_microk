@@ -26,14 +26,14 @@
 #define sv32_ppn1(pte) (bits(pte, 20, 12))
 
 // sets
-#define sv32_set_valid(pte, v) set_bits(pte, v? 1 : 0, 0, 1)
-#define sv32_set_can_read(pte, v) set_bits(pte, v? 1 : 0, 1, 1)
-#define sv32_set_can_write(pte, v) set_bits(pte, v? 1 : 0, 2, 1)
-#define sv32_set_can_execute(pte, v) set_bits(pte, v? 1 : 0, 3, 1)
-#define sv32_set_user_can_access(pte, v) set_bits(pte, v? 1 : 0, 4, 1)
-#define sv32_set_is_global(pte, v) set_bits(pte, v? 1 : 0, 5, 1)
-#define sv32_set_accessed(pte, v) set_bits(pte, v? 1 : 0, 6, 1)
-#define sv32_set_dirty(pte, v) set_bits(pte, v? 1 : 0, 7, 1)
+#define sv32_set_valid(pte, v) set_bits(pte, (v == true ? 1 : 0), 0, 1)
+#define sv32_set_can_read(pte, v) set_bits(pte, (v == true ? 1 : 0), 1, 1)
+#define sv32_set_can_write(pte, v) set_bits(pte, (v == true ? 1 : 0), 2, 1)
+#define sv32_set_can_execute(pte, v) set_bits(pte, (v == true ? 1 : 0), 3, 1)
+#define sv32_set_user_can_access(pte, v) set_bits(pte, (v == true? 1 : 0), 4, 1)
+#define sv32_set_is_global(pte, v) set_bits(pte, (v == true? 1 : 0), 5, 1)
+#define sv32_set_accessed(pte, v) set_bits(pte, (v == true ? 1 : 0), 6, 1)
+#define sv32_set_dirty(pte, v) set_bits(pte, (v == true? 1 : 0), 7, 1)
 #define sv32_set_rsw(pte, v) set_bits(pte, v, 8, 2)
 #define sv32_set_ppn0(pte, v) set_bits(pte, v, 10, 10)
 #define sv32_set_ppn1(pte, v) set_bits(pte, v, 20, 12)
@@ -58,5 +58,20 @@ void page_table_simple_flush_tlb();
 
 void page_table_init(uint32_t higher_half_addr, uint32_t kernel_start_addr,
                      uint32_t nr_direct_map_pgs, uint32_t* page_table);
+
+uint32_t sv32_pte(uint32_t vaddr, bool user_access,
+                  bool can_read, bool can_write,
+                  bool can_exec, bool global, bool valid);
+
+uint32_t sv32_user_pte(uint32_t vaddr, bool can_read,
+                       bool can_write, bool can_exec, bool valid);
+
+uint32_t sv32_kernel_pte(uint32_t vaddr, bool can_read,
+                         bool can_write, bool can_exec, bool valid);
+
+uint32_t sv32_kernel_pte_pointer(uint32_t vaddr, bool valid);
+
+uint32_t sv32_user_pte_pointer(uint32_t vaddr, bool valid);
+
 
 #endif //RISCV_MICROK_PAGE_TABLE_H

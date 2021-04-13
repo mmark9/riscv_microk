@@ -17,10 +17,11 @@ bool paging_is_enabled() {
 
 uint32_t* page_table_set_lvl1(uint32_t* frame) {
     uint32_t asid = 0;
-    uint32_t ppn = (uint32_t)frame / PAGE_SIZE;
+    uint32_t ppn = (uint32_t)frame / FRAME_SIZE;
     uint32_t old_value = satp_r_csr();
     uint32_t new_value = set_bits(old_value, ppn, 0, 22);
-    new_value = set_bits(old_value, asid, 22, 9);
+    new_value = set_bits(new_value, asid, 22, 9);
+    new_value = set_bits(new_value, 1, 31, 1);
     satp_w_csr(new_value);
     return (uint32_t*)old_value;
 }
@@ -65,6 +66,41 @@ uint32_t page_table_set_lvl2_entry(uint32_t pte, uint32_t address) {
 
 void page_table_simple_flush_tlb() {
     __asm__("sfence.vma zero, zero");
+}
+
+uint32_t sv32_pte(uint32_t vaddr, bool user_access,
+                  bool can_read, bool can_write,
+                  bool can_exec, bool global, bool valid) {
+    uint32_t pte = (vaddr >> 12U) << 10U;
+    pte = sv32_set_user_can_access(pte, user_access);
+    pte = sv32_set_can_execute(pte, can_exec);
+    pte = sv32_set_can_write(pte, can_write);
+    pte = sv32_set_can_read(pte, can_read);
+    pte = sv32_set_is_global(pte, global);
+    pte = sv32_set_valid(pte, valid);
+    return pte;
+}
+
+uint32_t sv32_user_pte(uint32_t vaddr, bool can_read,
+                       bool can_write, bool can_exec, bool valid) {
+    return sv32_pte(vaddr, true, can_read,
+                    can_write, can_exec, false, valid);
+}
+
+uint32_t sv32_kernel_pte(uint32_t vaddr, bool can_read,
+                         bool can_write, bool can_exec, bool valid) {
+    return sv32_pte(vaddr, false, can_read,
+                    can_write, can_exec, false, valid);
+}
+
+uint32_t sv32_kernel_pte_pointer(uint32_t vaddr, bool valid) {
+    return sv32_pte(vaddr, false, false,
+                    false, false, false, valid);
+}
+
+uint32_t sv32_user_pte_pointer(uint32_t vaddr, bool valid) {
+    return sv32_pte(vaddr, true, false,
+                    false, false, false, valid);
 }
 
 void page_table_init(uint32_t higher_half_addr, uint32_t kernel_start_addr,
