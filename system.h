@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+void shutdown();
 void kassert(bool condition);
 void panic(const char* reason);
 

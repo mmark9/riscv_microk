@@ -9,6 +9,11 @@ void panic(const char* reason) {
                            SBI_RESET_SYSTEM_FAILURE);
 }
 
+void shutdown() {
+    kprintf("system: shutdown started\n");
+    sbi_relay_system_reset(SBI_SHUTDOWN, SBI_RESET_NO_REASON);
+}
+
 void kassert(bool condition) {
     if (!condition)
         panic("assertion failed");
