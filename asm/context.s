@@ -41,5 +41,6 @@ load_context:
     csrw sepc, t0
     lw t0, 0(sp)
     # point of no return
+    add sp, sp, 8
     lw a0, 40(a0)
     sret
