@@ -3,6 +3,6 @@
 #include "kthread.h"
 #include <stdint.h>
 
-int sched_spawn_thread(void* entry_pc, void* arg);
+int sched_demo_spawn_thread(void* entry_pc, void* arg);
 
 #endif //RISCV_MICROK_SCHED_H

@@ -50,8 +50,9 @@ typedef struct {
     uint32_t thread_id;
     uint32_t u_stack_ptr;
     uint32_t k_stack_ptr;
-    RegisterGroup regs;
     uint32_t quantum;
     uint32_t priority;
+    uint32_t entry_pc;
+    RegisterGroup regs;
 } KThread;
 #endif //RISCV_MICROK_KTHREAD_H

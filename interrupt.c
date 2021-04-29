@@ -1,23 +1,20 @@
 #include "csr.h"
+#include "sched.h"
 #include "kthread.h"
+#include "kprint.h"
 #include "bit_utils.h"
 #include "sbi_relay.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
-void thread_function_1() {
-    int x = 25;
-    while (true) {
-        x += 5;
-    }
-}
+extern KThread* current_thread;
 
-void thread_function_2() {
-    uint32_t y = 10;
-    while (true) {
-        y += 12;
-    }
+void dummy_print_thread() {
+    kprintf("thread %d: now executing..\n", current_thread->thread_id);
+    // useful work here
+    kprintf("thread %d: now exiting..\n", current_thread->thread_id);
+    // return to scheduler
 }
 
 
@@ -97,27 +94,27 @@ void handle_store_amo_page_fault_exception(const RegisterGroup* regs) {
 }
 
 void handle_user_software_interrupt(const RegisterGroup* regs) {
-    // TODO: ?
+    // TODO: ??
 }
 
 void handle_supervisor_software_interrupt(const RegisterGroup* regs) {
-    // TODO: ?
+    // TODO: ??
 }
 
 void handle_user_timer_interrupt(const RegisterGroup* regs) {
-    // TODO: adjust timer
+    // TODO: ??
 }
 
 void handle_supervisor_timer_interrupt(const RegisterGroup* regs) {
-    // TODO: adjust timer
+    sched_demo_spawn_thread(dummy_print_thread, 0);
 }
 
 void handle_user_external_interrupt(const RegisterGroup* regs) {
-    // TODO: ?
+    // TODO: handle possible device driver interrupt
 }
 
 void handle_supervisor_external_interrupt(const RegisterGroup* regs) {
-    // TODO: ?
+    // TODO: handle possible device driver interrupt
 }
 
 void handle_any_trap_dummy(const RegisterGroup* regs) {  }
@@ -202,11 +199,9 @@ void supervisor_handle_trap(RegisterGroup* regs) {
     // TODO verify cause is in range?
     (*trap_handlers[cause])(regs);
     sepc_w_csr(sepc);
-    timer_reset();
-    // return from interrupt
 }
 
-void trap_handling_init() {
+void setup_trap_handlers() {
     trap_handlers[USER_SOFTWARE_INTERRUPT] = handle_user_software_interrupt;
     trap_handlers[SUPERVISOR_SOFTWARE_INTERRUPT] = handle_supervisor_software_interrupt;
     trap_handlers[USER_TIMER_INTERRUPT] = handle_user_timer_interrupt;
@@ -226,13 +221,24 @@ void trap_handling_init() {
     trap_handlers[INSTRUCTION_PAGE_FAULT] = handle_instruction_page_fault_exception;
     trap_handlers[LOAD_PAGE_FAULT] = handle_load_page_fault_exception;
     trap_handlers[STORE_AMO_PAGE_FAULT] = handle_store_amo_page_fault_exception;
-    // configure timer interrupts
+}
+
+void enable_interrupts() {
     uint32_t sstatus = sstatus_r_csr();
     uint32_t sie_val = sie_set_stie(0U, 0x1U);
     sie_val = sie_set_ssie(sie_val, 0x1U);
-    sie_s_csr(sie_val);
+    sie_w_csr(sie_val);
     uint32_t new_sstatus = sstatus_set_sie(sstatus, 1U);
     uint64_t time = time_r_csr();
-    struct sbiret timer_res = sbi_relay_set_timer(time+10000);
+    uint64_t new_time = time + 10000;
+    struct sbiret timer_res = sbi_relay_set_timer(0);
+    sstatus_w_csr(new_sstatus);
+}
+
+void disable_interrupts() {
+    uint32_t sstatus = sstatus_r_csr();
+    uint32_t sie_val = sie_set_stie(0U, 0x0U);
+    sie_w_csr(sie_val);
+    uint32_t new_sstatus = sstatus_set_sie(sstatus, 0U);
     sstatus_w_csr(new_sstatus);
 }
