@@ -15,7 +15,7 @@ SECTIONS
     {
 		*(.boot_text)
 	}
-	BOOT_LOADER_TEXT_END = . - 1;
+	BOOT_LOADER_TEXT_END = .;
 	
 	BOOT_LOADER_BSS_BEGIN = .;
 	/* stage 1 boot bss (boot loader) */
@@ -69,7 +69,7 @@ SECTIONS
 	}
 	
 	LMA_PTR = ALIGN(4K) - VIRTUAL_DELTA;
-	KERNEL_BSS_END = LMA_PTR - 1;
+	KERNEL_BSS_END = LMA_PTR;
     KERNEL_VIRTUAL_END = .;
     KERNEL_SIZE_IN_BYTES = KERNEL_BSS_END - BOOT_LOADER_TEXT_BEGIN;
 }
