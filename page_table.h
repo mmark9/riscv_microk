@@ -42,15 +42,15 @@
 #define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 20 | pde_index << 10))
 
 void page_table_simple_flush_tlb();
-uint32_t sv32_pte(uint32_t vaddr, bool user_access,
+uint32_t sv32_pte(uint32_t paddr, bool user_access,
                   bool can_read, bool can_write,
                   bool can_exec, bool global, bool valid);
-uint32_t sv32_user_pte(uint32_t vaddr, bool can_read,
+uint32_t sv32_user_pte(uint32_t paddr, bool can_read,
                        bool can_write, bool can_exec, bool valid);
-uint32_t sv32_kernel_pte(uint32_t vaddr, bool can_read,
+uint32_t sv32_kernel_pte(uint32_t paddr, bool can_read,
                          bool can_write, bool can_exec, bool valid);
-uint32_t sv32_kernel_pte_pointer(uint32_t vaddr, bool valid);
-uint32_t sv32_user_pte_pointer(uint32_t vaddr, bool valid);
+uint32_t sv32_kernel_pte_pointer(uint32_t paddr, bool valid);
+uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 
 
 #endif //RISCV_MICROK_PAGE_TABLE_H

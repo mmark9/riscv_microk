@@ -17,10 +17,10 @@ void page_table_simple_flush_tlb() {
     __asm__("sfence.vma zero, zero");
 }
 
-uint32_t sv32_pte(uint32_t vaddr, bool user_access,
+uint32_t sv32_pte(uint32_t paddr, bool user_access,
                   bool can_read, bool can_write,
                   bool can_exec, bool global, bool valid) {
-    uint32_t pte = (vaddr >> 12U) << 10U;
+    uint32_t pte = (paddr >> 12U) << 10U;
     pte = sv32_set_user_can_access(pte, user_access);
     pte = sv32_set_can_execute(pte, can_exec);
     pte = sv32_set_can_write(pte, can_write);
@@ -30,25 +30,25 @@ uint32_t sv32_pte(uint32_t vaddr, bool user_access,
     return pte;
 }
 
-uint32_t sv32_user_pte(uint32_t vaddr, bool can_read,
+uint32_t sv32_user_pte(uint32_t paddr, bool can_read,
                        bool can_write, bool can_exec, bool valid) {
-    return sv32_pte(vaddr, true, can_read,
+    return sv32_pte(paddr, true, can_read,
                     can_write, can_exec, false, valid);
 }
 
-uint32_t sv32_kernel_pte(uint32_t vaddr, bool can_read,
+uint32_t sv32_kernel_pte(uint32_t paddr, bool can_read,
                          bool can_write, bool can_exec, bool valid) {
-    return sv32_pte(vaddr, false, can_read,
+    return sv32_pte(paddr, false, can_read,
                     can_write, can_exec, false, valid);
 }
 
-uint32_t sv32_kernel_pte_pointer(uint32_t vaddr, bool valid) {
-    return sv32_pte(vaddr, false, false,
+uint32_t sv32_kernel_pte_pointer(uint32_t paddr, bool valid) {
+    return sv32_pte(paddr, false, false,
                     false, false, false, valid);
 }
 
-uint32_t sv32_user_pte_pointer(uint32_t vaddr, bool valid) {
-    return sv32_pte(vaddr, true, false,
+uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid) {
+    return sv32_pte(paddr, true, false,
                     false, false, false, valid);
 }
 
