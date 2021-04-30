@@ -38,39 +38,18 @@
 #define sv32_set_ppn0(pte, v) set_bits(pte, v, 10, 10)
 #define sv32_set_ppn1(pte, v) set_bits(pte, v, 20, 12)
 
-bool paging_is_enabled();
-
-uint32_t* page_table_set_lvl1(uint32_t* frame);
-
-uint32_t* page_table_current_lvl1_page();
-
-uint32_t page_table_lvl1_entry(uint32_t address);
-
-// returns the old entry
-uint32_t page_table_lvl1_set_entry(uint32_t pte, uint32_t address);
-
-uint32_t page_table_lvl2_entry(uint32_t address);
-
-// returns the old entry
-uint32_t page_table_set_lvl2_entry(uint32_t pte, uint32_t address);
+#define page_table_lv1_ptr ((uint32_t*)(1023 << 20 | 1023 << 10))
+#define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 20 | pde_index << 10))
 
 void page_table_simple_flush_tlb();
-
-void page_table_init(uint32_t higher_half_addr, uint32_t kernel_start_addr,
-                     uint32_t nr_direct_map_pgs, uint32_t* page_table);
-
 uint32_t sv32_pte(uint32_t vaddr, bool user_access,
                   bool can_read, bool can_write,
                   bool can_exec, bool global, bool valid);
-
 uint32_t sv32_user_pte(uint32_t vaddr, bool can_read,
                        bool can_write, bool can_exec, bool valid);
-
 uint32_t sv32_kernel_pte(uint32_t vaddr, bool can_read,
                          bool can_write, bool can_exec, bool valid);
-
 uint32_t sv32_kernel_pte_pointer(uint32_t vaddr, bool valid);
-
 uint32_t sv32_user_pte_pointer(uint32_t vaddr, bool valid);
 
 
