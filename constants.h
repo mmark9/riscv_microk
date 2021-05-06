@@ -3,6 +3,10 @@
 
 #define FRAME_SIZE 4096
 #define PAGE_SIZE FRAME_SIZE
+#define LVL1_SIZE 0x400000
+#define PAGE_TABLE_NR_SLOTS 1024
 
+#define kIB * (1U << 10U)
+#define MiB * (1U << 20U)
 
 #endif //RISCV_MICROK_CONSTANTS_H
