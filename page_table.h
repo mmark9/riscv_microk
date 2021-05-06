@@ -38,8 +38,8 @@
 #define sv32_set_ppn0(pte, v) set_bits(pte, v, 10, 10)
 #define sv32_set_ppn1(pte, v) set_bits(pte, v, 20, 12)
 
-#define page_table_lv1_ptr ((uint32_t*)(1023 << 20 | 1023 << 10))
-#define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 20 | pde_index << 10))
+#define page_table_lv1_ptr ((uint32_t*)(1023 << 22 | 1022 << 12))
+#define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 22 | pde_index << 12))
 
 void page_table_simple_flush_tlb();
 uint32_t sv32_pte(uint32_t paddr, bool user_access,
