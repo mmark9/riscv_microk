@@ -1,6 +1,8 @@
+#include "kprint.h"
+#include "devtree.h"
 #include "bit_utils.h"
 #include "page_frame.h"
-#include "devtree.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -106,6 +108,35 @@ bool pf_bitmap_region_is_free(uint32_t address, uint32_t nr_pages) {
         addr_ptr += FRAME_SIZE;
     }
     return true;
+}
+
+void init_frame_bitmap_from_linker_config(KernelLinkerConfig* config) {
+    // this includes the deadzone below the firmware
+    uint32_t total_image_size = config->kernel_bss_end;
+    uint32_t total_image_frame_count = total_image_size / FRAME_SIZE;
+    uint32_t total_remains = total_image_size % FRAME_SIZE;
+    total_image_frame_count = total_remains > 1 ?
+            total_image_frame_count + 1 : total_image_frame_count;
+    pf_bitmap_mark_region_allocated(0, total_image_frame_count);
+}
+
+uint32_t pf_bitmap_alloc_frame() {
+    uint32_t frame_no = 0;
+    for (uint32_t i = 0; i < NUM_FRAMES; i++) {
+        if (!pf_bitmap_bit_is_on(i)) {
+            frame_no = i;
+            break;
+        }
+    }
+    if (frame_no == 0) {
+        kputs("page_frame [alloc]: no free frames available\n");
+        return 0;
+    }
+    uint32_t frame_addr = frame_no * FRAME_SIZE;
+    kprintf("page_frame [alloc]: allocating frame %d (%p) from pool\n",
+            frame_no, frame_addr);
+    pf_bitmap_mark_allocated(frame_no);
+    return frame_addr;
 }
 
 int init_frame_bitmap(const void* dtb) {
