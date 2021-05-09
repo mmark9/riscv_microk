@@ -1,21 +1,12 @@
 #include "csr.h"
 #include "sched.h"
-#include "kthread.h"
 #include "kprint.h"
+#include "system.h"
+#include "constants.h"
 #include "bit_utils.h"
-#include "sbi_relay.h"
 
 #include <stdint.h>
 #include <stdbool.h>
-
-extern KThread* current_thread;
-
-void dummy_print_thread() {
-    kprintf("thread %d: now executing..\n", current_thread->thread_id);
-    // useful work here
-    kprintf("thread %d: now exiting..\n", current_thread->thread_id);
-    // return to scheduler
-}
 
 
 typedef enum {
@@ -41,85 +32,114 @@ typedef enum {
     RESERVED_OR_UNKNOWN
 } TrapCause;
 
-void handle_instruction_address_misaligned_exception(const RegisterGroup* regs) {
+const char* trap_string_table[] = {
+        "Instruction Address Misaligned",
+        "Instruction Access Fault",
+        "Illegal Instruction",
+        "Breakpoint",
+        "Load Address Misaligned",
+        "Load Access Fault",
+        "Store Amo Address Fault",
+        "Store Amo Access Fault",
+        "User Software Interrupt",
+        "Supervisor Software Interrupt",
+        "User Timer Interrupt",
+        "Supervisor Timer Interrupt",
+        "user External Interrupt",
+        "Supervisor External Interrupt",
+        "Reserved or Unknown"
+};
+
+uint32_t handle_instruction_address_misaligned_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort
+    return sepc;
 }
 
-void handle_instruction_access_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_instruction_access_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort
+    return sepc;
 }
 
-void handle_illegal_instruction_exception(const RegisterGroup* regs) {
+uint32_t handle_illegal_instruction_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort
+    return sepc;
 }
 
-void handle_breakpoint_exception(const RegisterGroup* regs) {
+uint32_t handle_breakpoint_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: ??
+    return sepc;
 }
 
-void handle_load_address_misaligned_exception(const RegisterGroup* regs) {
+uint32_t handle_load_address_misaligned_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort
+    return sepc;
 }
 
-void handle_load_access_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_load_access_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort
+    return sepc;
 }
 
-void handle_store_amo_address_misaligned_exception(const RegisterGroup* regs) {
+uint32_t handle_store_amo_address_misaligned_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort?
+    return sepc;
 }
 
-void handle_store_amo_access_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_store_amo_access_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: abort?
+    return sepc;
 }
 
-void handle_ecall_from_user_mode_exception(const RegisterGroup* regs) {
+uint32_t handle_ecall_from_user_mode_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: possible handle syscalls
+    return sepc;
 }
 
-void handle_ecall_from_supervisor_mode_exception(const RegisterGroup* regs) {
-    // TODO: probably nothing, horizontal
+uint32_t handle_ecall_from_supervisor_mode_exception(const RiscvGPRS* regs, uint32_t sepc) {
+    schedule(regs, sepc);
+    return sepc; // won't get here
 }
 
-void handle_instruction_page_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_instruction_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    return sepc;
 }
 
-void handle_load_page_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_load_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    return sepc;
 }
 
-void handle_store_amo_page_fault_exception(const RegisterGroup* regs) {
+uint32_t handle_store_amo_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    return sepc;
 }
 
-void handle_user_software_interrupt(const RegisterGroup* regs) {
+uint32_t handle_user_software_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
+    return sepc;
+}
+
+uint32_t handle_supervisor_software_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
+    return sepc;
+}
+
+uint32_t handle_user_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: ??
 }
 
-void handle_supervisor_software_interrupt(const RegisterGroup* regs) {
-    // TODO: ??
+uint32_t handle_supervisor_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
+    return sepc;
 }
 
-void handle_user_timer_interrupt(const RegisterGroup* regs) {
-    // TODO: ??
-}
-
-void handle_supervisor_timer_interrupt(const RegisterGroup* regs) {
-    sched_demo_spawn_thread(dummy_print_thread, 0);
-}
-
-void handle_user_external_interrupt(const RegisterGroup* regs) {
+uint32_t handle_user_external_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: handle possible device driver interrupt
 }
 
-void handle_supervisor_external_interrupt(const RegisterGroup* regs) {
+uint32_t handle_supervisor_external_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: handle possible device driver interrupt
 }
 
-void handle_any_trap_dummy(const RegisterGroup* regs) {  }
-
-void (*trap_handlers[24]) (const RegisterGroup*);
+uint32_t (*trap_handlers[24]) (const RiscvGPRS *, uint32_t);
 
 TrapCause interrupt_cause(uint32_t trap_code) {
     if (trap_code == 0)
@@ -187,18 +207,15 @@ TrapCause trap_read_cause(uint32_t scause_reg) {
     }
 }
 
-void timer_reset() {
-    uint64_t time = time_r_csr();
-    struct sbiret timer_res = sbi_relay_set_timer(time+10000);
-}
-
-void supervisor_handle_trap(RegisterGroup* regs) {
+void supervisor_handle_trap(RiscvGPRS * regs) {
     uint32_t scause = scause_r_csr();
     uint32_t sepc = sepc_r_csr();
     TrapCause cause = trap_read_cause(scause);
+    kprintf("system [interrupt]: caught %s at PC %p\n",
+            trap_string_table[cause], sepc);
     // TODO verify cause is in range?
-    (*trap_handlers[cause])(regs);
-    sepc_w_csr(sepc);
+    uint32_t new_sepc = (*trap_handlers[cause])(regs, sepc);
+    sepc_w_csr(new_sepc);
 }
 
 void setup_trap_handlers() {
@@ -221,24 +238,4 @@ void setup_trap_handlers() {
     trap_handlers[INSTRUCTION_PAGE_FAULT] = handle_instruction_page_fault_exception;
     trap_handlers[LOAD_PAGE_FAULT] = handle_load_page_fault_exception;
     trap_handlers[STORE_AMO_PAGE_FAULT] = handle_store_amo_page_fault_exception;
-}
-
-void enable_interrupts() {
-    uint32_t sstatus = sstatus_r_csr();
-    uint32_t sie_val = sie_set_stie(0U, 0x1U);
-    sie_val = sie_set_ssie(sie_val, 0x1U);
-    sie_w_csr(sie_val);
-    uint32_t new_sstatus = sstatus_set_sie(sstatus, 1U);
-    uint64_t time = time_r_csr();
-    uint64_t new_time = time + 10000;
-    struct sbiret timer_res = sbi_relay_set_timer(0);
-    sstatus_w_csr(new_sstatus);
-}
-
-void disable_interrupts() {
-    uint32_t sstatus = sstatus_r_csr();
-    uint32_t sie_val = sie_set_stie(0U, 0x0U);
-    sie_w_csr(sie_val);
-    uint32_t new_sstatus = sstatus_set_sie(sstatus, 0U);
-    sstatus_w_csr(new_sstatus);
 }
