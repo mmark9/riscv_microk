@@ -1,8 +1,35 @@
 #ifndef RISCV_MICROK_SCHED_H
 #define RISCV_MICROK_SCHED_H
-#include "kthread.h"
+#include "context.h"
 #include <stdint.h>
 
-int sched_demo_spawn_thread(void* entry_pc, void* arg);
+typedef enum ThreadStatus {
+    KTHREAD_CREATED = 0,
+    KTHREAD_READY_TO_RUN,
+    KTHREAD_USER_RUNNING,
+    KTHREAD_KERNEL_RUNNING,
+    KTHREAD_ASLEEP,
+    KTHREAD_PREEMPTED
+} KThreadState;
+
+typedef struct thread_tcb {
+    int32_t thread_id;
+    uint32_t u_stack_ptr;
+    uint32_t k_stack_ptr;
+    uint32_t quantum;
+    uint32_t priority;
+    uint32_t entry_pc;
+    uint32_t pc;
+    RiscvGPRS regs;
+    KThreadState state;
+    uint32_t root_page;
+    struct thread_tcb* next;
+    struct thread_tcb* prev;
+} KThread;
+
+void sched_init();
+void schedule();
+void sched_init_thread(struct thread_tcb* tcb, void* func);
+void sched_enqueue(struct thread_tcb* thread);
 
 #endif //RISCV_MICROK_SCHED_H
