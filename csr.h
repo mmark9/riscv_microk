@@ -3,11 +3,11 @@
 
 #include <stdint.h>
 
-#define field_mask(n_bits, pos) (uint32_t)(((1U << (uint32_t)n_bits) - 1) << (uint32_t)pos)
-#define clear_field(x, n_bits, pos) ~field_mask(n_bits, pos) & x
+#define field_mask(n_bits, pos) ((uint32_t)(((1U << (uint32_t)n_bits) - 1) << (uint32_t)pos))
+#define clear_field(x, n_bits, pos) (~field_mask(n_bits, pos) & x)
 #define extract_field(x, n_bits, pos) (field_mask(n_bits, pos) & x) >> (uint32_t)pos
-#define set_field(x, n_bits, val, pos) clear_field(x, n_bits, pos) \
-            | ((field_mask(n_bits, 0) & val) << (uint32_t)pos)
+#define set_field(x, n_bits, val, pos) (clear_field(x, n_bits, pos) \
+            | ((field_mask(n_bits, 0) & val) << (uint32_t)pos))
 
 #define misa_ext(x) extract_field(x, 26, 0)
 #define misa_mxl(x) extract_field(x, 2, 29)
