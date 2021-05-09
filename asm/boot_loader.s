@@ -17,6 +17,14 @@
 .extern KERNEL_DATA_END
 .extern KERNEL_BSS_BEGIN
 .extern KERNEL_BSS_END
+.extern KERNEL_TEXT_BEGIN_VIRTUAL
+.extern KERNEL_TEXT_END_VIRTUAL
+.extern KERNEL_RO_DATA_BEGIN_VIRTUAL
+.extern KERNEL_RO_DATA_END_VIRTUAL
+.extern KERNEL_DATA_BEGIN_VIRTUAL
+.extern KERNEL_DATA_END_VIRTUAL
+.extern KERNEL_BSS_BEGIN_VIRTUAL
+.extern KERNEL_BSS_END_VIRTUAL
 .extern KERNEL_VIRTUAL_END
 .extern KERNEL_SIZE_IN_BYTES
 
@@ -45,6 +53,14 @@ linker_config:
 	.long KERNEL_DATA_END
 	.long KERNEL_BSS_BEGIN
 	.long KERNEL_BSS_END
+	.long KERNEL_TEXT_BEGIN_VIRTUAL
+    .long KERNEL_TEXT_END_VIRTUAL
+    .long KERNEL_RO_DATA_BEGIN_VIRTUAL
+    .long KERNEL_RO_DATA_END_VIRTUAL
+    .long KERNEL_DATA_BEGIN_VIRTUAL
+    .long KERNEL_DATA_END_VIRTUAL
+    .long KERNEL_BSS_BEGIN_VIRTUAL
+    .long KERNEL_BSS_END_VIRTUAL
 	.long KERNEL_VIRTUAL_BASE
 	.long KERNEL_VIRTUAL_END
 	.long KERNEL_SIZE_IN_BYTES
@@ -72,6 +88,18 @@ boot_entry:
 	xor t4, t4, t4
 	xor t5, t5, t5
 	xor t6, t6, t6
+recursive_map:
+    la s0, page_directory
+    srli s0, s0, 12
+    slli s0, s0, 10
+    ori s1, s0, 7
+    ori s2, s0, 1
+    la s3, page_directory
+    li s4, 4088
+    add s3, s3, s4
+    sw s1, 0(s3)
+    addi s3, s3, 4
+    sw s2, 0(s3)
 boot_identity_map:
 	# we start by creating
 	# temp mappings
@@ -305,6 +333,7 @@ next_pde:
 	# page_directory_offset += 4
 	addi s0, s0, 0x4
 	beq zero, zero, fill_lvl1_table
+
 .align 0x2
 # TODO: handle boot exceptions better
 trap_boot_exceptions:
