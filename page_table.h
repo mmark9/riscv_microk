@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 
+#define RSW_LV1_FIXUP 2
 #define sv32_page_offset(addr) bits(addr, 0, 12)
 // level 2
 #define sv32_vpn0(addr) bits(addr, 12, 10)
@@ -44,11 +45,14 @@
 void page_table_simple_flush_tlb();
 uint32_t sv32_pte(uint32_t paddr, bool user_access,
                   bool can_read, bool can_write,
-                  bool can_exec, bool global, bool valid);
+                  bool can_exec, bool global,
+                  bool valid, bool fixup);
 uint32_t sv32_user_pte(uint32_t paddr, bool can_read,
-                       bool can_write, bool can_exec, bool valid);
+                       bool can_write, bool can_exec,
+                       bool valid, bool fixup);
 uint32_t sv32_kernel_pte(uint32_t paddr, bool can_read,
-                         bool can_write, bool can_exec, bool valid);
+                         bool can_write, bool can_exec,
+                         bool valid, bool fixup);
 uint32_t sv32_kernel_pte_pointer(uint32_t paddr, bool valid);
 uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 
