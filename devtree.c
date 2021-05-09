@@ -23,8 +23,8 @@ int32_t strlen_(const char *str) {
 }
 
 int devtree_load_header(const char *blob, DeviceTreeHdr *header) {
-    kassert(header != 0);
-    kassert(blob != 0);
+    sys_kassert(header != 0);
+    sys_kassert(blob != 0);
     const uint32_t *word_ptr = (uint32_t *) blob;
     header->magic = big2little_l(*word_ptr++);
     header->total_size = big2little_l(*word_ptr++);
@@ -136,7 +136,7 @@ void devtree_print_prop_value(const char *name, uint32_t prop_len, const void *b
 
 int devtree_property(const char *name, DeviceTreeProp *out,
                      const DeviceTreeContext *ctx) {
-    kassert(ctx != 0);
+    sys_kassert(ctx != 0);
     uint32_t token = 0;
     const int8_t* ptr = (const int8_t*)ctx->node;
     DeviceTreePropHdr prop_hdr;
@@ -170,10 +170,10 @@ int devtree_property(const char *name, DeviceTreeProp *out,
 }
 
 void devtree_print_all(const void *blob) {
-    kassert(blob != 0);
+    sys_kassert(blob != 0);
     DeviceTreeHdr header;
     devtree_load_header(blob, &header);
-    kassert(header.magic == FDT_HEADER_MAGIC);
+    sys_kassert(header.magic == FDT_HEADER_MAGIC);
     // load memory reservation block
     DeviceTreeMemReserve *resv_ptr = (DeviceTreeMemReserve *) (blob + header.off_mem_rsvmap);
     while (!FDT_RESERVE_EMPTY(resv_ptr)) {
@@ -234,11 +234,11 @@ void devtree_print_all(const void *blob) {
 }
 
 int devtree_load_context(const void* blob, DeviceTreeContext* ctx) {
-    kassert(blob != 0);
+    sys_kassert(blob != 0);
     ctx->tree_root = blob;
     ctx->level = 0;
     devtree_load_header(blob, &ctx->header);
-    kassert(ctx->header.magic == FDT_HEADER_MAGIC);
+    sys_kassert(ctx->header.magic == FDT_HEADER_MAGIC);
     // load structure block
     int32_t level = -1;
     uint32_t str_len = 0;
@@ -437,7 +437,7 @@ int devtree_move_to_root(DeviceTreeContext *ctx) {
 }
 
 const char *devtree_node_name(const DeviceTreeContext *ctx) {
-    kassert(ctx != 0);
+    sys_kassert(ctx != 0);
     return ctx->node_name;
 }
 
@@ -455,7 +455,7 @@ bool devtree_property_exists(const char *name, const DeviceTreeContext *ctx) {
     FILE *in_fh = fopen(file_path, "rb");
     kassert(in_fh != 0);
     uint32_t read_count = fread(buffer, sizeof(char), file_stat.st_size, in_fh);
-    kassert(read_count == file_stat.st_size);
+    sys_kassert(read_count == file_stat.st_size);
     devtree_print_all(buffer);
     int res = devtree_load_context(buffer, ctx);
     return res;
