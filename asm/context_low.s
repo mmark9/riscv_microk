@@ -39,6 +39,7 @@ load_context:
     lw t0, 0(a0)
     # set the pc
     csrw sepc, t0
+    # check if we need to switch the address space
     lw t0, 0(sp)
     # point of no return
     add sp, sp, 8
