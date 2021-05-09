@@ -9,4 +9,7 @@
 #define kIB * (1U << 10U)
 #define MiB * (1U << 20U)
 
+#define STACK_SIZE 16384
+#define MAX_NR_FRAMES_SUPPORTED 1048576
+
 #endif //RISCV_MICROK_CONSTANTS_H
