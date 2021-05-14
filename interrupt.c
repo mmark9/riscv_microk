@@ -66,8 +66,8 @@ uint32_t handle_illegal_instruction_exception(const RiscvGPRS* regs, uint32_t se
 }
 
 uint32_t handle_breakpoint_exception(const RiscvGPRS* regs, uint32_t sepc) {
-    // TODO: ??
-    return sepc;
+    sched_run_scheduler(regs, sepc+4);
+    return sepc; // won't get here
 }
 
 uint32_t handle_load_address_misaligned_exception(const RiscvGPRS* regs, uint32_t sepc) {

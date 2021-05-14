@@ -8,6 +8,9 @@
 void sys_ecall() {
     __asm__("ecall");
 }
+void sys_ebreak() {
+    __asm__("ebreak");
+}
 void sys_kassert(bool condition) {
     if (!condition)
         sys_panic("assertion failed");

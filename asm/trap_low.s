@@ -3,6 +3,9 @@
 .section .text
 supervisor_trap:
     mv tp,sp
+    # switch to kernel stack
+    # TODO: define per task kernel stack
+    mv sp,gp
     addi sp,sp,-116
     sw ra,0(sp)
     sw tp,4(sp)

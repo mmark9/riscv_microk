@@ -66,9 +66,17 @@ struct thread_tcb* sched_dequeue() {
         return 0;
     sys_kassert(run_queue->head.next != 0);
     struct thread_tcb* thread = run_queue->head.next;
-    run_queue->head.next = thread->next;
-    run_queue->head.next->prev = run_queue->tail;
-    return 0;
+    run_queue->count -= 1;
+    if (run_queue->count == 0) {
+        run_queue->head.next = 0;
+        run_queue->tail = 0;
+    } else {
+        run_queue->head.next = thread->next;
+        run_queue->head.next->prev = &run_queue->head;
+    }
+    thread->next = 0;
+    thread->prev = 0;
+    return thread;
 }
 
 struct thread_tcb* sched_peek() {
@@ -91,8 +99,21 @@ void sched_init() {
 
 void sched_thread_exit() {
     sys_kassert(sched_state.initialized);
-    kprintf("sched > exit: thread %d exiting...\n", current_thread->thread_id);
-    schedule();
+    kprintf("sched [exit]: thread %d exiting...\n",
+            current_thread->thread_id);
+    current_thread->flagged_delete = true;
+    sys_ebreak();
+}
+
+void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+    if (current_thread != 0 && current_thread->flagged_delete) {
+        kprintf("sched: cleaning up thread %d\n",
+                current_thread->thread_id);
+        kfree((void*)current_thread->k_stack_ptr);
+        kfree(current_thread);
+        current_thread = 0;
+    }
+    schedule(regs, old_pc);
 }
 
 
@@ -103,7 +124,10 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     tcb->entry_pc = (uint32_t)func;
     tcb->thread_id = sched_state.thread_id_counter++;
     tcb->regs.x1_ra = (uint32_t)sched_thread_exit;
-    tcb->regs.x2_sp = (uint32_t)kmalloc(STACK_SIZE);
+    uint32_t stack_region = (uint32_t)kmalloc(STACK_SIZE);
+    tcb->k_stack_ptr = stack_region;
+    tcb->regs.x2_sp = stack_region + STACK_SIZE;
+    tcb->flagged_delete = false;
 }
 
 void sched_cleanup_thread(struct thread_tcb* tcb) {
@@ -123,16 +147,18 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     struct thread_tcb* tmp = sched_dequeue();
     if (tmp != 0 && current_thread != 0) {
         uint32_t old_thread_id = current_thread->thread_id;
-        kprintf("sched: switching from thread %d to thread id\n",
+        kprintf("sched: switching from thread %d to thread %d\n",
                 old_thread_id, tmp->thread_id);
         // save the old context
-        sched_save_thread_context(regs, old_pc);
+        if (regs != 0)
+            sched_save_thread_context(regs, old_pc);
     } else if (tmp != 0) {
         kprintf("sched: switching to thread %d\n",
                 tmp->thread_id);
     } else {
         sys_panic("scheduler could not find new thread to run");
     }
+    sepc_w_csr(tmp->pc);
     current_thread = tmp;
     load_context(&tmp->regs);
 }

@@ -25,11 +25,14 @@ typedef struct thread_tcb {
     uint32_t root_page;
     struct thread_tcb* next;
     struct thread_tcb* prev;
+    // for testing
+    bool flagged_delete;
 } KThread;
 
 void sched_init();
-void schedule();
+void schedule(const RiscvGPRS* prev_context, uint32_t pc);
 void sched_init_thread(struct thread_tcb* tcb, void* func);
+void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc);
 void sched_enqueue(struct thread_tcb* thread);
 
 #endif //RISCV_MICROK_SCHED_H

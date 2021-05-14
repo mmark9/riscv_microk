@@ -15,6 +15,7 @@ const char* BANNER = " _____ ___  ___ ___ ___  __   __  _  _____ ___ _  _ ___ _ 
                      "   |_| |_|_\\|___/___\\___|   \\_/   |_|\\_\\___|_|_\\_|\\_|___|____|\n"
                      "                                                              \n";
 
+extern struct thread_tcb* current_thread;
 
 void print_banner() {
     kputs("\n\n");
@@ -22,20 +23,26 @@ void print_banner() {
 }
 
 void thread_func1() {
-    for (uint32_t i = 0; i < 100; i++) {
-        kputs("running in thread 1...\n");
+    for (uint32_t i = 0; i < 40; i++) {
+        kprintf("thread %d: executing iteration %d...\n",
+                current_thread->thread_id, i);
         // hacky yield
-        if (i % 20 == 0)
-            sys_ecall();
+        if (i % 20 == 0) {
+            sched_enqueue(current_thread);
+            sys_ebreak();
+        }
     }
 }
 
 void thread_func2() {
-    for (uint32_t i = 0; i < 200; i++) {
-        kputs("running in thread 2...\n");
+    for (uint32_t i = 0; i < 50; i++) {
+        kprintf("thread %d: executing iteration %d...\n",
+                current_thread->thread_id, i);
         // hacky yield
-        if (i % 10 == 0)
-            sys_ecall();
+        if (i % 10 == 0) {
+            sched_enqueue(current_thread);
+            sys_ebreak();
+        }
     }
 }
 
@@ -94,6 +101,7 @@ void kernel_main(
     sched_init_thread(&thread2, thread_func2);
     sched_enqueue(&thread1);
     sched_enqueue(&thread2);
+    sys_ebreak();
     // at this point we either jump to another thread
     // or just wait for the timer interrupt to fire
     while (true) {

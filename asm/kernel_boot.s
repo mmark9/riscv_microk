@@ -27,6 +27,7 @@ kernel_boot:
 	# TODO: avoid hard coding
 	li a1, 0x87000000
 	la sp,kernel_stack_bottom
+	mv gp,sp
 	# call main
 	call kernel_main
 halt:
