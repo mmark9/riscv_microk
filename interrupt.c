@@ -125,6 +125,7 @@ uint32_t handle_supervisor_software_interrupt(const RiscvGPRS* regs, uint32_t se
 
 uint32_t handle_user_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: ??
+    return sepc;
 }
 
 uint32_t handle_supervisor_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
@@ -133,10 +134,12 @@ uint32_t handle_supervisor_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc)
 
 uint32_t handle_user_external_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: handle possible device driver interrupt
+    return sepc;
 }
 
 uint32_t handle_supervisor_external_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: handle possible device driver interrupt
+    return sepc;
 }
 
 uint32_t (*trap_handlers[24]) (const RiscvGPRS *, uint32_t);
