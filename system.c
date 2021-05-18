@@ -76,6 +76,9 @@ void sys_disable_supervisor_software_interrupts() {
     uint32_t new_sie = sie_set_ssie(sie, 0U);
     sie_w_csr(new_sie);
 }
+uint64_t sys_time() {
+    return time_r_csr();
+}
 bool sys_supervisor_interrupts_enabled() {
     uint32_t sstatus = sstatus_r_csr();
     return sstatus_sie(sstatus) == 1;
