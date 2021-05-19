@@ -3,6 +3,8 @@
 #include "system.h"
 #include "interrupt.h"
 #include "sbi_relay.h"
+#include "constants.h"
+#include "time.h"
 #include "memory.h"
 #include "page_frame.h"
 
@@ -42,6 +44,18 @@ void thread_func2() {
         if (i % 10 == 0) {
             sched_enqueue(current_thread);
             sys_ebreak();
+        }
+    }
+}
+
+void thread_func3() {
+    uint32_t accumulator = 0;
+    for (uint32_t i = 0;; i++) {
+        if (i % 100 == 0) {
+            kprintf("thread %d: executing "
+                    "preemptive thread (iter: %d)...\n",
+                    current_thread->thread_id, i);
+            accumulator += i;
         }
     }
 }
@@ -97,11 +111,12 @@ void kernel_main(
     kputs("system: initializing scheduler\n");
     sched_init();
     kputs("system: starting first thread\n");
-    sched_init_thread(&thread1, thread_func1);
-    sched_init_thread(&thread2, thread_func2);
+    sched_init_thread(&thread1, thread_func3);
+    sched_init_thread(&thread2, thread_func3);
     sched_enqueue(&thread1);
     sched_enqueue(&thread2);
-    sys_ebreak();
+    time_capture_boot_time();
+    time_schedule_next_timer(TIMER_TICK_INTERVAL);
     // at this point we either jump to another thread
     // or just wait for the timer interrupt to fire
     while (true) {

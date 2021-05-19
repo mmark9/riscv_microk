@@ -18,8 +18,6 @@ void sys_enable_supervisor_external_interrupts();
 void sys_disable_supervisor_external_interrupts();
 void sys_enable_supervisor_software_interrupts();
 void sys_disable_supervisor_software_interrupts();
-void sys_set_timer(uint64_t expire_time);
-uint64_t sys_time();
 bool sys_supervisor_interrupts_enabled();
 bool sys_supervisor_timer_interrupts_enabled();
 bool sys_supervisor_software_interrupts_enabled();

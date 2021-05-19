@@ -25,17 +25,6 @@ void sys_shutdown() {
     sbi_relay_system_reset(SBI_SHUTDOWN,
                            SBI_RESET_NO_REASON);
 }
-void sys_set_timer(uint64_t expire_time) {
-    uint64_t time = time_r_csr();
-    uint64_t new_time = time + expire_time;
-    struct sbiret timer_res = sbi_relay_set_timer(new_time);
-    sys_kassert(timer_res.error == SBI_SUCCESS);
-}
-void sys_stop_timer() {
-    uint64_t new_time = -1ULL;
-    struct sbiret timer_res = sbi_relay_set_timer(new_time);
-    sys_kassert(timer_res.error == SBI_SUCCESS);
-}
 void sys_enable_supervisor_interrupts() {
     uint32_t sstatus = sstatus_r_csr();
     uint32_t new_sstatus = sstatus_set_sie(sstatus, 1U);
@@ -75,9 +64,6 @@ void sys_disable_supervisor_software_interrupts() {
     uint32_t sie = sie_r_csr();
     uint32_t new_sie = sie_set_ssie(sie, 0U);
     sie_w_csr(new_sie);
-}
-uint64_t sys_time() {
-    return time_r_csr();
 }
 bool sys_supervisor_interrupts_enabled() {
     uint32_t sstatus = sstatus_r_csr();

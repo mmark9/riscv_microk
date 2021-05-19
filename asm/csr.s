@@ -64,6 +64,7 @@ cycle_r_csr:
 .globl time_r_csr
 time_r_csr:
     csrr a0, time
+    csrr a1, timeh
     ret
 
 .globl instret_r_csr
@@ -2276,6 +2277,7 @@ cycle_s_csr:
 .globl time_s_csr
 time_s_csr:
     csrs time, a0
+    csrs timeh, a1
     ret
 
 .globl instret_s_csr
