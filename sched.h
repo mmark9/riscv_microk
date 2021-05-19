@@ -16,7 +16,7 @@ typedef struct thread_tcb {
     int32_t thread_id;
     uint32_t u_stack_ptr;
     uint32_t k_stack_ptr;
-    uint32_t quantum;
+    int32_t quantum;
     uint32_t priority;
     uint32_t entry_pc;
     uint32_t pc;

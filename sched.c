@@ -12,11 +12,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-extern uint64_t trap_elapsed_time;
 
 struct thread_tcb idle_thread;
 struct thread_tcb* old_thread;
 struct thread_tcb* current_thread;
+
+uint32_t sched_time_msecs = 0;
+uint32_t sched_cap_time_msecs = 0;
 
 typedef struct {
     KThread head;
@@ -97,6 +99,7 @@ void sched_init() {
     sched_state.run_queue.tail = 0;
     sched_state.initialized = true;
     sched_state.thread_id_counter = 0;
+    sched_cap_time_msecs = time_msecs_since_boot();
 }
 
 void sched_thread_exit() {
@@ -105,6 +108,15 @@ void sched_thread_exit() {
             current_thread->thread_id);
     current_thread->flagged_delete = true;
     sys_ebreak();
+}
+
+void sched_update_thread_quantum(struct thread_tcb* tcb) {
+    if (current_thread == 0) {
+        kputs("sched: current_thread is null!\n");
+        sys_kassert(current_thread != 0);
+    }
+    int32_t delta = time_msecs_since_boot() - sched_cap_time_msecs;
+    tcb->quantum -= delta;
 }
 
 void sched_do_thread_cleanup() {
@@ -124,9 +136,19 @@ void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
 
 void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
     sched_do_thread_cleanup();
-    if (current_thread != 0)
-        sched_enqueue(current_thread);
-    schedule(regs, old_pc);
+    if (current_thread != 0) {
+        sched_update_thread_quantum(current_thread);
+        if (current_thread->quantum <= 0) {
+            kprintf("sched: preempting thread %d due to time slice\n",
+                    current_thread->thread_id);
+            current_thread->quantum = TASK_TIME_SLICE;
+            sched_enqueue(current_thread);
+            schedule(regs, old_pc);
+        }
+    } else {
+        schedule(regs, old_pc);
+    }
+    sched_cap_time_msecs = time_msecs_since_boot();
 }
 
 
@@ -141,6 +163,7 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     tcb->k_stack_ptr = stack_region;
     tcb->regs.x2_sp = stack_region + STACK_SIZE;
     tcb->flagged_delete = false;
+    tcb->quantum = TASK_TIME_SLICE;
 }
 
 void sched_cleanup_thread(struct thread_tcb* tcb) {
@@ -152,10 +175,6 @@ void sched_cleanup_thread(struct thread_tcb* tcb) {
 void sched_save_thread_context(const RiscvGPRS* regs, uint32_t old_pc) {
     kmemcpy(&current_thread->regs, regs, sizeof(RiscvGPRS));
     current_thread->pc = old_pc;
-}
-
-void sched_update_thread_quantum(const struct thread_tcb* tcb) {
-
 }
 
 void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
@@ -177,5 +196,7 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     }
     sepc_w_csr(tmp->pc);
     current_thread = tmp;
+    sched_time_msecs = time_msecs_since_boot();
+    sched_cap_time_msecs = sched_time_msecs;
     load_context(&tmp->regs);
 }

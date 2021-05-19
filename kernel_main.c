@@ -51,7 +51,7 @@ void thread_func2() {
 void thread_func3() {
     uint32_t accumulator = 0;
     for (uint32_t i = 0;; i++) {
-        if (i % 100 == 0) {
+        if (i % 10000 == 0) {
             kprintf("thread %d: executing "
                     "preemptive thread (iter: %d)...\n",
                     current_thread->thread_id, i);
