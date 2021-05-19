@@ -1,4 +1,5 @@
 #include "csr.h"
+#include "time.h"
 #include "sched.h"
 #include "system.h"
 #include "kprint.h"
@@ -11,6 +12,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+extern uint64_t trap_elapsed_time;
 
 struct thread_tcb idle_thread;
 struct thread_tcb* old_thread;
@@ -105,7 +107,7 @@ void sched_thread_exit() {
     sys_ebreak();
 }
 
-void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+void sched_do_thread_cleanup() {
     if (current_thread != 0 && current_thread->flagged_delete) {
         kprintf("sched: cleaning up thread %d\n",
                 current_thread->thread_id);
@@ -113,6 +115,17 @@ void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
         kfree(current_thread);
         current_thread = 0;
     }
+}
+
+void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+    sched_do_thread_cleanup();
+    schedule(regs, old_pc);
+}
+
+void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+    sched_do_thread_cleanup();
+    if (current_thread != 0)
+        sched_enqueue(current_thread);
     schedule(regs, old_pc);
 }
 
@@ -139,6 +152,10 @@ void sched_cleanup_thread(struct thread_tcb* tcb) {
 void sched_save_thread_context(const RiscvGPRS* regs, uint32_t old_pc) {
     kmemcpy(&current_thread->regs, regs, sizeof(RiscvGPRS));
     current_thread->pc = old_pc;
+}
+
+void sched_update_thread_quantum(const struct thread_tcb* tcb) {
+
 }
 
 void schedule(const RiscvGPRS* regs, uint32_t old_pc) {

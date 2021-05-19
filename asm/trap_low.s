@@ -40,7 +40,6 @@ supervisor_trap:
     # at this point we should switch stacks
     call supervisor_handle_trap
     lw ra,0(sp)
-    lw tp,4(sp)
     lw t0,8(sp)
     lw t1,12(sp)
     lw t2,16(sp)
@@ -68,5 +67,5 @@ supervisor_trap:
     lw t4,104(sp)
     lw t5,108(sp)
     lw t6,112(sp)
-    addi sp,sp,116
+    lw sp,4(sp)
     sret

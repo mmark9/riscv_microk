@@ -2,12 +2,15 @@
 #include "sched.h"
 #include "kprint.h"
 #include "system.h"
+#include "time.h"
 #include "constants.h"
 #include "bit_utils.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
+
+uint64_t trap_capture_time;
 
 typedef enum {
     INSTRUCTION_ADDRESS_MISALIGNED,
@@ -134,6 +137,11 @@ uint32_t handle_user_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
 }
 
 uint32_t handle_supervisor_timer_interrupt(const RiscvGPRS* regs, uint32_t sepc) {
+    uint32_t uptime_secs = time_secs_since_boot();
+    uint32_t uptime_msecs = time_msecs_since_boot();
+    kprintf("system: uptime: msecs %u | %u second(s)\n", uptime_msecs, uptime_secs);
+    time_schedule_next_timer(TIMER_TICK_INTERVAL);
+    sched_run_rr_scheduler(regs, sepc);
     return sepc;
 }
 

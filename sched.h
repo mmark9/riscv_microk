@@ -34,5 +34,6 @@ void schedule(const RiscvGPRS* prev_context, uint32_t pc);
 void sched_init_thread(struct thread_tcb* tcb, void* func);
 void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc);
 void sched_enqueue(struct thread_tcb* thread);
+void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc);
 
 #endif //RISCV_MICROK_SCHED_H
