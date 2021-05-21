@@ -21,6 +21,9 @@ void sys_kassert(bool condition) {
 void sys_halt() {
     for (;;);
 }
+void sys_tlb_flush_all() {
+    __asm__("sfence.vma zero, zero");
+}
 void sys_panic(const char* reason) {
     kprintf("!!kernel sys_panic!!: %s\n", reason);
     sys_halt();

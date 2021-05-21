@@ -16,6 +16,7 @@ void sys_panic(const char* reason);
 void sys_ecall();
 void sys_ebreak();
 void sys_halt();
+void sys_tlb_flush_all();
 void sys_stop_timer();
 void sys_enable_supervisor_interrupts();
 void sys_disable_supervisor_interrupts();

@@ -172,8 +172,12 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
         sys_kassert(false);
     }
     tcb->root_page = simple_falloc_alloc();
+    sys_kassert(tcb->root_page != 0);
     // we can clone the kernel address space at this point
     // to avoid copying for every switch but this is less flexible
+    // however, its inefficient to clone on every switch so we should
+    // avoid changing kernel address space
+    mem_clone_kernel_address_space(tcb->root_page);
 }
 
 void sched_cleanup_thread(struct thread_tcb* tcb) {
@@ -208,9 +212,9 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     current_thread = tmp;
     sched_time_msecs = time_msecs_since_boot();
     sched_cap_time_msecs = sched_time_msecs;
-    mem_clone_kernel_address_space(current_thread->root_page);
     // at this point we can switch address spaces
-    kprintf("sched: switching to address space of thread %d\n", current_thread->thread_id);
+    kprintf("sched: switching to address space of thread %d\n",
+            current_thread->thread_id);
     page_table_set_root_page(current_thread->root_page);
     load_context(&tmp->regs);
 }

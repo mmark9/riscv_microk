@@ -9,14 +9,7 @@
 
 static bool paging_enabled;
 static uint32_t root_page_table = 0;
-
-bool paging_is_enabled() {
-    return paging_enabled;
-}
-
-void page_table_simple_flush_tlb() {
-    __asm__("sfence.vma zero, zero");
-}
+uint32_t* root_page_ptr = page_table_lv1_ptr;
 
 void page_table_set_root_page(uint32_t table) {
     kprintf("paging: setting root page table to %p table (old value=%p)\n",
@@ -67,7 +60,3 @@ uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid) {
     return sv32_pte(paddr, true, false,
                     false, false, false, valid, false);
 }
-
-
-
-

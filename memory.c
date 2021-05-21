@@ -338,14 +338,18 @@ void mem_clone_kernel_address_space(uint32_t page) {
                                          false, true, false);
     uint32_t* lv1_ptr = page_table_lv1_ptr;
     lv1_ptr[ROOT_PAGE_TABLE_SPARE_INDEX] = spare_pte;
+    sys_tlb_flush_all();
     uint32_t* spare_table_ptr = page_table_lv1_spare_ptr;
     if (kernel_virtual_start_index == 0) {
         kputs("mem [clone]: kernel_virtual_start_index == 0\n");
         sys_kassert(false);
     }
-    kprintf("mem[clone]: cloning kernel address space to page %p...\n", page);
+    kprintf("mem [clone]: cloning kernel address space to page %p...\n", page);
     for (uint32_t i = kernel_virtual_start_index; i < 1024; i++) {
         spare_table_ptr[i] = lv1_ptr[i];
     }
+    // set up recursive maps
+    spare_table_ptr[1023] = sv32_kernel_pte_pointer(page, true);
+    spare_table_ptr[1022] = sv32_kernel_pte(page, true, true, false, true, false);
     lv1_ptr[ROOT_PAGE_TABLE_SPARE_INDEX] = 0;
 }
