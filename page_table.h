@@ -40,9 +40,13 @@
 #define sv32_set_ppn1(pte, v) set_bits(pte, v, 20, 12)
 
 #define page_table_lv1_ptr ((uint32_t*)(1023 << 22 | 1022 << 12))
+// this is used for modifying any physical page within the current
+// address space by simply creating an entry and pointing to the page
+#define page_table_lv1_spare_ptr ((uint32_t*)(1023 << 22 | 1021 << 12))
 #define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 22 | pde_index << 12))
 
 void page_table_simple_flush_tlb();
+void page_table_set_root_page(uint32_t table);
 uint32_t sv32_pte(uint32_t paddr, bool user_access,
                   bool can_read, bool can_write,
                   bool can_exec, bool global,

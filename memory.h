@@ -49,4 +49,6 @@ void setup_kernel_heap(uint32_t heap_base, uint32_t heap_size);
 void mem_setup_page_table(KernelLinkerConfig* config);
 void mem_map_leaf_page(uint32_t phys_addr, uint32_t vaddr, SegmentType seg_type);
 void mem_unmap_leaf_page(uint32_t vaddr);
+void mem_set_kernel_virtual_start_address(uint32_t vbase);
+void mem_clone_kernel_address_space(uint32_t page);
 #endif //RISCV_MICROK_MEMORY_H

@@ -110,16 +110,19 @@ uint32_t handle_ecall_from_supervisor_mode_exception(const RiscvGPRS* regs, uint
 
 uint32_t handle_instruction_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    sys_panic("page fault exception");
     return sepc;
 }
 
 uint32_t handle_load_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    sys_panic("page fault exception");
     return sepc;
 }
 
 uint32_t handle_store_amo_page_fault_exception(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    sys_panic("page fault exception");
     return sepc;
 }
 

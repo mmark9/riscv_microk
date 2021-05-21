@@ -6,8 +6,10 @@
 #include "system.h"
 #include "kmalloc.h"
 #include "utils.h"
+#include "page_table.h"
 #include "interrupt.h"
 #include "constants.h"
+#include "simple_falloc.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -164,6 +166,14 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     tcb->regs.x2_sp = stack_region + STACK_SIZE;
     tcb->flagged_delete = false;
     tcb->quantum = TASK_TIME_SLICE;
+    if (simple_falloc_free_count() == 0) {
+        kprintf("sched [create_thread]: no frames "
+                "available for thread %d address space\n", tcb->thread_id);
+        sys_kassert(false);
+    }
+    tcb->root_page = simple_falloc_alloc();
+    // we can clone the kernel address space at this point
+    // to avoid copying for every switch but this is less flexible
 }
 
 void sched_cleanup_thread(struct thread_tcb* tcb) {
@@ -198,5 +208,9 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     current_thread = tmp;
     sched_time_msecs = time_msecs_since_boot();
     sched_cap_time_msecs = sched_time_msecs;
+    mem_clone_kernel_address_space(current_thread->root_page);
+    // at this point we can switch address spaces
+    kprintf("sched: switching to address space of thread %d\n", current_thread->thread_id);
+    page_table_set_root_page(current_thread->root_page);
     load_context(&tmp->regs);
 }

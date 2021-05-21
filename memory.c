@@ -6,6 +6,11 @@
 #include "page_table.h"
 #include "page_frame.h"
 
+// need to remember where the first entry
+// begins for cloning purposes
+// Zero is always assumed to be invalid
+uint32_t kernel_virtual_start_index = 0;
+
 uint64_t memory_range_from_device_tree(const void* devtree) {
     DeviceTreeContext ctx;
     uint32_t res = devtree_load_context(devtree, &ctx);
@@ -29,8 +34,6 @@ uint64_t memory_range_from_device_tree(const void* devtree) {
     ret |= word3;
     return ret;
 }
-
-
 
 void setup_memory_subsystem(uint32_t load_addr,
                             uint32_t mem_base,
@@ -63,8 +66,6 @@ void map_kernel_higher_half(uint32_t load_addr,
     }
     // tlb flush?
 }
-
-
 
 void map_device_tree_area(uint32_t device_tree_addr) {
     // for now we will just map the device tree area 1:1
@@ -291,7 +292,12 @@ void mem_placement_map_segment(uint32_t p_start,
     uint32_t nr_pages_needed = size / FRAME_SIZE;
     uint32_t page_count_remain = size % FRAME_SIZE;
     nr_pages_needed = page_count_remain > 0 ? nr_pages_needed + 1 : nr_pages_needed;
+    kprintf("mem: creating %u mappings for segment type %d\n", nr_pages_needed, type);
     mem_placement_map_segment_low(v_start, p_start, nr_pages_needed, type);
+}
+
+void mem_set_kernel_virtual_start_address(uint32_t address) {
+    kernel_virtual_start_index = sv32_vpn1(address);
 }
 
 uint32_t mem_size_in_pages(uint32_t bytes) {
@@ -325,4 +331,21 @@ void mem_setup_page_table(KernelLinkerConfig* config) {
     uint32_t kernel_bss_size = config->kernel_bss_end - config->kernel_bss_begin + FRAME_SIZE;
     mem_placement_map_segment(config->kernel_data_begin, bss_v_addr, kernel_bss_size, DATA_SEGMENT);
     // TODO: map heap?
+}
+
+void mem_clone_kernel_address_space(uint32_t page) {
+    uint32_t spare_pte = sv32_kernel_pte(page, true, true,
+                                         false, true, false);
+    uint32_t* lv1_ptr = page_table_lv1_ptr;
+    lv1_ptr[ROOT_PAGE_TABLE_SPARE_INDEX] = spare_pte;
+    uint32_t* spare_table_ptr = page_table_lv1_spare_ptr;
+    if (kernel_virtual_start_index == 0) {
+        kputs("mem [clone]: kernel_virtual_start_index == 0\n");
+        sys_kassert(false);
+    }
+    kprintf("mem[clone]: cloning kernel address space to page %p...\n", page);
+    for (uint32_t i = kernel_virtual_start_index; i < 1024; i++) {
+        spare_table_ptr[i] = lv1_ptr[i];
+    }
+    lv1_ptr[ROOT_PAGE_TABLE_SPARE_INDEX] = 0;
 }

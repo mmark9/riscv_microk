@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "time.h"
 #include "memory.h"
+#include "simple_falloc.h"
 #include "page_frame.h"
 
 #include <stdint.h>
@@ -99,6 +100,9 @@ void kernel_main(
     init_frame_bitmap_from_linker_config(&linker_config);
     kprintf("boot: setting up higher half of address space...\n");
     mem_setup_page_table(&linker_config);
+    kputs("system: setting up page frame allocator...\n");
+    simple_falloc_init_from_frame_bitmap(mem_base, mem_size);
+    mem_set_kernel_virtual_start_address(linker_config.kernel_virtual_base);
     // TODO: make heap setup flexible
     uint32_t kheap_size = (0x1U << 20U); // 1MiB
     uint32_t kheap_start = linker_config.kernel_virtual_base +

@@ -1,4 +1,5 @@
 #include "csr.h"
+#include "kprint.h"
 #include "constants.h"
 #include "bit_utils.h"
 #include "page_table.h"
@@ -7,7 +8,7 @@
 
 
 static bool paging_enabled;
-static uint32_t* page_table_current_lvl1;
+static uint32_t root_page_table = 0;
 
 bool paging_is_enabled() {
     return paging_enabled;
@@ -15,6 +16,17 @@ bool paging_is_enabled() {
 
 void page_table_simple_flush_tlb() {
     __asm__("sfence.vma zero, zero");
+}
+
+void page_table_set_root_page(uint32_t table) {
+    kprintf("paging: setting root page table to %p table (old value=%p)\n",
+            table, root_page_table);
+    root_page_table = table;
+    uint32_t old_satp = satp_r_csr();
+    uint32_t ppn = table / FRAME_SIZE;
+    // TODO: utilize ASID
+    uint32_t new_satp = satp_set_ppn(old_satp, ppn);
+    satp_w_csr(new_satp);
 }
 
 uint32_t sv32_pte(uint32_t paddr, bool user_access,
