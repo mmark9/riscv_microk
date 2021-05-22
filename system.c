@@ -79,7 +79,7 @@ void sys_initialize_privilege_mode_status() {
 }
 void sys_prepare_switch_to_user() {
     uint32_t ssatus = sstatus_r_csr();
-    uint32_t mpp = sstatus_spp(ssatus);
+    uint32_t spp = sstatus_spp(ssatus);
     uint32_t new_sstatus = sstatus_set_spp(ssatus, 0);
     sstatus_w_csr(new_sstatus);
     // Note this won't be accurate until a return interrupt
