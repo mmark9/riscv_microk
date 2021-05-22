@@ -33,5 +33,7 @@ bool sys_supervisor_interrupts_enabled();
 bool sys_supervisor_timer_interrupts_enabled();
 bool sys_supervisor_software_interrupts_enabled();
 bool sys_supervisor_external_interrupts_enabled();
+int32_t sys_core_id();
+void sys_set_core_id(int32_t core_id);
 
 #endif //RISCV_MICROK_SYSTEM_H

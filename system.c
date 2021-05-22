@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 
+int32_t current_core_id = -1;
 PrivilegeMode sys_privilege_mode;
 PrivilegeMode sys_previous_privilege_mode;
 
@@ -108,4 +109,10 @@ bool sys_supervisor_software_interrupts_enabled() {
 bool sys_supervisor_external_interrupts_enabled() {
     uint32_t sie = sie_r_csr();
     return sie_seie(sie) == 1;
+}
+int32_t sys_core_id() {
+    return current_core_id;
+}
+void sys_set_core_id(int32_t core_id) {
+    current_core_id = core_id;
 }
