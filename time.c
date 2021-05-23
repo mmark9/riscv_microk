@@ -15,7 +15,7 @@ uint32_t time_secs_since_boot() {
 uint32_t time_msecs_since_boot() {
     uint64_t new_time_hz = time_r_csr();
     uint64_t delta_hz = new_time_hz - boot_hz_cap;
-    uint32_t ms = delta_hz / (TIMER_FREQUENCY_BASE / 100);
+    uint32_t ms = delta_hz / TIMER_CYCLES_PER_MSEC;
     return ms;
 }
 
