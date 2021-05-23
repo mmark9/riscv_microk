@@ -126,7 +126,11 @@ void sched_do_thread_cleanup() {
         kprintf("sched: cleaning up thread %d\n",
                 current_thread->thread_id);
         kfree((void*)current_thread->k_stack_ptr);
-        kfree(current_thread);
+        // TODO: find a way to clean up thread objects
+        // threads may be allocated on the stack which should not
+        // be tied to the heap pool; alternatively kfree() should
+        // avoid freeing non-heap memory
+        //kfree(current_thread);
         current_thread = 0;
     }
 }
