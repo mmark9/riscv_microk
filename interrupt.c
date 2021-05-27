@@ -3,6 +3,7 @@
 #include "kprint.h"
 #include "system.h"
 #include "time.h"
+#include "syscalls.h"
 #include "constants.h"
 #include "bit_utils.h"
 
@@ -74,8 +75,10 @@ uint32_t handle_illegal_instruction_exception(const RiscvGPRS* regs, uint32_t se
 }
 
 uint32_t handle_breakpoint_exception(const RiscvGPRS* regs, uint32_t sepc) {
-    sched_run_scheduler(regs, sepc+4);
-    return sepc; // won't get here
+    // handle system call emulation for supervisor mode
+    time_schedule_next_timer(TIMER_TICK_INTERVAL);
+    uint32_t new_sepc = syscall_execute(regs, sepc);
+    return new_sepc;
 }
 
 uint32_t handle_load_address_misaligned_exception(const RiscvGPRS* regs, uint32_t sepc) {
