@@ -14,13 +14,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-
 struct thread_tcb idle_thread;
 struct thread_tcb* old_thread;
 struct thread_tcb* current_thread;
 
 uint32_t sched_time_msecs = 0;
 uint32_t sched_cap_time_msecs = 0;
+
+struct thread_tcb* thread_table[MAX_NUM_THREADS];
 
 typedef struct {
     KThread head;
@@ -31,8 +32,9 @@ typedef struct {
 // LOCK CANDIDATE
 typedef struct {
     SchedQueue run_queue;
+    SchedQueue block_queue;
     bool initialized;
-    uint32_t thread_id_counter;
+    int32_t thread_id_counter;
 } SchedState;
 
 SchedState sched_state;
@@ -63,6 +65,7 @@ void sched_enqueue(struct thread_tcb* thread) {
         run_queue->tail = thread;
     }
     run_queue->count += 1;
+    thread->state = KTHREAD_READY_TO_RUN;
 }
 
 struct thread_tcb* sched_dequeue() {
@@ -182,6 +185,7 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     // however, its inefficient to clone on every switch so we should
     // avoid changing kernel address space
     mem_clone_kernel_address_space(tcb->root_page);
+    thread_table[tcb->thread_id] = tcb;
 }
 
 void sched_cleanup_thread(struct thread_tcb* tcb) {
@@ -221,4 +225,93 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
             current_thread->thread_id);
     page_table_set_root_page(current_thread->root_page);
     load_context(&tmp->regs);
+}
+
+struct thread_tcb* sched_find_blocked_thread(int32_t thread_id) {
+    sys_kassert(sched_state.initialized);
+    SchedQueue* block_queue = &sched_state.block_queue;
+    if (block_queue->count == 0)
+        return 0;
+    sys_kassert(block_queue->head.next != 0);
+    struct thread_tcb* thread = block_queue->head.next;
+    do {
+        if (thread->thread_id == thread_id)
+            return thread;
+        thread = thread->next;
+    } while (thread != &block_queue->head);
+    return 0;
+}
+
+bool sched_thread_is_blocked(int32_t thread_id) {
+    struct thread_tcb* tmp = sched_find_blocked_thread(thread_id);
+    return tmp != 0;
+}
+
+void sched_enqueue_blocked_thread(struct thread_tcb* thread) {
+    sys_kassert(thread != 0);
+    SchedQueue* block_queue = &sched_state.block_queue;
+    if (thread->state == KTHREAD_BLOCKED) {
+        kprintf("sched [block]: thread %d is already blocked\n",
+                current_thread->thread_id);
+        return;
+    }
+    kprintf("sched [block]: thread %d is now blocked\n",
+            thread->thread_id);
+    if (block_queue->head.next == 0) {
+        block_queue->head.next = thread;
+        thread->prev = &block_queue->head;
+        thread->next = &block_queue->head;
+        block_queue->tail = thread;
+    } else {
+        block_queue->tail->next = thread;
+        thread->prev = block_queue->tail;
+        thread->next = &block_queue->head;
+        block_queue->head.prev = thread;
+        block_queue->tail = thread;
+    }
+    block_queue->count += 1;
+    thread->state = KTHREAD_BLOCKED;
+}
+
+void sched_dequeue_blocked_thread(struct thread_tcb* thread) {
+    thread->prev->next = thread->next;
+    thread->next->prev = thread->prev;
+    thread->next = thread->prev = 0;
+    SchedQueue* block_queue = &sched_state.block_queue;
+    block_queue->count -= 1;
+    if (block_queue->count == 0) {
+        block_queue->head.next = 0;
+        block_queue->tail = 0;
+    }
+}
+
+void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
+    sys_kassert(sched_state.initialized);
+    kprintf("sched [block]: blocking thread %u\n",
+            current_thread->thread_id);
+    sched_enqueue_blocked_thread(current_thread);
+    // switch to another thread
+    schedule(regs, next_pc);
+}
+
+bool sched_unblock_thread(int32_t thread_id) {
+    sys_kassert(sched_state.initialized);
+    struct thread_tcb* thread = sched_find_blocked_thread(thread_id);
+    if (thread == 0) {
+        kprintf("sched [unblock]: could not find thread %u in block queue\n", thread_id);
+        return false;
+    }
+    sched_dequeue_blocked_thread(thread);
+    kprintf("sched [unblock]: adding thread %u to run queue\n", thread_id);
+    sched_enqueue(thread);
+    return true;
+}
+
+struct thread_tcb* sched_lookup_thread(int32_t thread_id) {
+    if (thread_id >= MAX_NUM_THREADS) {
+        kprintf("sched [lookup]: thread id %d of range [0, %u]\n",
+                thread_id, MAX_NUM_THREADS);
+        return 0;
+    }
+    return thread_table[thread_id];
 }
