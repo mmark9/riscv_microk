@@ -147,6 +147,17 @@ int32_t ipc_async_recv_msg(const RiscvGPRS* regs, uint32_t sepc) {
     }
     struct ipc_msg* msg = ipc_pop_msg(buf);
     kmemcpy((void*)msg_out, (void*)msg, sizeof(struct ipc_msg));
+    if (current_thread->send_queue.count > 0) {
+        kprintf("ipc [recv]: thread %u waking up %d blocked sending threads\n",
+                current_thread->thread_id, current_thread->send_queue.count);
+        struct thread_tcb* tmp_tcb = 0;
+        while (current_thread->send_queue.count > 0) {
+            tmp_tcb = ipc_dequeue_wait_write(current_thread->thread_id);
+            kprintf("ipc [recv]: thread %u waking up blocked thread %u\n",
+                    current_thread->thread_id, tmp_tcb->thread_id);
+            sched_unblock_thread(tmp_tcb->thread_id);
+        }
+    }
     return 0;
 }
 
