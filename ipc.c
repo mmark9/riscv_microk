@@ -113,7 +113,7 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
     struct ipc_msg* msg = (struct ipc_msg*)regs->x10_a0;
     tmp_buf = ipc_map_dst_buffer(msg->dest);
     sys_kassert(tmp_buf != 0);
-    if (ipc_msg_buffer_full(tmp_buf)) {
+    while (ipc_msg_buffer_full(tmp_buf)) {
         kprintf("ipc [send]: thread %u msg queue full\n", msg->dest);
         kprintf("ipc [send]: sending thread %u is now blocked\n",
                 current_thread->thread_id);
