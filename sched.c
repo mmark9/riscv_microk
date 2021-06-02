@@ -167,10 +167,10 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     tcb->pc = (uint32_t)func;
     tcb->entry_pc = (uint32_t)func;
     tcb->thread_id = sched_state.thread_id_counter++;
-    tcb->regs.x1_ra = (uint32_t)sched_thread_exit;
+    tcb->user_context.regs.x1_ra = (uint32_t)sched_thread_exit;
     uint32_t stack_region = (uint32_t)kmalloc(STACK_SIZE);
     tcb->k_stack_ptr = stack_region;
-    tcb->regs.x2_sp = stack_region + STACK_SIZE;
+    tcb->user_context.regs.x2_sp = stack_region + STACK_SIZE;
     tcb->flagged_delete = false;
     tcb->quantum = TASK_TIME_SLICE;
     if (simple_falloc_free_count() == 0) {
@@ -191,12 +191,7 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
 void sched_cleanup_thread(struct thread_tcb* tcb) {
     sys_kassert(tcb != 0);
     sys_kassert(sched_state.initialized);
-    kfree((void*)tcb->regs.x2_sp);
-}
-
-void sched_save_thread_context(const RiscvGPRS* regs, uint32_t old_pc) {
-    kmemcpy(&current_thread->regs, regs, sizeof(RiscvGPRS));
-    current_thread->pc = old_pc;
+    kfree((void*)tcb->user_context.regs.x2_sp);
 }
 
 void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
@@ -209,7 +204,7 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
                 old_thread_id, tmp->thread_id);
         // save the old context
         if (regs != 0)
-            sched_save_thread_context(regs, old_pc);
+            context_save_thread_context(&current_thread->user_context, regs, old_pc);
     } else if (tmp != 0) {
         kprintf("sched: switching to thread %d\n",
                 tmp->thread_id);
@@ -224,7 +219,11 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     kprintf("sched: switching to address space of thread %d\n",
             current_thread->thread_id);
     page_table_set_root_page(current_thread->root_page);
-    load_context(&tmp->regs);
+    if (current_thread->state == KTHREAD_BLOCKED) {
+        current_thread->state = KTHREAD_KERNEL_RUNNING;
+        load_context(&tmp->kernel_context.regs);
+    } else
+        load_context(&tmp->user_context.regs);
 }
 
 struct thread_tcb* sched_find_blocked_thread(int32_t thread_id) {
@@ -289,6 +288,7 @@ void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
     sys_kassert(sched_state.initialized);
     kprintf("sched [block]: blocking thread %u\n",
             current_thread->thread_id);
+    current_thread->state = KTHREAD_BLOCKED;
     sched_enqueue_blocked_thread(current_thread);
     // switch to another thread
     schedule(regs, next_pc);

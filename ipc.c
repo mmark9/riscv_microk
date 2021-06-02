@@ -120,7 +120,12 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
         // place in waiting queue before sending msg
         // block process (this is a scheduler operation)
         ipc_enqueue_wait_write(msg->dest);
-        sched_block_thread(regs, sepc+4);
+        // save kernel thread context
+        context_save_imm_thread_context(
+                current_thread->kernel_context,
+                &&IPC_SEND_CONT)
+        sched_block_thread(regs, sepc);
+        IPC_SEND_CONT:;
     }
     ipc_push_msg(msg, tmp_buf);
     // check if a thread was waiting for a message

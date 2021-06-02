@@ -23,7 +23,8 @@ typedef struct thread_tcb {
     uint32_t priority;
     uint32_t entry_pc;
     uint32_t pc;
-    RiscvGPRS regs;
+    ThreadContext user_context;
+    ThreadContext kernel_context;
     KThreadState state;
     uint32_t root_page;
     struct thread_tcb* next;

@@ -1,7 +1,6 @@
 #ifndef RISCV_MICROK_CONTEXT_H
 #define RISCV_MICROK_CONTEXT_H
 
-#define NR_CONTEXT_LAYERS 5
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -38,13 +37,51 @@ typedef struct {
     uint32_t x31_t6;
 } RiscvGPRS;
 
-typedef struct {
-    RiscvGPRS gprs;
-    uint32_t kernel_stack;
-} ContextLayer;
+typedef struct thread_context {
+    RiscvGPRS regs;
+    uint32_t pc;
+} ThreadContext;
 
-bool context_layer_stack_full();
-bool context_push_layer(RiscvGPRS* gprs, uint32_t kernel_stack);
-void context_pop_layer();
+#define context_save_imm_thread_context(context,next_pc) \
+{ \
+    __asm__("mv tp, %0;" \
+       "sw ra, 0(tp);"    \
+       "sw sp, 4(tp);"    \
+       "sw t0, 8(tp);"    \
+       "sw t1, 12(tp);"   \
+       "sw t2, 16(tp);"   \
+       "sw s0, 20(tp);"   \
+       "sw s1, 24(tp);"   \
+       "sw a0, 28(tp);"   \
+       "sw a1, 32(tp);"   \
+       "sw a2, 36(tp);"   \
+       "sw a3, 40(tp);"   \
+       "sw a4, 44(tp);"   \
+       "sw a5, 48(tp);"   \
+       "sw a6, 52(tp);"   \
+       "sw a7, 56(tp);"   \
+       "sw s2, 60(tp);"   \
+       "sw s3, 64(tp);"   \
+       "sw s4, 68(tp);"   \
+       "sw s5, 72(tp);"   \
+       "sw s6, 76(tp);"   \
+       "sw s7, 80(tp);"   \
+       "sw s8, 84(tp);"   \
+       "sw s9, 88(tp);"   \
+       "sw s10, 92(tp);"  \
+       "sw s11, 96(tp);"  \
+       "sw t3, 100(tp);"  \
+       "sw t4, 104(tp);"  \
+       "sw t5, 108(tp);"  \
+       "sw t6, 112(tp);"  \
+       : /* no output */  \
+       : "r" (&(context).regs)       \
+       : "tp");            \
+       (context).pc = (uint32_t)(next_pc);    \
+}
+
+void context_save_thread_context(ThreadContext* dest,
+                                 const RiscvGPRS* regs,
+                                 uint32_t old_pc);
 
 #endif //RISCV_MICROK_CONTEXT_H
