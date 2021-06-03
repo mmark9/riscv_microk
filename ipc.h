@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #define NUM_TEST_QUEUES 16
-#define IPC_BUFFER_SIZE 32
+#define IPC_BUFFER_SIZE 4
 #define IPC_MSG_WORD_SIZE 64
 
 

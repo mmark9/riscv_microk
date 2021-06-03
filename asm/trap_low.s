@@ -2,10 +2,28 @@
 .globl supervisor_trap
 .section .text
 supervisor_trap:
-    mv tp,sp
-    # switch to kernel stack
-    # TODO: define per task kernel stack
-    mv sp,gp
+    # if not task is associated
+    # with this thread then simply
+    # use current context
+    beqz tp,push_context
+    # save registers in scratch area
+    sw gp,4(tp)
+    sw t0,8(tp)
+    # load context level
+    lw gp,12(tp)
+    addi gp,gp,1
+    sw gp,12(tp)
+    # save t0 in scratch area
+    li t0,2
+    bge gp,t0,restore_scratch
+switch_to_kernel_stack:
+    # we need to switch to kernel stack
+    sw sp,16(tp)
+    lw sp,20(tp)
+restore_scratch:
+    lw gp,4(tp)
+    lw t0,8(tp)
+push_context:
     addi sp,sp,-116
     sw ra,0(sp)
     sw tp,4(sp)
@@ -39,6 +57,7 @@ supervisor_trap:
     mv a0,sp
     # at this point we should switch stacks
     call supervisor_handle_trap
+return_from_trap_handler:
     lw ra,0(sp)
     lw t0,8(sp)
     lw t1,12(sp)
@@ -67,5 +86,16 @@ supervisor_trap:
     lw t4,104(sp)
     lw t5,108(sp)
     lw t6,112(sp)
-    lw sp,4(sp)
+    addi sp,sp,116
+check_context_level:
+    beqz tp,ret_from_interrupt
+    sw gp,4(tp)
+    # load context level
+    lw gp,12(tp)
+    addi gp,gp,-1
+    sw gp,12(tp)
+    bgtz gp,ret_from_interrupt
+    # load sp for user
+    lw sp,16(tp)
+ret_from_interrupt:
     sret

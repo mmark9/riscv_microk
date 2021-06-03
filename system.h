@@ -28,6 +28,8 @@ void sys_enable_supervisor_software_interrupts();
 void sys_disable_supervisor_software_interrupts();
 void sys_initialize_privilege_mode_status();
 void sys_prepare_switch_to_user();
+void sys_prepare_switch_to_supervisor();
+void sys_disable_interrupts_for_next_context();
 PrivilegeMode sys_target_privilege_mode();
 bool sys_supervisor_interrupts_enabled();
 bool sys_supervisor_timer_interrupts_enabled();
@@ -35,5 +37,6 @@ bool sys_supervisor_software_interrupts_enabled();
 bool sys_supervisor_external_interrupts_enabled();
 int32_t sys_core_id();
 void sys_set_core_id(int32_t core_id);
+void sys_return_from_blocked_status();
 
 #endif //RISCV_MICROK_SYSTEM_H

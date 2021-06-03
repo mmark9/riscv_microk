@@ -126,6 +126,12 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
                 &&IPC_SEND_CONT)
         sched_block_thread(regs, sepc);
         IPC_SEND_CONT:;
+        // if we were blocked then SPP will be set to 0
+        // at this point. This will cause a privilege
+        // switch to the user level which is not what we want
+        // so we manually set SPP after this point
+        // TODO: find a way to minimize calls to this
+        sys_prepare_switch_to_supervisor();
     }
     ipc_push_msg(msg, tmp_buf);
     // check if a thread was waiting for a message
@@ -144,8 +150,18 @@ int32_t ipc_async_recv_msg(const RiscvGPRS* regs, uint32_t sepc) {
     if (buf->count == 0) {
         kprintf("ipc [recv]: thread %u is blocked due to empty msg queue\n",
                 current_thread->thread_id);
-        sched_block_thread(regs, sepc+4);
+        context_save_imm_thread_context(
+                current_thread->kernel_context,
+                &&IPC_RECV_CONT)
+        sched_block_thread(regs, sepc);
+        IPC_RECV_CONT:;
     }
+    // if we were blocked then SPP will be set to 0
+    // at this point. This will cause a privilege
+    // switch to the user level which is not what we want
+    // so we manually set SPP after this point
+    // TODO: find a way to minimize calls to this
+    sys_prepare_switch_to_supervisor();
     if (msg_out == 0) {
         kputs("ipc [recv]: null pointer passed as recv_addr\n");
         return -1;

@@ -42,14 +42,14 @@ uint32_t syscall_exit(RiscvGPRS* regs, uint32_t sepc) {
 uint32_t syscall_ipc_send_async(RiscvGPRS* regs, uint32_t sepc) {
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
-    regs->x10_a0 = ipc_send_async_msg(regs, sepc);
+    regs->x10_a0 = ipc_send_async_msg(regs, sepc+4);
     return sepc+4;
 }
 
 uint32_t syscall_ipc_recv_async(RiscvGPRS* regs, uint32_t sepc) {
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
-    regs->x10_a0 = ipc_async_recv_msg(regs, sepc);
+    regs->x10_a0 = ipc_async_recv_msg(regs, sepc+4);
     return sepc+4;
 }
 

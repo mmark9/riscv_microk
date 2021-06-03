@@ -85,26 +85,30 @@ void thread_func4() {
 void thread_ipc_send_func() {
     int32_t ipc_res = 0;
     struct ipc_msg out_msg;
+    uint32_t elapsed = 0;
     out_msg.src = current_thread->thread_id;
     while (true) {
-        out_msg.data[0] = time_secs_since_boot();
-        out_msg.dest = time_msecs_since_boot() % 3;
-        sys_do_ipc_send_async(&out_msg);
-        if (time_secs_since_boot() % 5 == 0)
+        elapsed = time_secs_since_boot();
+        out_msg.data[0] = time_secs_since_boot() + 0xDEADBEEF;
+        out_msg.dest = 2;
+        ipc_res = sys_do_ipc_send_async(&out_msg);
+        if (elapsed % 50 == 0 && elapsed > 0)
             sys_do_yield();
     }
 }
 
 void thread_ipc_recv_func() {
     int32_t ipc_res = 0;
-    struct ipc_msg* msg;
+    struct ipc_msg msg;
+    uint32_t elapsed = 0;
     while (true) {
-        ipc_res = sys_do_ipc_recv_async(msg);
+        ipc_res = sys_do_ipc_recv_async(&msg);
         if (ipc_res == 0) {
-            kprintf("thread %d: received msg from thread %d\n",
-                    current_thread->thread_id, msg->src);
+            kprintf("thread %d: received msg %u from thread %d\n",
+                    current_thread->thread_id, msg.data[0], msg.src);
         }
-        sys_do_yield();
+        if (elapsed % 100 == 0 && elapsed > 0 )
+            sys_do_yield();
     }
 }
 
@@ -186,9 +190,9 @@ void kernel_main(
     kputs("system: setting up system calls\n");
     syscall_setup_table();
     kputs("system: starting first thread\n");
-    sched_init_thread(&thread1, thread_ipc_func);
-    sched_init_thread(&thread2, thread_ipc_func);
-    sched_init_thread(&thread3, thread_ipc_func);
+    sched_init_thread(&thread1, thread_ipc_send_func);
+    sched_init_thread(&thread2, thread_ipc_send_func);
+    sched_init_thread(&thread3, thread_ipc_recv_func);
     sched_enqueue(&thread1);
     sched_enqueue(&thread2);
     sched_enqueue(&thread3);

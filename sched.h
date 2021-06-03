@@ -17,14 +17,18 @@ typedef enum ThreadStatus {
 
 typedef struct thread_tcb {
     int32_t thread_id;
+    uint32_t scratch1;
+    uint32_t scratch2;
+    uint32_t context_lvl;
+    uint32_t u_stack;
+    uint32_t k_stack;
     uint32_t u_stack_ptr;
     uint32_t k_stack_ptr;
+    ThreadContext user_context;
+    ThreadContext kernel_context;
     int32_t quantum;
     uint32_t priority;
     uint32_t entry_pc;
-    uint32_t pc;
-    ThreadContext user_context;
-    ThreadContext kernel_context;
     KThreadState state;
     uint32_t root_page;
     struct thread_tcb* next;
@@ -33,6 +37,7 @@ typedef struct thread_tcb {
     struct thread_tcb* prev_snd;
     // for testing
     bool flagged_delete;
+    bool blocked_flag;
     struct {
         struct thread_tcb* head;
         struct thread_tcb* tail;
@@ -44,6 +49,7 @@ typedef struct thread_tcb {
 extern KThread* current_thread;
 
 void sched_init();
+void sched_set_current_thread(struct thread_tcb* thread);
 bool sched_thread_is_blocked(int32_t thread_id);
 void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc);
 bool sched_unblock_thread(int32_t thread_id);

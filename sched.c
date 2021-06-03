@@ -105,6 +105,11 @@ void sched_init() {
     sched_state.initialized = true;
     sched_state.thread_id_counter = 0;
     sched_cap_time_msecs = time_msecs_since_boot();
+    __asm__("li tp, 0"
+            : /* no outputs */
+            : /* no inputs */
+            : "tp"
+            );
 }
 
 void sched_thread_exit() {
@@ -164,15 +169,26 @@ void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
 void sched_init_thread(struct thread_tcb* tcb, void* func) {
     sys_kassert(tcb != 0);
     sys_kassert(sched_state.initialized);
-    tcb->pc = (uint32_t)func;
+    tcb->user_context.pc = (uint32_t)func;
     tcb->entry_pc = (uint32_t)func;
     tcb->thread_id = sched_state.thread_id_counter++;
     tcb->user_context.regs.x1_ra = (uint32_t)sched_thread_exit;
-    uint32_t stack_region = (uint32_t)kmalloc(STACK_SIZE);
-    tcb->k_stack_ptr = stack_region;
-    tcb->user_context.regs.x2_sp = stack_region + STACK_SIZE;
+    tcb->k_stack_ptr = (uint32_t)kmalloc(STACK_SIZE);
+    tcb->u_stack_ptr = (uint32_t)kmalloc(STACK_SIZE);
+    sys_kassert(tcb->k_stack_ptr != 0);
+    sys_kassert(tcb->u_stack_ptr != 0);
+    tcb->k_stack = tcb->k_stack_ptr + STACK_SIZE;
+    tcb->u_stack = tcb->u_stack_ptr + STACK_SIZE;
+    tcb->user_context.regs.x2_sp = tcb->u_stack_ptr + STACK_SIZE;
     tcb->flagged_delete = false;
     tcb->quantum = TASK_TIME_SLICE;
+    tcb->send_queue.count = 0;
+    tcb->send_queue.head = 0;
+    tcb->send_queue.tail = 0;
+    tcb->prev_snd = 0;
+    tcb->next_snd = 0;
+    tcb->context_lvl = 0;
+    tcb->blocked_flag = false;
     if (simple_falloc_free_count() == 0) {
         kprintf("sched [create_thread]: no frames "
                 "available for thread %d address space\n", tcb->thread_id);
@@ -211,19 +227,25 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     } else {
         sys_panic("scheduler could not find new thread to run");
     }
-    sepc_w_csr(tmp->pc);
-    current_thread = tmp;
+    sched_set_current_thread(tmp);
     sched_time_msecs = time_msecs_since_boot();
     sched_cap_time_msecs = sched_time_msecs;
     // at this point we can switch address spaces
     kprintf("sched: switching to address space of thread %d\n",
             current_thread->thread_id);
     page_table_set_root_page(current_thread->root_page);
-    if (current_thread->state == KTHREAD_BLOCKED) {
+    if (current_thread->blocked_flag) {
+        sepc_w_csr(current_thread->kernel_context.pc);
+        current_thread->blocked_flag = false;
         current_thread->state = KTHREAD_KERNEL_RUNNING;
+        // prevent interrupts from being enabled
+        // when returning to kernel mode
+        sys_disable_interrupts_for_next_context();
         load_context(&tmp->kernel_context.regs);
-    } else
+    } else {
+        sepc_w_csr(current_thread->user_context.pc);
         load_context(&tmp->user_context.regs);
+    }
 }
 
 struct thread_tcb* sched_find_blocked_thread(int32_t thread_id) {
@@ -249,11 +271,6 @@ bool sched_thread_is_blocked(int32_t thread_id) {
 void sched_enqueue_blocked_thread(struct thread_tcb* thread) {
     sys_kassert(thread != 0);
     SchedQueue* block_queue = &sched_state.block_queue;
-    if (thread->state == KTHREAD_BLOCKED) {
-        kprintf("sched [block]: thread %d is already blocked\n",
-                current_thread->thread_id);
-        return;
-    }
     kprintf("sched [block]: thread %d is now blocked\n",
             thread->thread_id);
     if (block_queue->head.next == 0) {
@@ -285,6 +302,15 @@ void sched_dequeue_blocked_thread(struct thread_tcb* thread) {
 }
 
 void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
+    if (current_thread->state == KTHREAD_BLOCKED) {
+        kprintf("sched [block]: thread %d is already blocked\n",
+                current_thread->thread_id);
+        return;
+    }
+    // set this to signal that the kernel
+    // context should be restored after
+    // unblocking
+    current_thread->blocked_flag = true;
     sys_kassert(sched_state.initialized);
     kprintf("sched [block]: blocking thread %u\n",
             current_thread->thread_id);
@@ -314,4 +340,13 @@ struct thread_tcb* sched_lookup_thread(int32_t thread_id) {
         return 0;
     }
     return thread_table[thread_id];
+}
+
+void sched_set_current_thread(struct thread_tcb* thread) {
+    current_thread = thread;
+    __asm__("mv tp, %0;"
+    : /* no outputs */
+    : "r" (current_thread)
+    : "tp"
+    );
 }

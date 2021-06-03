@@ -81,11 +81,26 @@ void sys_initialize_privilege_mode_status() {
 void sys_prepare_switch_to_user() {
     uint32_t ssatus = sstatus_r_csr();
     uint32_t spp = sstatus_spp(ssatus);
-    uint32_t new_sstatus = sstatus_set_spp(ssatus, 0);
+    uint32_t new_sstatus = sstatus_set_spp(ssatus, USER_MODE);
     sstatus_w_csr(new_sstatus);
     // Note this won't be accurate until a return interrupt
     sys_previous_privilege_mode = sys_privilege_mode;
     sys_privilege_mode = USER_MODE;
+}
+void sys_prepare_switch_to_supervisor() {
+    uint32_t ssatus = sstatus_r_csr();
+    uint32_t spp = sstatus_spp(ssatus);
+    uint32_t new_sstatus = sstatus_set_spp(ssatus, SUPERVISOR_MODE);
+    sstatus_w_csr(new_sstatus);
+    // Note this won't be accurate until a return interrupt
+    sys_previous_privilege_mode = sys_privilege_mode;
+    sys_privilege_mode = SUPERVISOR_MODE;
+}
+void sys_disable_interrupts_for_next_context() {
+    uint32_t sstatus = sstatus_r_csr();
+    uint32_t spie = sstatus_spie(sstatus);
+    uint32_t new_status = sstatus_set_spie(sstatus, 0);
+    sstatus_w_csr(new_status);
 }
 PrivilegeMode sys_target_privilege_mode() {
     // target privilege mode may or may not correspond

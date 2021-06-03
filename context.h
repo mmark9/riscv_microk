@@ -77,7 +77,7 @@ typedef struct thread_context {
        : /* no output */  \
        : "r" (&(context).regs)       \
        : "tp");            \
-       (context).pc = (uint32_t)(next_pc);    \
+       context.pc = (uint32_t)(next_pc);    \
 }
 
 void context_save_thread_context(ThreadContext* dest,
