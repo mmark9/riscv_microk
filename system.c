@@ -26,11 +26,12 @@ void sys_tlb_flush_all() {
     __asm__("sfence.vma zero, zero");
 }
 void sys_panic(const char* reason) {
-    kprintf("!!kernel sys_panic!!: %s\n", reason);
+    kprintf(K_ERROR, "!!kernel sys_panic!!: %s\n", reason);
     sys_halt();
 }
 void sys_shutdown() {
-    kprintf("system: sys_shutdown started\n");
+    kprintf(K_DEBUG,
+            "system: sys_shutdown started\n");
     sbi_relay_system_reset(SBI_SHUTDOWN,
                            SBI_RESET_NO_REASON);
 }

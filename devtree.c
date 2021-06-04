@@ -75,7 +75,7 @@ uint32_t devtree_print_string(const void *blob_ptr) {
     uint32_t len = 0;
     const char *str_ptr = (const char *) (blob_ptr);
     while (*str_ptr != 0) {
-        kprintf("%c", *str_ptr++);
+        kprintf(K_INFO, "%c", *str_ptr++);
         len++;
     }
     return len;
@@ -87,18 +87,18 @@ void devtree_print_chars(const void *blob_ptr, int32_t num_chars) {
     const char *str_ptr = (const char *) (blob_ptr);
     for (uint32_t i = 0; i < num_chars - 1; i++) {
         if (*str_ptr == 0) {
-            kprintf(", ");
+            kprintf(K_INFO, ", ");
             str_ptr++;
             continue;
         }
-        kprintf("%c", *str_ptr++);
+        kprintf(K_INFO, "%c", *str_ptr++);
     }
 }
 
 void print_indent(int32_t level, uint32_t spaces) {
     uint32_t num_spaces = level * spaces;
     for (uint32_t i = 0; i < num_spaces; i++)
-        kprintf(" ");
+        kprintf(K_INFO, " ");
 }
 
 void devtree_load_prop_hdr(DeviceTreePropHdr *hdr_out, const void *blob_ptr) {
@@ -124,13 +124,13 @@ void devtree_print_prop_value(const char *name, uint32_t prop_len, const void *b
     } else {
         uint32_t num_words = prop_len / 4;
         uint32_t *word_ptr = (uint32_t *) blob_ptr;
-        kprintf("<");
+        kprintf(K_INFO, "<");
         for (uint32_t i = 0; i < num_words; i++) {
-            kprintf("0x%08x", big2little_l(*word_ptr++));
+            kprintf(K_INFO, "0x%08x", big2little_l(*word_ptr++));
             if (i + 1 < num_words)
-                kprintf(" ");
+                kprintf(K_INFO, " ");
         }
-        kprintf(">");
+        kprintf(K_INFO, ">");
     }
 }
 
@@ -194,14 +194,14 @@ void devtree_print_all(const void *blob) {
             print_indent(level, 8);
             str_len = devtree_print_string(fdt_struct_ptr + sizeof(uint32_t));
             if (str_len == 0 && level == 0) {
-                kprintf("/");
+                kprintf(K_INFO, "/");
                 fdt_struct_ptr++;
             } else
                 fdt_struct_ptr += str_len;
-            kprintf(" {\n");
+            kprintf(K_INFO, " {\n");
         } else if (token == FDT_END_NODE) {
             print_indent(level, 8);
-            kprintf("};\n");
+            kprintf(K_INFO, "};\n");
             fdt_struct_ptr += sizeof(uint32_t);
             level -= 1;
         } else if (token == FDT_PROP) {
@@ -210,7 +210,7 @@ void devtree_print_all(const void *blob) {
             print_indent(level + 1, 8);
             const char *prop_name = (const char *) blob + header.off_dt_strings + prop_hdr.name_off;
             //devtree_print_string(blob + header.off_dt_strings + prop_hdr.name_off);
-            kprintf("%s = ", prop_name);
+            kprintf(K_INFO, "%s = ", prop_name);
             fdt_struct_ptr += sizeof(DeviceTreePropHdr);
             //devtree_print_chars(fdt_struct_ptr, prop_hdr.len);
             if (streq(prop_name, "#address-cells")) {
@@ -219,7 +219,7 @@ void devtree_print_all(const void *blob) {
                 cur_num_size_cells = big2little_l(*(uint32_t *) fdt_struct_ptr);
             }
             devtree_print_prop_value(prop_name, prop_hdr.len, fdt_struct_ptr);
-            kprintf(";\n");
+            kprintf(K_INFO, ";\n");
             fdt_struct_ptr += prop_hdr.len;
         } else if (token == FDT_NOP) {
             fdt_struct_ptr += sizeof(uint32_t);

@@ -129,11 +129,13 @@ uint32_t pf_bitmap_alloc_frame() {
         }
     }
     if (frame_no == 0) {
-        kputs("page_frame [alloc]: no free frames available\n");
+        kputs(K_DEBUG,
+              "page_frame [alloc]: no free frames available\n");
         return 0;
     }
     uint32_t frame_addr = frame_no * FRAME_SIZE;
-    kprintf("page_frame [alloc]: allocating frame %d (%p) from pool\n",
+    kprintf(K_DEBUG,
+            "page_frame [alloc]: allocating frame %d (%p) from pool\n",
             frame_no, frame_addr);
     pf_bitmap_mark_allocated(frame_no);
     return frame_addr;

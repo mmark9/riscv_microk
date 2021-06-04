@@ -49,7 +49,11 @@ int kputchar(int ch) {
     return ch;
 }
 
-int kputs(const char* ch) {
+int kputs(KLogLevel level, const char* ch) {
+    if (level == K_DEBUG) {
+        // TODO: handle debug printing
+        return 0;
+    }
     if (ch == 0)
         return EOF;
     while (*ch != '\0') {
@@ -557,7 +561,11 @@ int process_format_string(const char *const fmt, int *const fmt_index, va_list *
     return write_count;
 }
 
-int kprintf(const char *const fmt, ...) {
+int kprintf(KLogLevel level, const char *const fmt, ...) {
+    if (level == K_DEBUG) {
+        // TODO: handle debug printing
+        return 0;
+    }
     if (fmt == 0)
         return 0;
     va_list args;

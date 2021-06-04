@@ -5,10 +5,16 @@
 
 #define EOF (-1)
 
+typedef enum {
+    K_DEBUG = 0,
+    K_INFO,
+    K_WARN,
+    K_ERROR,
+} KLogLevel;
 
 int kchtoi(char c);
-int kprintf(const char* const, ...);
-int kputs(const char* const);
+int kprintf(KLogLevel level, const char* const, ...);
+int kputs(KLogLevel level, const char* const);
 int kputchar(int);
 
 

@@ -114,7 +114,8 @@ void sched_init() {
 
 void sched_thread_exit() {
     sys_kassert(sched_state.initialized);
-    kprintf("sched [exit]: thread %d exiting...\n",
+    kprintf(K_DEBUG,
+            "sched [exit]: thread %d exiting...\n",
             current_thread->thread_id);
     current_thread->flagged_delete = true;
     sys_ebreak();
@@ -122,7 +123,7 @@ void sched_thread_exit() {
 
 void sched_update_thread_quantum(struct thread_tcb* tcb) {
     if (current_thread == 0) {
-        kputs("sched: current_thread is null!\n");
+        kputs(K_ERROR, "sched: current_thread is null!\n");
         sys_kassert(current_thread != 0);
     }
     int32_t delta = time_msecs_since_boot() - sched_cap_time_msecs;
@@ -131,7 +132,8 @@ void sched_update_thread_quantum(struct thread_tcb* tcb) {
 
 void sched_do_thread_cleanup() {
     if (current_thread != 0 && current_thread->flagged_delete) {
-        kprintf("sched: cleaning up thread %d\n",
+        kprintf(K_DEBUG,
+                "sched: cleaning up thread %d\n",
                 current_thread->thread_id);
         kfree((void*)current_thread->k_stack_ptr);
         // TODO: find a way to clean up thread objects
@@ -153,7 +155,8 @@ void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
     if (current_thread != 0) {
         sched_update_thread_quantum(current_thread);
         if (current_thread->quantum <= 0) {
-            kprintf("sched: preempting thread %d due to time slice\n",
+            kprintf(K_DEBUG,
+                    "sched: preempting thread %d due to time slice\n",
                     current_thread->thread_id);
             current_thread->quantum = TASK_TIME_SLICE;
             sched_enqueue(current_thread);
@@ -190,7 +193,8 @@ void sched_init_thread(struct thread_tcb* tcb, void* func) {
     tcb->context_lvl = 0;
     tcb->blocked_flag = false;
     if (simple_falloc_free_count() == 0) {
-        kprintf("sched [create_thread]: no frames "
+        kprintf(K_ERROR,
+                "sched [create_thread]: no frames "
                 "available for thread %d address space\n", tcb->thread_id);
         sys_kassert(false);
     }
@@ -216,13 +220,15 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     struct thread_tcb* tmp = sched_dequeue();
     if (tmp != 0 && current_thread != 0) {
         uint32_t old_thread_id = current_thread->thread_id;
-        kprintf("sched: switching from thread %d to thread %d\n",
+        kprintf(K_DEBUG,
+                "sched: switching from thread %d to thread %d\n",
                 old_thread_id, tmp->thread_id);
         // save the old context
         if (regs != 0)
             context_save_thread_context(&current_thread->user_context, regs, old_pc);
     } else if (tmp != 0) {
-        kprintf("sched: switching to thread %d\n",
+        kprintf(K_DEBUG,
+                "sched: switching to thread %d\n",
                 tmp->thread_id);
     } else {
         sys_panic("scheduler could not find new thread to run");
@@ -231,7 +237,8 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     sched_time_msecs = time_msecs_since_boot();
     sched_cap_time_msecs = sched_time_msecs;
     // at this point we can switch address spaces
-    kprintf("sched: switching to address space of thread %d\n",
+    kprintf(K_DEBUG,
+            "sched: switching to address space of thread %d\n",
             current_thread->thread_id);
     page_table_set_root_page(current_thread->root_page);
     if (current_thread->blocked_flag) {
@@ -271,7 +278,8 @@ bool sched_thread_is_blocked(int32_t thread_id) {
 void sched_enqueue_blocked_thread(struct thread_tcb* thread) {
     sys_kassert(thread != 0);
     SchedQueue* block_queue = &sched_state.block_queue;
-    kprintf("sched [block]: thread %d is now blocked\n",
+    kprintf(K_DEBUG,
+            "sched [block]: thread %d is now blocked\n",
             thread->thread_id);
     if (block_queue->head.next == 0) {
         block_queue->head.next = thread;
@@ -303,7 +311,8 @@ void sched_dequeue_blocked_thread(struct thread_tcb* thread) {
 
 void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
     if (current_thread->state == KTHREAD_BLOCKED) {
-        kprintf("sched [block]: thread %d is already blocked\n",
+        kprintf(K_DEBUG,
+                "sched [block]: thread %d is already blocked\n",
                 current_thread->thread_id);
         return;
     }
@@ -312,7 +321,8 @@ void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
     // unblocking
     current_thread->blocked_flag = true;
     sys_kassert(sched_state.initialized);
-    kprintf("sched [block]: blocking thread %u\n",
+    kprintf(K_DEBUG,
+            "sched [block]: blocking thread %u\n",
             current_thread->thread_id);
     current_thread->state = KTHREAD_BLOCKED;
     sched_enqueue_blocked_thread(current_thread);
@@ -324,18 +334,21 @@ bool sched_unblock_thread(int32_t thread_id) {
     sys_kassert(sched_state.initialized);
     struct thread_tcb* thread = sched_find_blocked_thread(thread_id);
     if (thread == 0) {
-        kprintf("sched [unblock]: could not find thread %u in block queue\n", thread_id);
+        kprintf(K_DEBUG,
+                "sched [unblock]: could not find thread %u in block queue\n", thread_id);
         return false;
     }
     sched_dequeue_blocked_thread(thread);
-    kprintf("sched [unblock]: adding thread %u to run queue\n", thread_id);
+    kprintf(K_DEBUG,
+            "sched [unblock]: adding thread %u to run queue\n", thread_id);
     sched_enqueue(thread);
     return true;
 }
 
 struct thread_tcb* sched_lookup_thread(int32_t thread_id) {
     if (thread_id >= MAX_NUM_THREADS) {
-        kprintf("sched [lookup]: thread id %d of range [0, %u]\n",
+        kprintf(K_DEBUG,
+                "sched [lookup]: thread id %d of range [0, %u]\n",
                 thread_id, MAX_NUM_THREADS);
         return 0;
     }

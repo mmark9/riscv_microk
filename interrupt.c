@@ -145,7 +145,9 @@ uint32_t handle_user_timer_interrupt(RiscvGPRS* regs, uint32_t sepc) {
 uint32_t handle_supervisor_timer_interrupt(RiscvGPRS* regs, uint32_t sepc) {
     uint32_t uptime_secs = time_secs_since_boot();
     uint32_t uptime_msecs = time_msecs_since_boot();
-    kprintf("system: uptime: msecs %u | %u second(s)\n", uptime_msecs, uptime_secs);
+    kprintf(K_DEBUG,
+            "system: uptime: msecs %u | %u second(s)\n",
+            uptime_msecs, uptime_secs);
     time_schedule_next_timer(TIMER_TICK_INTERVAL);
     sched_run_rr_scheduler(regs, sepc);
     return sepc;
@@ -233,7 +235,7 @@ void supervisor_handle_trap(RiscvGPRS * regs) {
     uint32_t scause = scause_r_csr();
     uint32_t sepc = sepc_r_csr();
     TrapCause cause = trap_read_cause(scause);
-    kprintf("system [interrupt]: caught %s at PC %p\n",
+    kprintf(K_DEBUG, "system [interrupt]: caught %s at PC %p\n",
             trap_string_table[cause], sepc);
     // TODO verify cause is in range?
     uint32_t new_sepc = (*trap_handlers[cause])(regs, sepc);

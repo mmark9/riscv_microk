@@ -132,7 +132,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
             frame_addr = pf_bitmap_alloc_frame();
             if (frame_addr == 0)
                 sys_panic("mem: no available free frames available to map segment\n");
-            kprintf("mem: mapping lv1 page (%p) to virtual address %p\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv1 page (%p) to virtual address %p\n",
                     frame_addr, v_addr_ptr);
             page_table_lv1[pde_index] = sv32_kernel_pte(frame_addr,
                                                         true, true,
@@ -147,7 +148,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
                                                         true,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 text page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 text page (%p) to virtual address (%p)\n",
                     p_addr_ptr, v_addr_ptr);
         } else if (seg_type == DATA_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(p_addr_ptr,
@@ -156,7 +158,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 data page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 data page (%p) to virtual address (%p)\n",
                     p_addr_ptr, v_addr_ptr);
         } else if (seg_type == READ_ONLY_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(p_addr_ptr,
@@ -165,7 +168,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 read-only page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 read-only page (%p) to virtual address (%p)\n",
                     p_addr_ptr, v_addr_ptr);
         } else if (seg_type == BSS_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(p_addr_ptr,
@@ -174,7 +178,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 bss page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 bss page (%p) to virtual address (%p)\n",
                     p_addr_ptr, v_addr_ptr);
         } else {
             sys_panic("mem: mapping heap segment not supported yet");
@@ -205,7 +210,8 @@ void mem_map_segment_low(uint32_t v_addr_base,
             frame_addr = pf_bitmap_alloc_frame();
             if (frame_addr == 0)
                 sys_panic("mem: no available free frames available to map segment\n");
-            kprintf("mem: mapping lv1 page (%p) to virtual address %p\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv1 page (%p) to virtual address %p\n",
                     frame_addr, v_addr_ptr);
             // we temporarily map this as a leaf page for reverse mapping
             page_table_lv1[pde_index] = sv32_kernel_pte(frame_addr, true,
@@ -223,7 +229,8 @@ void mem_map_segment_low(uint32_t v_addr_base,
                                                         true,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 text page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 text page (%p) to virtual address (%p)\n",
                     frame_addr, v_addr_ptr);
         } else if (seg_type == DATA_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(frame_addr,
@@ -232,7 +239,8 @@ void mem_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 data page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 data page (%p) to virtual address (%p)\n",
                     frame_addr, v_addr_ptr);
         } else if (seg_type == READ_ONLY_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(frame_addr,
@@ -241,7 +249,8 @@ void mem_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 read-only page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 read-only page (%p) to virtual address (%p)\n",
                     frame_addr, v_addr_ptr);
         } else if (seg_type == BSS_SEGMENT) {
             page_table_lv2[pte_index] = sv32_kernel_pte(frame_addr,
@@ -250,7 +259,8 @@ void mem_map_segment_low(uint32_t v_addr_base,
                                                         false,
                                                         true,
                                                         false);
-            kprintf("mem: mapping lv2 bss page (%p) to virtual address (%p)\n",
+            kprintf(K_DEBUG,
+                    "mem: mapping lv2 bss page (%p) to virtual address (%p)\n",
                     frame_addr, v_addr_ptr);
         } else {
             sys_panic("mem: mapping heap segment not supported yet");
@@ -292,7 +302,8 @@ void mem_placement_map_segment(uint32_t p_start,
     uint32_t nr_pages_needed = size / FRAME_SIZE;
     uint32_t page_count_remain = size % FRAME_SIZE;
     nr_pages_needed = page_count_remain > 0 ? nr_pages_needed + 1 : nr_pages_needed;
-    kprintf("mem: creating %u mappings for segment type %d\n", nr_pages_needed, type);
+    kprintf(K_DEBUG,
+            "mem: creating %u mappings for segment type %d\n", nr_pages_needed, type);
     mem_placement_map_segment_low(v_start, p_start, nr_pages_needed, type);
 }
 
@@ -341,10 +352,12 @@ void mem_clone_kernel_address_space(uint32_t page) {
     sys_tlb_flush_all();
     uint32_t* spare_table_ptr = page_table_lv1_spare_ptr;
     if (kernel_virtual_start_index == 0) {
-        kputs("mem [clone]: kernel_virtual_start_index == 0\n");
+        kputs(K_DEBUG,
+              "mem [clone]: kernel_virtual_start_index == 0\n");
         sys_kassert(false);
     }
-    kprintf("mem [clone]: cloning kernel address space to page %p...\n", page);
+    kprintf(K_DEBUG,
+            "mem [clone]: cloning kernel address space to page %p...\n", page);
     for (uint32_t i = kernel_virtual_start_index; i < 1024; i++) {
         spare_table_ptr[i] = lv1_ptr[i];
     }

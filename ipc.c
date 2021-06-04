@@ -87,7 +87,7 @@ struct thread_tcb* ipc_dequeue_wait_write(uint32_t dest_thread) {
     struct thread_tcb* tcb = sched_lookup_thread(dest_thread);
     sys_kassert(tcb != 0);
     if (tcb->send_queue.head == 0) {
-        kprintf("ipc [dequeue]: no waiting writing "
+        kprintf(K_DEBUG, "ipc [dequeue]: no waiting writing "
                 "threads found for dest thread %u\n", dest_thread);
         // we don't treat this as an error
         return 0;
@@ -114,8 +114,8 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
     tmp_buf = ipc_map_dst_buffer(msg->dest);
     sys_kassert(tmp_buf != 0);
     while (ipc_msg_buffer_full(tmp_buf)) {
-        kprintf("ipc [send]: thread %u msg queue full\n", msg->dest);
-        kprintf("ipc [send]: sending thread %u is now blocked\n",
+        kprintf(K_DEBUG, "ipc [send]: thread %u msg queue full\n", msg->dest);
+        kprintf(K_DEBUG, "ipc [send]: sending thread %u is now blocked\n",
                 current_thread->thread_id);
         // place in waiting queue before sending msg
         // block process (this is a scheduler operation)
@@ -136,7 +136,8 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
     ipc_push_msg(msg, tmp_buf);
     // check if a thread was waiting for a message
     if (sched_thread_is_blocked(msg->dest)) {
-        kprintf("ipc [send]: awakening blocked thread %d\n", msg->dest);
+        kprintf(K_DEBUG,
+                "ipc [send]: awakening blocked thread %d\n", msg->dest);
         sched_unblock_thread(msg->dest);
     }
     ipc_unmap_dst_buffer();
@@ -148,7 +149,8 @@ int32_t ipc_async_recv_msg(const RiscvGPRS* regs, uint32_t sepc) {
     struct ipc_msg_buffer* buf = &ipc_buffers[current_thread->thread_id];
     sys_kassert(buf != 0);
     if (buf->count == 0) {
-        kprintf("ipc [recv]: thread %u is blocked due to empty msg queue\n",
+        kprintf(K_DEBUG,
+                "ipc [recv]: thread %u is blocked due to empty msg queue\n",
                 current_thread->thread_id);
         context_save_imm_thread_context(
                 current_thread->kernel_context,
@@ -163,18 +165,21 @@ int32_t ipc_async_recv_msg(const RiscvGPRS* regs, uint32_t sepc) {
     // TODO: find a way to minimize calls to this
     sys_prepare_switch_to_supervisor();
     if (msg_out == 0) {
-        kputs("ipc [recv]: null pointer passed as recv_addr\n");
+        kputs(K_DEBUG,
+              "ipc [recv]: null pointer passed as recv_addr\n");
         return -1;
     }
     struct ipc_msg* msg = ipc_pop_msg(buf);
     kmemcpy((void*)msg_out, (void*)msg, sizeof(struct ipc_msg));
     if (current_thread->send_queue.count > 0) {
-        kprintf("ipc [recv]: thread %u waking up %d blocked sending threads\n",
+        kprintf(K_DEBUG,
+                "ipc [recv]: thread %u waking up %d blocked sending threads\n",
                 current_thread->thread_id, current_thread->send_queue.count);
         struct thread_tcb* tmp_tcb = 0;
         while (current_thread->send_queue.count > 0) {
             tmp_tcb = ipc_dequeue_wait_write(current_thread->thread_id);
-            kprintf("ipc [recv]: thread %u waking up blocked thread %u\n",
+            kprintf(K_DEBUG,
+                    "ipc [recv]: thread %u waking up blocked thread %u\n",
                     current_thread->thread_id, tmp_tcb->thread_id);
             sched_unblock_thread(tmp_tcb->thread_id);
         }

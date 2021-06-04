@@ -12,7 +12,8 @@ static uint32_t root_page_table = 0;
 uint32_t* root_page_ptr = page_table_lv1_ptr;
 
 void page_table_set_root_page(uint32_t table) {
-    kprintf("paging: setting root page table to %p table (old value=%p)\n",
+    kprintf(K_DEBUG,
+            "paging: setting root page table to %p table (old value=%p)\n",
             table, root_page_table);
     root_page_table = table;
     uint32_t old_satp = satp_r_csr();

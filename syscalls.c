@@ -19,7 +19,8 @@ uint32_t syscall_yield(RiscvGPRS* regs, uint32_t sepc) {
     // TODO: call into scheduler
     // t0 = syscall number (1)
     sys_kassert(syscalls_initialized == true);
-    kprintf("syscall [yield]: thread %d yielded core %d\n",
+    kprintf(K_DEBUG,
+            "syscall [yield]: thread %d yielded core %d\n",
             current_thread->thread_id, sys_core_id());
     sched_enqueue(current_thread);
     // ensures that a new thread from queue is scheduled
@@ -32,7 +33,8 @@ uint32_t syscall_exit(RiscvGPRS* regs, uint32_t sepc) {
     // a0 = exit code
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
-    kprintf("syscall [exit]: thread %d exited with code %d on core %d\n",
+    kprintf(K_DEBUG,
+            "syscall [exit]: thread %d exited with code %d on core %d\n",
             current_thread->thread_id, regs->x10_a0, sys_core_id());
     current_thread->flagged_delete = true;
     sched_run_rr_scheduler(regs, sepc);
@@ -63,7 +65,8 @@ void syscall_setup_table() {
 
 void syscall_validate_code(SyscallCode code) {
     if (code < 0 || code > IPC_RECV_ASYNC_SYSCALL) {
-        kprintf("syscall: invalid code %d\n", code);
+        kprintf(K_DEBUG,
+                "syscall: invalid code %d\n", code);
         sys_panic("invalid syscall error");
     }
 }
