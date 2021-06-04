@@ -1,7 +1,8 @@
-#include <stdio.h>
+#include "kprint.h"
+#include "sbi_relay.h"
+
 #include <stdbool.h>
 #include <stdarg.h>
-#include "sbi_relay.h"
 
 
 typedef struct {
