@@ -1,4 +1,5 @@
 #include "csr.h"
+#include "arch.h"
 #include "kprint.h"
 #include "sbi_relay.h"
 #include "system.h"
@@ -36,43 +37,43 @@ void sys_shutdown() {
                            SBI_RESET_NO_REASON);
 }
 void sys_enable_supervisor_interrupts() {
-    uint32_t sstatus = sstatus_r_csr();
-    uint32_t new_sstatus = sstatus_set_sie(sstatus, 1U);
+    rvu_word sstatus = sstatus_r_csr();
+    rvu_word new_sstatus = sstatus_set_sie(sstatus, 1U);
     sstatus_w_csr(new_sstatus);
 }
 void sys_disable_supervisor_interrupts() {
-    uint32_t sstatus = sstatus_r_csr();
-    uint32_t new_sstatus = sstatus_set_sie(sstatus, 0U);
+    rvu_word sstatus = sstatus_r_csr();
+    rvu_word new_sstatus = sstatus_set_sie(sstatus, 0U);
     sstatus_w_csr(new_sstatus);
 }
 void sys_enable_supervisor_timer_interrupts() {
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_stie(sie, 1U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_stie(sie, 1U);
     sie_w_csr(new_sie);
 }
 void sys_disable_supervisor_timer_interrupts() {
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_stie(sie, 0U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_stie(sie, 0U);
     sie_w_csr(new_sie);
 }
 void sys_enable_supervisor_external_interrupts() {
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_seie(sie, 1U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_seie(sie, 1U);
     sie_w_csr(new_sie);
 }
 void sys_disable_supervisor_external_interrupts() {
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_seie(sie, 0U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_seie(sie, 0U);
     sie_w_csr(new_sie);
 }
 void sys_enable_supervisor_software_interrupts(){
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_ssie(sie, 1U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_ssie(sie, 1U);
     sie_w_csr(new_sie);
 }
 void sys_disable_supervisor_software_interrupts() {
-    uint32_t sie = sie_r_csr();
-    uint32_t new_sie = sie_set_ssie(sie, 0U);
+    rvu_word sie = sie_r_csr();
+    rvu_word new_sie = sie_set_ssie(sie, 0U);
     sie_w_csr(new_sie);
 }
 void sys_initialize_privilege_mode_status() {
@@ -80,27 +81,27 @@ void sys_initialize_privilege_mode_status() {
     sys_privilege_mode = SUPERVISOR_MODE;
 }
 void sys_prepare_switch_to_user() {
-    uint32_t ssatus = sstatus_r_csr();
-    uint32_t spp = sstatus_spp(ssatus);
-    uint32_t new_sstatus = sstatus_set_spp(ssatus, USER_MODE);
+    rvu_word ssatus = sstatus_r_csr();
+    rvu_word spp = sstatus_spp(ssatus);
+    rvu_word new_sstatus = sstatus_set_spp(ssatus, USER_MODE);
     sstatus_w_csr(new_sstatus);
     // Note this won't be accurate until a return interrupt
     sys_previous_privilege_mode = sys_privilege_mode;
     sys_privilege_mode = USER_MODE;
 }
 void sys_prepare_switch_to_supervisor() {
-    uint32_t ssatus = sstatus_r_csr();
-    uint32_t spp = sstatus_spp(ssatus);
-    uint32_t new_sstatus = sstatus_set_spp(ssatus, SUPERVISOR_MODE);
+    rvu_word ssatus = sstatus_r_csr();
+    rvu_word spp = sstatus_spp(ssatus);
+    rvu_word new_sstatus = sstatus_set_spp(ssatus, SUPERVISOR_MODE);
     sstatus_w_csr(new_sstatus);
     // Note this won't be accurate until a return interrupt
     sys_previous_privilege_mode = sys_privilege_mode;
     sys_privilege_mode = SUPERVISOR_MODE;
 }
 void sys_disable_interrupts_for_next_context() {
-    uint32_t sstatus = sstatus_r_csr();
-    uint32_t spie = sstatus_spie(sstatus);
-    uint32_t new_status = sstatus_set_spie(sstatus, 0);
+    rvu_word sstatus = sstatus_r_csr();
+    rvu_word spie = sstatus_spie(sstatus);
+    rvu_word new_status = sstatus_set_spie(sstatus, 0);
     sstatus_w_csr(new_status);
 }
 PrivilegeMode sys_target_privilege_mode() {
@@ -111,19 +112,19 @@ PrivilegeMode sys_target_privilege_mode() {
     return sys_privilege_mode;
 }
 bool sys_supervisor_interrupts_enabled() {
-    uint32_t sstatus = sstatus_r_csr();
+    rvu_word sstatus = sstatus_r_csr();
     return sstatus_sie(sstatus) == 1;
 }
 bool sys_supervisor_timer_interrupts_enabled() {
-    uint32_t sie = sie_r_csr();
+    rvu_word sie = sie_r_csr();
     return sie_stie(sie) == 1;
 }
 bool sys_supervisor_software_interrupts_enabled() {
-    uint32_t sie = sie_r_csr();
+    rvu_word sie = sie_r_csr();
     return sie_ssie(sie) == 1;
 }
 bool sys_supervisor_external_interrupts_enabled() {
-    uint32_t sie = sie_r_csr();
+    rvu_word sie = sie_r_csr();
     return sie_seie(sie) == 1;
 }
 int32_t sys_core_id() {

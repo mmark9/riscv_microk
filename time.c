@@ -1,21 +1,22 @@
 #include "csr.h"
+#include "system.h"
 #include "sbi_relay.h"
 #include "constants.h"
 
 
 uint64_t boot_hz_cap = 0;
 
-uint32_t time_secs_since_boot() {
+rvu_word time_secs_since_boot() {
     uint64_t new_time_hz = time_r_csr();
     uint64_t delta_hz = new_time_hz - boot_hz_cap;
-    uint32_t seconds = delta_hz / TIMER_FREQUENCY_BASE;
+    rvu_word seconds = delta_hz / TIMER_FREQUENCY_BASE;
     return seconds;
 }
 
-uint32_t time_msecs_since_boot() {
+rvu_word time_msecs_since_boot() {
     uint64_t new_time_hz = time_r_csr();
     uint64_t delta_hz = new_time_hz - boot_hz_cap;
-    uint32_t ms = delta_hz / TIMER_CYCLES_PER_MSEC;
+    rvu_word ms = delta_hz / TIMER_CYCLES_PER_MSEC;
     return ms;
 }
 

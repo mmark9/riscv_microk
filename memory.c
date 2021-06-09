@@ -109,8 +109,8 @@ void mem_do_page_table_fixup() {
     }
 }
 
-void mem_placement_map_segment_low(uint32_t v_addr_base,
-                                   uint32_t p_addr_base,
+void mem_placement_map_segment_low(rvu_word v_addr_base,
+                                   rvu_word p_addr_base,
                                    uint32_t nr_pages,
                                    SegmentType seg_type) {
     // maps a segment which is a contiguous region
@@ -120,8 +120,8 @@ void mem_placement_map_segment_low(uint32_t v_addr_base,
     uint32_t pde_index = 0;
     uint32_t frame_addr = 0;
     uint32_t pte_index = 0;
-    uint32_t v_addr_ptr = v_addr_base;
-    uint32_t p_addr_ptr = p_addr_base;
+    rvu_word v_addr_ptr = v_addr_base;
+    rvu_word p_addr_ptr = p_addr_base;
     uint32_t* page_table_lv1 = page_table_lv1_ptr;
     uint32_t* page_table_lv2 = page_table_lv2_ptr(0);
     for (uint32_t i = 0; i < nr_pages; i++) {

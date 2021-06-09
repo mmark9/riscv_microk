@@ -13,9 +13,8 @@ typedef enum {
 
 bool syscalls_initialized = false;
 
-uint32_t (*syscall_table[32]) (RiscvGPRS *, uint32_t);
-
-uint32_t syscall_yield(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word (*syscall_table[32]) (RiscvGPRS *, rvu_word);
+rvu_word syscall_yield(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: call into scheduler
     // t0 = syscall number (1)
     sys_kassert(syscalls_initialized == true);
@@ -28,7 +27,7 @@ uint32_t syscall_yield(RiscvGPRS* regs, uint32_t sepc) {
     return 0;
 }
 
-uint32_t syscall_exit(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word syscall_exit(RiscvGPRS* regs, rvu_word sepc) {
     // t0 = syscall number (0)
     // a0 = exit code
     sys_kassert(syscalls_initialized == true);
@@ -41,7 +40,7 @@ uint32_t syscall_exit(RiscvGPRS* regs, uint32_t sepc) {
     return 0;
 }
 
-uint32_t syscall_ipc_send_async(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word syscall_ipc_send_async(RiscvGPRS* regs, rvu_word sepc) {
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
     regs->x10_a0 = ipc_send_async_msg(regs, sepc+4);
@@ -71,9 +70,9 @@ void syscall_validate_code(SyscallCode code) {
     }
 }
 
-uint32_t syscall_execute(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word syscall_execute(RiscvGPRS* regs, rvu_word sepc) {
     syscall_validate_code(regs->x5_t0);
-    uint32_t new_sepc = syscall_table[regs->x5_t0](regs, sepc);
+    rvu_word new_sepc = syscall_table[regs->x5_t0](regs, sepc);
     return new_sepc;
 }
 

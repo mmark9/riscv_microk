@@ -1,45 +1,46 @@
 #ifndef RISCV_MICROK_CONTEXT_H
 #define RISCV_MICROK_CONTEXT_H
 
+#include "arch.h"
 
 #include <stdint.h>
 #include <stdbool.h>
 
 typedef struct {
-    uint32_t x1_ra;
-    uint32_t x2_sp;
-    uint32_t x5_t0;
-    uint32_t x6_t1;
-    uint32_t x7_t2;
-    uint32_t x8_s0;
-    uint32_t x9_s1;
-    uint32_t x10_a0;
-    uint32_t x11_a1;
-    uint32_t x12_a2;
-    uint32_t x13_a3;
-    uint32_t x14_a4;
-    uint32_t x15_a5;
-    uint32_t x16_a6;
-    uint32_t x17_a7;
-    uint32_t x18_s2;
-    uint32_t x19_s3;
-    uint32_t x20_s4;
-    uint32_t x21_s5;
-    uint32_t x22_s6;
-    uint32_t x23_s7;
-    uint32_t x24_s8;
-    uint32_t x25_s9;
-    uint32_t x26_s10;
-    uint32_t x27_s11;
-    uint32_t x28_t3;
-    uint32_t x29_t4;
-    uint32_t x30_t5;
-    uint32_t x31_t6;
+    rvu_word x1_ra;
+    rvu_word x2_sp;
+    rvu_word x5_t0;
+    rvu_word x6_t1;
+    rvu_word x7_t2;
+    rvu_word x8_s0;
+    rvu_word x9_s1;
+    rvu_word x10_a0;
+    rvu_word x11_a1;
+    rvu_word x12_a2;
+    rvu_word x13_a3;
+    rvu_word x14_a4;
+    rvu_word x15_a5;
+    rvu_word x16_a6;
+    rvu_word x17_a7;
+    rvu_word x18_s2;
+    rvu_word x19_s3;
+    rvu_word x20_s4;
+    rvu_word x21_s5;
+    rvu_word x22_s6;
+    rvu_word x23_s7;
+    rvu_word x24_s8;
+    rvu_word x25_s9;
+    rvu_word x26_s10;
+    rvu_word x27_s11;
+    rvu_word x28_t3;
+    rvu_word x29_t4;
+    rvu_word x30_t5;
+    rvu_word x31_t6;
 } RiscvGPRS;
 
 typedef struct thread_context {
     RiscvGPRS regs;
-    uint32_t pc;
+    rvu_word pc;
 } ThreadContext;
 
 #define context_save_imm_thread_context(context,next_pc) \
@@ -77,11 +78,11 @@ typedef struct thread_context {
        : /* no output */  \
        : "r" (&(context).regs)       \
        : "tp");            \
-       context.pc = (uint32_t)(next_pc);    \
+       context.pc = (rvu_word)(next_pc);    \
 }
 
 void context_save_thread_context(ThreadContext* dest,
                                  const RiscvGPRS* regs,
-                                 uint32_t old_pc);
+                                 rvu_word old_pc);
 
 #endif //RISCV_MICROK_CONTEXT_H

@@ -145,12 +145,12 @@ void sched_do_thread_cleanup() {
     }
 }
 
-void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+void sched_run_scheduler(const RiscvGPRS* regs, rvu_word old_pc) {
     sched_do_thread_cleanup();
     schedule(regs, old_pc);
 }
 
-void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
+void sched_run_rr_scheduler(const RiscvGPRS* regs, rvu_word old_pc) {
     sched_do_thread_cleanup();
     if (current_thread != 0) {
         sched_update_thread_quantum(current_thread);
@@ -172,12 +172,12 @@ void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc) {
 void sched_init_thread(struct thread_tcb* tcb, void* func) {
     sys_kassert(tcb != 0);
     sys_kassert(sched_state.initialized);
-    tcb->user_context.pc = (uint32_t)func;
-    tcb->entry_pc = (uint32_t)func;
+    tcb->user_context.pc = (rvu_word)func;
+    tcb->entry_pc = (rvu_word)func;
     tcb->thread_id = sched_state.thread_id_counter++;
-    tcb->user_context.regs.x1_ra = (uint32_t)sched_thread_exit;
-    tcb->k_stack_ptr = (uint32_t)kmalloc(STACK_SIZE);
-    tcb->u_stack_ptr = (uint32_t)kmalloc(STACK_SIZE);
+    tcb->user_context.regs.x1_ra = (rvu_word)sched_thread_exit;
+    tcb->k_stack_ptr = (rvu_word)kmalloc(STACK_SIZE);
+    tcb->u_stack_ptr = (rvu_word)kmalloc(STACK_SIZE);
     sys_kassert(tcb->k_stack_ptr != 0);
     sys_kassert(tcb->u_stack_ptr != 0);
     tcb->k_stack = tcb->k_stack_ptr + STACK_SIZE;
@@ -214,7 +214,7 @@ void sched_cleanup_thread(struct thread_tcb* tcb) {
     kfree((void*)tcb->user_context.regs.x2_sp);
 }
 
-void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
+void schedule(const RiscvGPRS* regs, rvu_word old_pc) {
     // this is only called during interrupt
     sys_kassert(sched_state.initialized);
     struct thread_tcb* tmp = sched_dequeue();
@@ -317,7 +317,7 @@ void sched_dequeue_blocked_thread(struct thread_tcb* thread) {
     }
 }
 
-void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc) {
+void sched_block_thread(const RiscvGPRS* regs, rvu_word next_pc) {
     if (current_thread->state == KTHREAD_BLOCKED) {
         kprintf(K_DEBUG,
                 "sched [block]: thread %d is already blocked\n",

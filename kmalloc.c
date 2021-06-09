@@ -1,14 +1,17 @@
 #include "kheap.h"
 
+#include "arch.h"
+
 #include <stdint.h>
 #include <assert.h>
+#include <stddef.h>
 
 typedef union block_header {
     struct {
-        unsigned int size;
+        size_t size;
         union block_header* next;
     } s;
-    uint32_t x; // forces all header sizes to be a multiple of an int
+    size_t x; // forces all header sizes to be a multiple of an int
 } MallocHeader;
 
 /**
@@ -80,7 +83,7 @@ void kfree(void* ptr) {
 }
 
 
-void* kmalloc(unsigned int nr_bytes) {
+void* kmalloc(size_t nr_bytes) {
     void* addr = 0;
     MallocHeader* cur = free_list->s.next;
     MallocHeader* prev = free_list;
@@ -96,7 +99,7 @@ void* kmalloc(unsigned int nr_bytes) {
             else
                 break;
         }
-        int size_diff = cur->s.size - true_size;
+        rvi_word size_diff = cur->s.size - true_size;
         if(size_diff >= 0 && size_diff < MAX_INTERNAL_FRAGMENT_SIZE) {
             // no need to split this block up - good fit
             // remove this block from the free list
@@ -127,7 +130,7 @@ void* kmalloc(unsigned int nr_bytes) {
 }
 
 
-int init_malloc(void* memory_start, unsigned int size_in_bytes) {
+int init_malloc(void* memory_start, rvu_word size_in_bytes) {
     if(size_in_bytes < 5) {
         return 1;
     }

@@ -1,6 +1,7 @@
 #ifndef RISCV_MICROK_MEMORY_H
 #define RISCV_MICROK_MEMORY_H
 
+#include "arch.h"
 #include <stdint.h>
 
 typedef struct {

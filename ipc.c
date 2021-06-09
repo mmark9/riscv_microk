@@ -108,7 +108,7 @@ struct thread_tcb* ipc_dequeue_wait_write(uint32_t dest_thread) {
 }
 
 
-int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
+rvi_word ipc_send_async_msg(const RiscvGPRS* regs, rvu_word sepc) {
     struct ipc_msg_buffer* tmp_buf;
     struct ipc_msg* msg = (struct ipc_msg*)regs->x10_a0;
     tmp_buf = ipc_map_dst_buffer(msg->dest);
@@ -144,7 +144,7 @@ int32_t ipc_send_async_msg(const RiscvGPRS* regs, uint32_t sepc) {
     return 0;
 }
 
-int32_t ipc_async_recv_msg(const RiscvGPRS* regs, uint32_t sepc) {
+rvi_word ipc_async_recv_msg(const RiscvGPRS* regs, rvu_word sepc) {
     struct ipc_msg* msg_out = (struct ipc_msg*)regs->x10_a0;
     struct ipc_msg_buffer* buf = &ipc_buffers[current_thread->thread_id];
     sys_kassert(buf != 0);

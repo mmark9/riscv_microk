@@ -1,6 +1,9 @@
 #ifndef RISCV_MICROK_SCHED_H
 #define RISCV_MICROK_SCHED_H
+
+#include "arch.h"
 #include "context.h"
+
 #include <stdint.h>
 
 #define MAX_NUM_THREADS 128
@@ -17,20 +20,20 @@ typedef enum ThreadStatus {
 
 typedef struct thread_tcb {
     int32_t thread_id;
-    uint32_t scratch1;
-    uint32_t scratch2;
-    uint32_t context_lvl;
-    uint32_t u_stack;
-    uint32_t k_stack;
-    uint32_t u_stack_ptr;
-    uint32_t k_stack_ptr;
+    rvu_word scratch1;
+    rvu_word scratch2;
+    rvu_word context_lvl;
+    rvu_word u_stack;
+    rvu_word k_stack;
+    rvu_word u_stack_ptr;
+    rvu_word k_stack_ptr;
     ThreadContext user_context;
     ThreadContext kernel_context;
     int32_t quantum;
     uint32_t priority;
-    uint32_t entry_pc;
+    rvu_word entry_pc;
     KThreadState state;
-    uint32_t root_page;
+    rvu_word root_page;
     struct thread_tcb* next;
     struct thread_tcb* prev;
     struct thread_tcb* next_snd;
@@ -51,13 +54,13 @@ extern KThread* current_thread;
 void sched_init();
 void sched_set_current_thread(struct thread_tcb* thread);
 bool sched_thread_is_blocked(int32_t thread_id);
-void sched_block_thread(const RiscvGPRS* regs, uint32_t next_pc);
+void sched_block_thread(const RiscvGPRS* regs, rvu_word next_pc);
 bool sched_unblock_thread(int32_t thread_id);
-void schedule(const RiscvGPRS* prev_context, uint32_t pc);
+void schedule(const RiscvGPRS* prev_context, rvu_word pc);
 void sched_init_thread(struct thread_tcb* tcb, void* func);
-void sched_run_scheduler(const RiscvGPRS* regs, uint32_t old_pc);
+void sched_run_scheduler(const RiscvGPRS* regs, rvu_word old_pc);
 void sched_enqueue(struct thread_tcb* thread);
-void sched_run_rr_scheduler(const RiscvGPRS* regs, uint32_t old_pc);
+void sched_run_rr_scheduler(const RiscvGPRS* regs, rvu_word old_pc);
 struct thread_tcb* sched_lookup_thread(int32_t thread_id);
 
 #endif //RISCV_MICROK_SCHED_H

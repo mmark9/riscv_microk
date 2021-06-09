@@ -18,7 +18,7 @@ uint32_t big2little_l(uint32_t big) {
     return ret;
 }
 
-uint32_t big2little_dl(uint64_t big) {
+uint64_t big2little_dl(uint64_t big) {
     uint64_t ret = 0;
     ret |= ((big & 0xFF00000000000000U) >> 56U) << 0U;
     ret |= ((big & 0x00FF000000000000U) >> 48U) << 8U;
