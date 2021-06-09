@@ -251,6 +251,8 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
         load_context(&tmp->kernel_context.regs);
     } else {
         sepc_w_csr(current_thread->user_context.pc);
+        // returning to the user implies that context level is 0
+        current_thread->context_lvl = 0;
         load_context(&tmp->user_context.regs);
     }
 }
