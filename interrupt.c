@@ -113,18 +113,24 @@ uint32_t handle_ecall_from_supervisor_mode_exception(RiscvGPRS* regs, uint32_t s
 
 uint32_t handle_instruction_page_fault_exception(RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    uint32_t stval = sbadaddr_r_csr();
+    kprintf(K_DEBUG, "system [interrupt]: instruction page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
 
 uint32_t handle_load_page_fault_exception(RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    uint32_t stval = sbadaddr_r_csr();
+    kprintf(K_DEBUG, "system [interrupt]: load page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
 
 uint32_t handle_store_amo_page_fault_exception(RiscvGPRS* regs, uint32_t sepc) {
     // TODO: forward to corresponding pager
+    uint32_t stval = sbadaddr_r_csr();
+    kprintf(K_DEBUG, "system [interrupt]: store page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
