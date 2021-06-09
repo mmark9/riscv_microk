@@ -224,6 +224,7 @@ void scause_w_csr(uint32_t val);
 
 uint32_t stval_r_csr(void);
 void stval_w_csr(uint32_t val);
+uint32_t sbadaddr_r_csr(void);
 
 #define satp_ppn(x) extract_field(x, 22, 0)
 #define satp_asid(x) extract_field(x, 9, 22)

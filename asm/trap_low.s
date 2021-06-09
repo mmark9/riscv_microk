@@ -26,7 +26,7 @@ restore_scratch:
 push_context:
     addi sp,sp,-116
     sw ra,0(sp)
-    sw tp,4(sp)
+    # sw tp,4(sp)
     sw t0,8(sp)
     sw t1,12(sp)
     sw t2,16(sp)
@@ -54,6 +54,12 @@ push_context:
     sw t4,104(sp)
     sw t5,108(sp)
     sw t6,112(sp)
+    # TODO: make this more efficient
+    # store user stack in regs structure
+    beqz tp,call_handler
+    lw a0,16(tp)
+    sw a0,4(sp)
+call_handler:
     mv a0,sp
     # at this point we should switch stacks
     call supervisor_handle_trap

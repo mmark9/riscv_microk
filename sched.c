@@ -218,6 +218,12 @@ void schedule(const RiscvGPRS* regs, uint32_t old_pc) {
     // this is only called during interrupt
     sys_kassert(sched_state.initialized);
     struct thread_tcb* tmp = sched_dequeue();
+    if (tmp != 0 && current_thread != 0 && tmp->thread_id == current_thread->thread_id) {
+        kprintf(K_DEBUG,
+                "sched: avoiding context "
+                "switch to same thread (%d)\n", tmp->thread_id);
+        return;
+    }
     if (tmp != 0 && current_thread != 0) {
         uint32_t old_thread_id = current_thread->thread_id;
         kprintf(K_DEBUG,

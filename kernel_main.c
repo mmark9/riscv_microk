@@ -4,11 +4,13 @@
 #include "interrupt.h"
 #include "sbi_relay.h"
 #include "constants.h"
+#include "utils.h"
 #include "time.h"
 #include "memory.h"
 #include "syscalls.h"
 #include "simple_falloc.h"
 #include "page_frame.h"
+#include "terminal.h"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -94,7 +96,7 @@ void thread_ipc_send_func() {
     out_msg.src = current_thread->thread_id;
     while (true) {
         elapsed = time_secs_since_boot();
-        out_msg.data[0] = time_secs_since_boot() + 0xDEADBEEF;
+        out_msg.data[0] = time_msecs_since_boot() + 0xDE;
         out_msg.dest = 2;
         kprintf(K_INFO, "thread %d: send msg %u to thread %d\n",
                 current_thread->thread_id, out_msg.data[0], out_msg.dest);
@@ -144,6 +146,49 @@ void thread_ipc_func() {
 struct thread_tcb thread1;
 struct thread_tcb thread2;
 struct thread_tcb thread3;
+
+#define TERMINAL_THREAD_ID 0
+
+void thread_terminal_thread() {
+    const char* terminal_prompt = "[ascslab@trireme simulation]$ ";
+    //terminal_ed(CLEAR_ENTIRE_SCREEN);
+    terminal_clear();
+    terminal_puts(terminal_prompt);
+    struct ipc_msg msg;
+    int32_t ipc_res = 0;
+    int32_t output_char = 0;
+    while (true) {
+        ipc_res = sys_do_ipc_recv_async(&msg);
+        if (ipc_res == 0) {
+            output_char = msg.data[0];
+            terminal_putchar(output_char);
+            if (output_char == '\n')
+                terminal_puts(terminal_prompt);
+        }
+    }
+}
+
+void thread_uart_character_reader() {
+    int32_t ipc_res = 0;
+    struct ipc_msg out_msg;
+    uint32_t elapsed = 0;
+    uint32_t msg_index = 0;
+    const char* long_msg = "Sending test command.......\n";
+    uint32_t msg_len = kstrlen(long_msg);
+    uint32_t old_elapsed = 0;
+    out_msg.src = current_thread->thread_id;
+    out_msg.dest = TERMINAL_THREAD_ID;
+    while (true) {
+        elapsed = time_secs_since_boot();
+        if (old_elapsed != elapsed) {
+            old_elapsed = elapsed;
+            out_msg.data[0] = long_msg[msg_index];
+            msg_index = (msg_index + 1) % msg_len;
+            ipc_res = sys_do_ipc_send_async(&out_msg);
+            sys_kassert(ipc_res == 0);
+        }
+    }
+}
 
 void kernel_main(
         uint32_t hart_id,
@@ -203,12 +248,12 @@ void kernel_main(
     kputs(K_INFO, "system: setting up system calls\n");
     syscall_setup_table();
     kputs(K_INFO, "system: starting first thread\n");
-    sched_init_thread(&thread1, thread_ipc_send_func);
-    sched_init_thread(&thread2, thread_ipc_send_func);
-    sched_init_thread(&thread3, thread_ipc_recv_func);
+    sched_init_thread(&thread1, thread_terminal_thread);
+    sched_init_thread(&thread2, thread_uart_character_reader);
+    //sched_init_thread(&thread3, thread_ipc_recv_func);
     sched_enqueue(&thread1);
     sched_enqueue(&thread2);
-    sched_enqueue(&thread3);
+    //sched_enqueue(&thread3);
     time_capture_boot_time();
     time_schedule_next_timer(TIMER_TICK_INTERVAL);
     // at this point we either jump to another thread

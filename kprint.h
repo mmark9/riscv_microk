@@ -10,12 +10,14 @@ typedef enum {
     K_INFO,
     K_WARN,
     K_ERROR,
+    CONSOLE,
 } KLogLevel;
 
 int kchtoi(char c);
 int kprintf(KLogLevel level, const char* const, ...);
 int kputs(KLogLevel level, const char* const);
 int kputchar(int);
+int kstrlen(const char *const str);
 
 
 #endif /* SRC_ARCH_RISCV32_PRINT_H_ */
