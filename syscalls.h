@@ -14,6 +14,6 @@ int32_t sys_do_yield();
 int32_t sys_do_exit(uint32_t code);
 int32_t sys_do_ipc_send_async(struct ipc_msg* msg);
 int32_t sys_do_ipc_recv_async(struct ipc_msg* msg_out);
-uint32_t syscall_execute(RiscvGPRS* regs, rvu_word sepc);
+rvu_word syscall_execute(RiscvGPRS* regs, rvu_word sepc);
 
 #endif //RISCV_MICROK_SYSCALLS_H

@@ -47,7 +47,7 @@ rvu_word syscall_ipc_send_async(RiscvGPRS* regs, rvu_word sepc) {
     return sepc+4;
 }
 
-uint32_t syscall_ipc_recv_async(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word syscall_ipc_recv_async(RiscvGPRS* regs, uint32_t sepc) {
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
     regs->x10_a0 = ipc_async_recv_msg(regs, sepc+4);
