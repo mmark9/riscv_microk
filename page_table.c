@@ -61,3 +61,44 @@ uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid) {
     return sv32_pte(paddr, true, false,
                     false, false, false, valid, false);
 }
+
+// sv39
+
+uint64_t sv39_pte(uint64_t paddr, bool user_access,
+                  bool can_read, bool can_write,
+                  bool can_exec, bool global,
+                  bool valid, bool fixup) {
+    uint64_t pte = (paddr >> 12U) << 10U;
+    pte = sv39_set_user_can_access(pte, user_access);
+    pte = sv39_set_can_execute(pte, can_exec);
+    pte = sv39_set_can_write(pte, can_write);
+    pte = sv39_set_can_read(pte, can_read);
+    pte = sv39_set_is_global(pte, global);
+    pte = sv39_set_valid(pte, valid);
+    pte = sv39_set_rsw(pte, (fixup == true ? RSW_LV1_FIXUP : 0));
+    return pte;
+}
+
+uint64_t sv39_user_pte(uint64_t paddr, bool can_read,
+                       bool can_write, bool can_exec,
+                       bool valid, bool fixup) {
+    return sv39_pte(paddr, true, can_read,
+                    can_write, can_exec, false, valid, fixup);
+}
+
+uint64_t sv39_kernel_pte(uint64_t paddr, bool can_read,
+                         bool can_write, bool can_exec,
+                         bool valid, bool fixup) {
+    return sv39_pte(paddr, false, can_read,
+                    can_write, can_exec, false, valid, fixup);
+}
+
+uint64_t sv39_kernel_pte_pointer(uint64_t paddr, bool valid) {
+    return sv39_pte(paddr, false, false,
+                    false, false, false, valid, false);
+}
+
+uint64_t sv39_user_pte_pointer(uint64_t paddr, bool valid) {
+    return sv39_pte(paddr, true, false,
+                    false, false, false, valid, false);
+}

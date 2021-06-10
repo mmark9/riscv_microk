@@ -60,5 +60,58 @@ uint32_t sv32_kernel_pte(uint32_t paddr, bool can_read,
 uint32_t sv32_kernel_pte_pointer(uint32_t paddr, bool valid);
 uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 
+// Sv39
 
+#define sv39_is_valid(pte) (bits(pte, 0, 1) == 1 ? true : false)
+#define sv39_can_read(pte) (bits(pte, 1, 1) == 1 ? true : false)
+#define sv39_can_write(pte) (bits(pte, 2, 1) == 1 ? true : false)
+#define sv39_can_execute(pte) (bits(pte, 3, 1) == 1 ? true : false)
+#define sv39_user_can_access(pte) (bits(pte, 4, 1) == 1 ? true : false)
+#define sv39_is_global(pte) (bits(pte, 5, 1) == 1 ? true : false)
+#define sv39_accessed(pte) (bits(pte, 6, 1) == 1 ? true : false)
+#define sv39_is_dirty(pte) (bits(pte, 7, 1) == 1 ? true : false)
+#define sv39_is_leaf_page(pte) (bits(pte, 1, 3) > 0 ? true : false)
+#define sv39_rsw(pte) (bits(pte, 8, 2))
+#define sv39_ppn(pte) (bits(pte, 10, 44))
+
+#define sv39_set_valid(pte, v) set_bits(pte, (v == true ? 1 : 0), 0, 1)
+#define sv39_set_can_read(pte, v) set_bits(pte, (v == true ? 1 : 0), 1, 1)
+#define sv39_set_can_write(pte, v) set_bits(pte, (v == true ? 1 : 0), 2, 1)
+#define sv39_set_can_execute(pte, v) set_bits(pte, (v == true ? 1 : 0), 3, 1)
+#define sv39_set_user_can_access(pte, v) set_bits(pte, (v == true? 1 : 0), 4, 1)
+#define sv39_set_is_global(pte, v) set_bits(pte, (v == true? 1 : 0), 5, 1)
+#define sv39_set_accessed(pte, v) set_bits(pte, (v == true ? 1 : 0), 6, 1)
+#define sv39_set_dirty(pte, v) set_bits(pte, (v == true? 1 : 0), 7, 1)
+#define sv39_set_rsw(pte, v) set_bits(pte, v, 8, 2)
+#define sv39_set_ppn(pte, v) set_bits(pte, v, 10, 44)
+
+#define sv39_vpn0(vaddr) bits(vaddr, 12, 9)
+#define sv39_vpn1(vaddr) bits(vaddr, 21, 9)
+#define sv39_vpn2(vaddr) bits(vaddr, 30, 9)
+#define sv39_offset(vaddr) bits(vaddr, 0, 12)
+
+#define sv39_ppn0(paddr) bits(paddr, 12, 9)
+#define sv39_ppn1(paddr) bits(paddr, 21, 9)
+#define sv39_ppn2(paddr) bits(paddr, 30, 26)
+
+
+#define page_table_sv39_lv1_ptr ((uint64_t*)(511ULL << 30 | 510ULL << 21 | 509ULL << 12))
+#define page_table_sv39_lv1_spare_ptr ((uint64_t*)(511ULL << 30 | 510ULL << 21 | 508ULL << 12))
+#define page_table_sv39_lv2_ptr(l1_index) ((uint64_t*)(511ULL << 30 | 510ULL << 21 | (l1_index) << 12))
+#define page_table_sv39_lv3_ptr(l1_index, l2_index) ((uint64_t*)(511ULL << 30 | (l1_index) << 21 | (l2_index) << 12))
+
+
+uint64_t sv39_pte(uint64_t paddr, bool user_access,
+                  bool can_read, bool can_write,
+                  bool can_exec, bool global,
+                  bool valid, bool fixup);
+uint64_t sv39_user_pte(uint64_t paddr, bool can_read,
+                       bool can_write, bool can_exec,
+                       bool valid, bool fixup);
+
+uint64_t sv39_kernel_pte(uint64_t paddr, bool can_read,
+                         bool can_write, bool can_exec,
+                         bool valid, bool fixup);
+uint64_t sv39_kernel_pte_pointer(uint64_t paddr, bool valid);
+uint64_t sv39_user_pte_pointer(uint64_t paddr, bool valid);
 #endif //RISCV_MICROK_PAGE_TABLE_H

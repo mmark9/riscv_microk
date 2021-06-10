@@ -1,10 +1,16 @@
 #ifndef RISCV_MICROK_CONSTANTS_H
 #define RISCV_MICROK_CONSTANTS_H
 
+#include "arch.h"
+
 #define FRAME_SIZE 4096
 #define PAGE_SIZE FRAME_SIZE
 #define LVL1_SIZE 0x400000
+#ifdef RV64
+#define PAGE_TABLE_NR_SLOTS 512
+#else
 #define PAGE_TABLE_NR_SLOTS 1024
+#endif
 
 #define kIB * (1U << 10U)
 #define MiB * (1U << 20U)
