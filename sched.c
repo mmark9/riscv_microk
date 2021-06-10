@@ -104,6 +104,7 @@ void sched_init() {
     sched_state.run_queue.tail = 0;
     sched_state.initialized = true;
     sched_state.thread_id_counter = 0;
+    sched_set_current_thread(0);
     sched_cap_time_msecs = time_msecs_since_boot();
     __asm__("li tp, 0"
             : /* no outputs */
