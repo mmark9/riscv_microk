@@ -95,10 +95,10 @@ uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 #define sv39_ppn2(paddr) bits(paddr, 30, 26)
 
 
-#define page_table_sv39_lv1_ptr ((uint64_t*)(511ULL << 30 | 510ULL << 21 | 509ULL << 12))
-#define page_table_sv39_lv1_spare_ptr ((uint64_t*)(511ULL << 30 | 510ULL << 21 | 508ULL << 12))
-#define page_table_sv39_lv2_ptr(l1_index) ((uint64_t*)(511ULL << 30 | 510ULL << 21 | (l1_index) << 12))
-#define page_table_sv39_lv3_ptr(l1_index, l2_index) ((uint64_t*)(511ULL << 30 | (l1_index) << 21 | (l2_index) << 12))
+#define page_table_sv39_lv2_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 510ULL << 12))
+#define page_table_sv39_lv2_spare_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 509ULL << 12))
+#define page_table_sv39_lv1_ptr(l1_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | (l1_index) << 12))
+#define page_table_sv39_lv0_ptr(l1_index, l2_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | (l1_index) << 21 | (l2_index) << 12))
 
 
 uint64_t sv39_pte(uint64_t paddr, bool user_access,
