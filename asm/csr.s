@@ -56,15 +56,26 @@ fcsr_r_csr:
     csrr a0, fcsr
     ret
 
-.globl cycle_r_csr
-cycle_r_csr:
+.globl cycle_r_csr32
+cycle_r_csr32:
+    csrr a0, cycle
+    csrr a1, cycleh
+    ret
+
+.globl time_r_csr32
+time_r_csr32:
+    csrr a0, time
+    csrr a1, timeh
+    ret
+
+.globl cycle_r_csr64
+cycle_r_csr64:
     csrr a0, cycle
     ret
 
-.globl time_r_csr
-time_r_csr:
+.globl time_r_csr64
+time_r_csr64:
     csrr a0, time
-    csrr a1, timeh
     ret
 
 .globl instret_r_csr

@@ -27,14 +27,14 @@
 #define sv32_ppn1(pte) (bits(pte, 20, 12))
 
 // sets
-#define sv32_set_valid(pte, v) set_bits(pte, (v == true ? 1 : 0), 0, 1)
-#define sv32_set_can_read(pte, v) set_bits(pte, (v == true ? 1 : 0), 1, 1)
-#define sv32_set_can_write(pte, v) set_bits(pte, (v == true ? 1 : 0), 2, 1)
-#define sv32_set_can_execute(pte, v) set_bits(pte, (v == true ? 1 : 0), 3, 1)
-#define sv32_set_user_can_access(pte, v) set_bits(pte, (v == true? 1 : 0), 4, 1)
-#define sv32_set_is_global(pte, v) set_bits(pte, (v == true? 1 : 0), 5, 1)
-#define sv32_set_accessed(pte, v) set_bits(pte, (v == true ? 1 : 0), 6, 1)
-#define sv32_set_dirty(pte, v) set_bits(pte, (v == true? 1 : 0), 7, 1)
+#define sv32_set_valid(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 0, 1)
+#define sv32_set_can_read(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 1, 1)
+#define sv32_set_can_write(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 2, 1)
+#define sv32_set_can_execute(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 3, 1)
+#define sv32_set_user_can_access(pte, v) set_bits(pte, ((v) == true? 1 : 0), 4, 1)
+#define sv32_set_is_global(pte, v) set_bits(pte, ((v) == true? 1 : 0), 5, 1)
+#define sv32_set_accessed(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 6, 1)
+#define sv32_set_dirty(pte, v) set_bits(pte, ((v) == true? 1 : 0), 7, 1)
 #define sv32_set_rsw(pte, v) set_bits(pte, v, 8, 2)
 #define sv32_set_ppn0(pte, v) set_bits(pte, v, 10, 10)
 #define sv32_set_ppn1(pte, v) set_bits(pte, v, 20, 12)
@@ -43,7 +43,7 @@
 // this is used for modifying any physical page within the current
 // address space by simply creating an entry and pointing to the page
 #define page_table_lv1_spare_ptr ((uint32_t*)(1023 << 22 | 1021 << 12))
-#define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 22 | pde_index << 12))
+#define page_table_lv2_ptr(pde_index) ((uint32_t*)(1023 << 22 | (pde_index) << 12))
 
 void page_table_simple_flush_tlb();
 void page_table_set_root_page(uint32_t table);
@@ -74,14 +74,14 @@ uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 #define sv39_rsw(pte) (bits(pte, 8, 2))
 #define sv39_ppn(pte) (bits(pte, 10, 44))
 
-#define sv39_set_valid(pte, v) set_bits(pte, (v == true ? 1 : 0), 0, 1)
-#define sv39_set_can_read(pte, v) set_bits(pte, (v == true ? 1 : 0), 1, 1)
-#define sv39_set_can_write(pte, v) set_bits(pte, (v == true ? 1 : 0), 2, 1)
-#define sv39_set_can_execute(pte, v) set_bits(pte, (v == true ? 1 : 0), 3, 1)
-#define sv39_set_user_can_access(pte, v) set_bits(pte, (v == true? 1 : 0), 4, 1)
-#define sv39_set_is_global(pte, v) set_bits(pte, (v == true? 1 : 0), 5, 1)
-#define sv39_set_accessed(pte, v) set_bits(pte, (v == true ? 1 : 0), 6, 1)
-#define sv39_set_dirty(pte, v) set_bits(pte, (v == true? 1 : 0), 7, 1)
+#define sv39_set_valid(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 0, 1)
+#define sv39_set_can_read(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 1, 1)
+#define sv39_set_can_write(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 2, 1)
+#define sv39_set_can_execute(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 3, 1)
+#define sv39_set_user_can_access(pte, v) set_bits(pte, ((v) == true? 1 : 0), 4, 1)
+#define sv39_set_is_global(pte, v) set_bits(pte, ((v) == true? 1 : 0), 5, 1)
+#define sv39_set_accessed(pte, v) set_bits(pte, ((v) == true ? 1 : 0), 6, 1)
+#define sv39_set_dirty(pte, v) set_bits(pte, ((v) == true? 1 : 0), 7, 1)
 #define sv39_set_rsw(pte, v) set_bits(pte, v, 8, 2)
 #define sv39_set_ppn(pte, v) set_bits(pte, v, 10, 44)
 
@@ -94,11 +94,14 @@ uint32_t sv32_user_pte_pointer(uint32_t paddr, bool valid);
 #define sv39_ppn1(paddr) bits(paddr, 21, 9)
 #define sv39_ppn2(paddr) bits(paddr, 30, 26)
 
+#define sv39_pte_ppn(pte) bits(pte, 10, 44)
+
 
 #define page_table_sv39_lv2_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 510ULL << 12))
-#define page_table_sv39_lv2_spare_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 509ULL << 12))
-#define page_table_sv39_lv1_ptr(l1_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | (l1_index) << 12))
-#define page_table_sv39_lv0_ptr(l1_index, l2_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | (l1_index) << 21 | (l2_index) << 12))
+#define page_table_sv39_lv2_spare1_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 509ULL << 12))
+#define page_table_sv39_lv2_spare2_ptr ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | 508ULL << 12))
+#define page_table_sv39_lv1_ptr(l2_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | 511ULL << 21 | (l2_index) << 12))
+#define page_table_sv39_lv0_ptr(l2_index, l1_index) ((uint64_t*)(0x1ffffffULL << 39 | 511ULL << 30 | (l2_index) << 21 | (l1_index) << 12))
 
 
 uint64_t sv39_pte(uint64_t paddr, bool user_access,

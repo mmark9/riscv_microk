@@ -16,10 +16,10 @@ void page_table_set_root_page(uint32_t table) {
             "paging: setting root page table to %p table (old value=%p)\n",
             table, root_page_table);
     root_page_table = table;
-    uint32_t old_satp = satp_r_csr();
+    rvu_word old_satp = satp_r_csr();
     uint32_t ppn = table / FRAME_SIZE;
     // TODO: utilize ASID
-    uint32_t new_satp = satp_set_ppn(old_satp, ppn);
+    rvu_word new_satp = satp_set_ppn(old_satp, ppn);
     satp_w_csr(new_satp);
 }
 

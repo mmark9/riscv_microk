@@ -21,6 +21,7 @@ void sys_kassert(bool condition) {
         sys_panic("assertion failed");
 }
 void sys_halt() {
+    sys_disable_supervisor_interrupts();
     for (;;);
 }
 void sys_tlb_flush_all() {

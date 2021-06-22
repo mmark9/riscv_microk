@@ -43,6 +43,46 @@ typedef struct thread_context {
     rvu_word pc;
 } ThreadContext;
 
+#ifdef RV64
+#define context_save_imm_thread_context(context,next_pc) \
+{ \
+    __asm__("mv tp, %0;" \
+       "sd ra, 0(tp);"    \
+       "sd sp, 8(tp);"    \
+       "sd t0, 16(tp);"    \
+       "sd t1, 24(tp);"   \
+       "sd t2, 32(tp);"   \
+       "sd s0, 40(tp);"   \
+       "sd s1, 48(tp);"   \
+       "sd a0, 56(tp);"   \
+       "sd a1, 64(tp);"   \
+       "sd a2, 72(tp);"   \
+       "sd a3, 80(tp);"   \
+       "sd a4, 88(tp);"   \
+       "sd a5, 96(tp);"   \
+       "sd a6, 104(tp);"   \
+       "sd a7, 112(tp);"   \
+       "sd s2, 120(tp);"   \
+       "sd s3, 128(tp);"   \
+       "sd s4, 136(tp);"   \
+       "sd s5, 144(tp);"   \
+       "sd s6, 152(tp);"   \
+       "sd s7, 160(tp);"   \
+       "sd s8, 168(tp);"   \
+       "sd s9, 176(tp);"   \
+       "sd s10, 184(tp);"  \
+       "sd s11, 192(tp);"  \
+       "sd t3, 200(tp);"  \
+       "sd t4, 208(tp);"  \
+       "sd t5, 216(tp);"  \
+       "sd t6, 224(tp);"  \
+       : /* no output */  \
+       : "r" (&(context).regs)       \
+       : "tp");            \
+       (context).pc = (rvu_word)(next_pc);    \
+}
+
+#else
 #define context_save_imm_thread_context(context,next_pc) \
 { \
     __asm__("mv tp, %0;" \
@@ -78,8 +118,9 @@ typedef struct thread_context {
        : /* no output */  \
        : "r" (&(context).regs)       \
        : "tp");            \
-       context.pc = (rvu_word)(next_pc);    \
+       (context).pc = (rvu_word)(next_pc);    \
 }
+#endif
 
 void context_save_thread_context(ThreadContext* dest,
                                  const RiscvGPRS* regs,

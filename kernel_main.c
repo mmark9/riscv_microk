@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "utils.h"
 #include "time.h"
+#include "kmalloc.h"
 #include "memory.h"
 #include "syscalls.h"
 #include "simple_falloc.h"
@@ -101,8 +102,8 @@ void thread_ipc_send_func() {
         kprintf(K_INFO, "thread %d: send msg %u to thread %d\n",
                 current_thread->thread_id, out_msg.data[0], out_msg.dest);
         ipc_res = sys_do_ipc_send_async(&out_msg);
-        if (elapsed % 50 == 0 && elapsed > 0)
-            sys_do_yield();
+        /*if (elapsed % 50 == 0 && elapsed > 0)
+            sys_do_yield();*/
     }
 }
 
@@ -117,8 +118,8 @@ void thread_ipc_recv_func() {
                     "thread %d: received msg %u from thread %d\n",
                     current_thread->thread_id, msg.data[0], msg.src);
         }
-        if (elapsed % 100 == 0 && elapsed > 0 )
-            sys_do_yield();
+        /*if (elapsed % 100 == 0 && elapsed > 0 )
+            sys_do_yield();*/
     }
 }
 
@@ -176,11 +177,14 @@ void thread_uart_character_reader() {
     const char* long_msg = "Sending test command.......\n";
     uint32_t msg_len = kstrlen(long_msg);
     uint32_t old_elapsed = 0;
+    uint32_t msec_delta = 0;
+    uint32_t read_interval_msec = 200;
     out_msg.src = current_thread->thread_id;
     out_msg.dest = TERMINAL_THREAD_ID;
     while (true) {
-        elapsed = time_secs_since_boot();
-        if (old_elapsed != elapsed) {
+        elapsed = time_msecs_since_boot();
+        msec_delta = elapsed - old_elapsed;
+        if (msec_delta > read_interval_msec) {
             old_elapsed = elapsed;
             out_msg.data[0] = long_msg[msg_index];
             msg_index = (msg_index + 1) % msg_len;
@@ -206,7 +210,7 @@ void kernel_main(
             march_id.value, vendor_id.value, impl_id.value);
     kprintf(K_INFO,
             "boot: kernel image size %d\n", linker_config.kernel_size_in_bytes);
-    // for now map 16 MiB
+    // for now map 132 MiB
     uint32_t identity_map_size = (0x1 << 22U) * 8;
     // map 8 MiB for kernel area initially
     kputs(K_INFO, "system: setting up supervisor level interrupts..\n");
@@ -219,7 +223,7 @@ void kernel_main(
           "system: setting up early kernel address space.\n");
     create_early_identity_map(linker_config.firmware_load_address,
                               identity_map_size);
-    map_device_tree_area((uint32_t)config);
+    //map_device_tree_area((rvu_word)config);
     kputs(K_INFO, "system: loading memory config from device tree..\n");
     uint64_t mem_range = memory_range_from_device_tree(config);
     uint32_t mem_base = mem_range >> 32;
@@ -227,8 +231,9 @@ void kernel_main(
     kprintf(K_INFO,
             "system: memory_start = %p | memory_size = %u\n",
             mem_base, mem_size);
+    pf_bitmap_init(mem_base, mem_size);
     kputs(K_INFO, "system: setting up frame bitmap...\n");
-    init_frame_bitmap_from_linker_config(&linker_config);
+    pf_bitmap_process_linker_config(&linker_config);
     kprintf(K_INFO, "boot: setting up higher half of address space...\n");
     mem_setup_page_table(&linker_config);
     kputs(K_INFO, "system: setting up page frame allocator...\n");
@@ -243,6 +248,7 @@ void kernel_main(
     kprintf(K_INFO, "system: setting heap @ %p | size = %u bytes\n",
             kheap_start, kheap_size);
     setup_kernel_heap(kheap_start, kheap_size);
+    init_malloc((void*)kheap_start, kheap_size);
     kputs(K_INFO, "system: initializing scheduler\n");
     sched_init();
     kputs(K_INFO, "system: setting up system calls\n");

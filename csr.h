@@ -4,7 +4,11 @@
 #include "arch.h"
 #include <stdint.h>
 
+#ifdef RV64
+#define field_mask(n_bits, pos) ((rvu_word)(((1ULL << (rvu_word)(n_bits)) - 1) << (rvu_word)(pos)))
+#else
 #define field_mask(n_bits, pos) ((rvu_word)(((1U << (rvu_word)(n_bits)) - 1) << (uint32_t)(pos)))
+#endif
 #define clear_field(x, n_bits, pos) (~field_mask((n_bits), (pos)) & (x))
 #define extract_field(x, n_bits, pos) ((field_mask((n_bits), (pos)) & (x)) >> (rvu_word)(pos))
 #define set_field(x, n_bits, val, pos) (clear_field((x), (n_bits), (pos)) \
@@ -97,7 +101,16 @@ void sie_w_csr(rvu_word val);
 void sie_s_csr(rvu_word val);
 void sie_c_csr(rvu_word val);
 
-uint64_t time_r_csr(void);
-uint64_t cycle_r_csr(void);
+#ifdef RV64
+uint64_t time_r_csr64(void);
+uint64_t cycle_r_csr64(void);
+#define cycle_r_csr() cycle_r_csr64()
+#define time_r_csr() time_r_csr64()
+#else
+uint64_t time_r_csr32(void);
+uint64_t cycle_r_csr32(void);
+#define cycle_r_csr() cycle_r_csr64()
+#define time_r_csr() time_r_csr64()
+#endif
 
 #endif /* SRC_ARCH_RISCV32_CSR_H_ */

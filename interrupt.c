@@ -60,96 +60,96 @@ const char* trap_string_table[] = {
         "Reserved or Unknown"
 };
 
-uint32_t handle_instruction_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_instruction_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort
     return sepc;
 }
 
-uint32_t handle_instruction_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_instruction_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort
     return sepc;
 }
 
-uint32_t handle_illegal_instruction_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_illegal_instruction_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort
     return sepc;
 }
 
-uint32_t handle_breakpoint_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_breakpoint_exception(RiscvGPRS* regs, rvu_word sepc) {
     // handle system call emulation for supervisor mode
     time_schedule_next_timer(TIMER_TICK_INTERVAL);
-    uint32_t new_sepc = syscall_execute(regs, sepc);
+    rvu_word new_sepc = syscall_execute(regs, sepc);
     return new_sepc;
 }
 
-uint32_t handle_load_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_load_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort
     return sepc;
 }
 
-uint32_t handle_load_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_load_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort
     return sepc;
 }
 
-uint32_t handle_store_amo_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_store_amo_address_misaligned_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort?
     return sepc;
 }
 
-uint32_t handle_store_amo_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_store_amo_access_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: abort?
     return sepc;
 }
 
-uint32_t handle_ecall_from_user_mode_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_ecall_from_user_mode_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: possible handle syscalls
     return sepc;
 }
 
-uint32_t handle_ecall_from_supervisor_mode_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_ecall_from_supervisor_mode_exception(RiscvGPRS* regs, rvu_word sepc) {
     schedule(regs, sepc);
     return sepc; // won't get here
 }
 
-uint32_t handle_instruction_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_instruction_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: forward to corresponding pager
-    uint32_t stval = sbadaddr_r_csr();
+    rvu_word stval = sbadaddr_r_csr();
     kprintf(K_DEBUG, "system [interrupt]: instruction page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
 
-uint32_t handle_load_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_load_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: forward to corresponding pager
-    uint32_t stval = sbadaddr_r_csr();
+    rvu_word stval = sbadaddr_r_csr();
     kprintf(K_DEBUG, "system [interrupt]: load page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
 
-uint32_t handle_store_amo_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_store_amo_page_fault_exception(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: forward to corresponding pager
-    uint32_t stval = sbadaddr_r_csr();
+    rvu_word stval = sbadaddr_r_csr();
     kprintf(K_DEBUG, "system [interrupt]: store page fault @ %p; address: %p\n", sepc, stval);
     sys_panic("page fault exception");
     return sepc;
 }
 
-uint32_t handle_user_software_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_user_software_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     return sepc;
 }
 
-uint32_t handle_supervisor_software_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_supervisor_software_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     return sepc;
 }
 
-uint32_t handle_user_timer_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_user_timer_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: ??
     return sepc;
 }
 
-uint32_t handle_supervisor_timer_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_supervisor_timer_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     uint32_t uptime_secs = time_secs_since_boot();
     uint32_t uptime_msecs = time_msecs_since_boot();
     kprintf(K_DEBUG,
@@ -160,12 +160,12 @@ uint32_t handle_supervisor_timer_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     return sepc;
 }
 
-uint32_t handle_user_external_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_user_external_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: handle possible device driver interrupt
     return sepc;
 }
 
-uint32_t handle_supervisor_external_interrupt(RiscvGPRS* regs, rvu_word sepc) {
+rvu_word handle_supervisor_external_interrupt(RiscvGPRS* regs, rvu_word sepc) {
     // TODO: handle possible device driver interrupt
     return sepc;
 }
@@ -239,7 +239,7 @@ TrapCause trap_read_cause(rvu_word scause_reg) {
 }
 
 void supervisor_handle_trap(RiscvGPRS * regs) {
-    uint32_t scause = scause_r_csr();
+    rvu_word scause = scause_r_csr();
     rvu_word sepc = sepc_r_csr();
     TrapCause cause = trap_read_cause(scause);
     kprintf(K_DEBUG, "system [interrupt]: caught %s at PC %p\n",

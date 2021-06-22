@@ -47,7 +47,7 @@ rvu_word syscall_ipc_send_async(RiscvGPRS* regs, rvu_word sepc) {
     return sepc+4;
 }
 
-rvu_word syscall_ipc_recv_async(RiscvGPRS* regs, uint32_t sepc) {
+rvu_word syscall_ipc_recv_async(RiscvGPRS* regs, rvu_word sepc) {
     sys_kassert(syscalls_initialized == true);
     sys_kassert(current_thread != 0);
     regs->x10_a0 = ipc_async_recv_msg(regs, sepc+4);
@@ -81,7 +81,7 @@ int32_t sys_do_yield() {
     __asm__("mv t0, %0"
     : /* no output */
     : "r" (sys_call_code)
-    : "%t0"
+    : "t0"
     );
     sys_ebreak();
     return 0;
@@ -112,9 +112,9 @@ int32_t sys_do_ipc_send_async(struct ipc_msg* msg) {
     int32_t ret_code = 0;
     __asm__("mv t0, %0;"
             "sw a0, 0(t0);"
-            : /* no output */
-            : "r" (&ret_code)
-            : "t0", "a0"
+    : /* no output */
+    : "r" (&ret_code)
+    : "t0", "a0"
     );
     return ret_code;
 }
@@ -135,5 +135,6 @@ int32_t sys_do_ipc_recv_async(struct ipc_msg* msg_out) {
     : "r" (&ret_code)
     : "t0", "a0"
     );
+
     return ret_code;
 }

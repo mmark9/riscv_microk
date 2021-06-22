@@ -5,6 +5,7 @@
 
 // RVI = RISC-V Signed Word
 // RVU = RISC-V Unsigned Word
+#define RV64
 #ifdef RV64
 #define XLEN 64
 typedef int64_t rvi_word;

@@ -10,11 +10,18 @@ AS=$(HOST)-as
 OBJCOPY=$(HOST)-objcopy
 
 # Compile flags
-ASFLAGS?=-mabi=ilp32
+ifeq ($(TARGET_ARCH),riscv64)
+	ASFLAGS?=-mabi=lp64d
+else
+	ASFLAGS?=-mabi=ilp32
+endif
 CFLAGS:=-O0 -std=gnu99 \
 	-ffreestanding -fbuiltin -Wall -Wextra -I ./
 ifeq ($(BUILD_MODE),debug)
 	CFLAGS:=$(CFLAGS) -gdwarf-4
+endif
+ifeq ($(TARGET_ARCH),riscv64)
+	CFLAGS:=$(CFLAGS) -fPIC
 endif
 LIBFLAGS:=-nostdlib
 
@@ -40,9 +47,16 @@ OPEN_SBI_JMP=$(DEST_DIR)/sal_os_$(TARGET_ARCH)_jmp.elf
 KERNEL_IMAGE_ELF = $(DEST_DIR)/sal_os_$(TARGET_ARCH).elf
 KERNEL_IMAGE_BINARY = $(DEST_DIR)/sal_os_$(TARGET_ARCH).bin
 
+RV32_ASM_FILES=%/boot_loader.s %/context_low.s %/trap_low.s
+RV64_ASM_FILES=%/boot_loader_rv64.s %/context_low_rv64.s %/trap_low_rv64.s
+
 # Build objects
 OBJS:=$(patsubst %.c,$(BUILD_DIR)/%.o, $(wildcard ./*.c))
-ASM_OBJS:=$(patsubst %.s,%.s.o, $(wildcard asm/*.s))
+ifeq ($(TARGET_ARCH),riscv64)
+	ASM_OBJS:=$(patsubst %.s,%.s.o, $(filter-out $(RV32_ASM_FILES), $(wildcard asm/*.s)))
+else
+	ASM_OBJS:=$(patsubst %.s,%.s.o, $(filter-out $(RV64_ASM_FILES), $(wildcard asm/*.s)))
+endif
 ASM_OBJS:=$(notdir $(ASM_OBJS))
 ASM_OBJS:=$(patsubst %.s.o, $(BUILD_DIR)/%.s.o, $(ASM_OBJS))
 
@@ -75,6 +89,7 @@ clean:
 	rm -f $(KERNEL_IMAGE_BINARY)
 	rm -f $(OPEN_SBI_PAYLOAD)
 	rm -f $(OPEN_SBI_JMP)
+	make -C $(OPEN_SBI_PATH) clean
 
 $(BUILD_DIR)/%.o: %.c
 	mkdir -p $(BUILD_DIR)

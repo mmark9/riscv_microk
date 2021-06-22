@@ -28,6 +28,7 @@ kernel_boot:
 	li a1, 0x87000000
 	la sp,kernel_stack_bottom
 	mv gp,sp
+	mv tp,zero
 	# call main
 	call kernel_main
 halt:

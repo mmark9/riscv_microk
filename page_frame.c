@@ -6,11 +6,19 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define FRAME_BIT_MAP_ROWS 64
 #define NUM_FRAMES 1048576
-#define NUM_BIT_MAP_ROWS 32768
 #define FRAMES_PER_ROW 32
+#define NUM_BIT_MAP_ROWS 32768
+/*
+#ifdef RV64
+#define FRAMES_PER_ROW 64
+#define NUM_BIT_MAP_ROWS 16384
+#else
+#define FRAMES_PER_ROW 32
+#define NUM_BIT_MAP_ROWS 32768
+#endif*/
 
+uint32_t pf_base_frame_no = 0;
 // declare bitmap in data section
 uint32_t frame_bitmap[NUM_BIT_MAP_ROWS];
 
@@ -110,7 +118,7 @@ bool pf_bitmap_region_is_free(uint32_t address, uint32_t nr_pages) {
     return true;
 }
 
-void init_frame_bitmap_from_linker_config(KernelLinkerConfig* config) {
+void pf_bitmap_process_linker_config(KernelLinkerConfig* config) {
     // this includes the deadzone below the firmware
     uint32_t total_image_size = config->kernel_bss_end;
     uint32_t total_image_frame_count = total_image_size / FRAME_SIZE;
@@ -139,6 +147,15 @@ uint32_t pf_bitmap_alloc_frame() {
             frame_no, frame_addr);
     pf_bitmap_mark_allocated(frame_no);
     return frame_addr;
+}
+
+void pf_bitmap_init(uint32_t mem_start_addr, uint32_t mem_size) {
+    // assuming page aligned start address
+    pf_base_frame_no = mem_start_addr / FRAME_SIZE;
+    uint32_t nr_pages = mem_size / FRAME_SIZE;
+    uint32_t nr_pages_remain = mem_size % FRAME_SIZE;
+    nr_pages = nr_pages_remain > 0 ? nr_pages + 1 : nr_pages;
+    pf_bitmap_mark_region_free(mem_start_addr, nr_pages);
 }
 
 int init_frame_bitmap(const void* dtb) {
