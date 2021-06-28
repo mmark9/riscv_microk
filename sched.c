@@ -6,6 +6,7 @@
 #include "system.h"
 #include "kmalloc.h"
 #include "utils.h"
+#include "syscalls.h"
 #include "page_table.h"
 #include "interrupt.h"
 #include "constants.h"
@@ -114,12 +115,7 @@ void sched_init() {
 }
 
 void sched_thread_exit() {
-    sys_kassert(sched_state.initialized);
-    kprintf(K_DEBUG,
-            "sched [exit]: thread %d exiting...\n",
-            current_thread->thread_id);
-    current_thread->flagged_delete = true;
-    sys_ebreak();
+    sys_do_exit(0);
 }
 
 void sched_update_thread_quantum(struct thread_tcb* tcb) {
@@ -137,6 +133,9 @@ void sched_do_thread_cleanup() {
                 "sched: cleaning up thread %d\n",
                 current_thread->thread_id);
         kfree((void*)current_thread->k_stack_ptr);
+        kfree((void*)current_thread->u_stack_ptr);
+        simple_falloc_free(current_thread->root_page);
+        thread_table[current_thread->thread_id] = 0;
         // TODO: find a way to clean up thread objects
         // threads may be allocated on the stack which should not
         // be tied to the heap pool; alternatively kfree() should
