@@ -10,7 +10,15 @@ typedef enum {
     USER_MODE
 } PrivilegeMode;
 
+typedef struct {
+    uint32_t mem_base;
+    uint32_t mem_size;
+    uint32_t core_id;
+} PlatformInfo;
+
 void sys_shutdown();
+void sys_set_platform_info(PlatformInfo* info);
+PlatformInfo sys_platform_info();
 void sys_kassert(bool condition);
 void sys_panic(const char* reason);
 void sys_ecall();

@@ -9,6 +9,8 @@
 int32_t current_core_id = -1;
 PrivilegeMode sys_privilege_mode;
 PrivilegeMode sys_previous_privilege_mode;
+PlatformInfo hw_info;
+
 
 void sys_ecall() {
     __asm__("ecall");
@@ -133,4 +135,13 @@ int32_t sys_core_id() {
 }
 void sys_set_core_id(int32_t core_id) {
     current_core_id = core_id;
+}
+void sys_set_platform_info(PlatformInfo* info) {
+    hw_info.mem_base = info->mem_base;
+    hw_info.core_id = info->core_id;
+    hw_info.mem_size = info->mem_size;
+}
+
+PlatformInfo sys_platform_info() {
+    return hw_info;
 }

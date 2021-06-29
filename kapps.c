@@ -25,7 +25,7 @@ typedef enum {
     TERM_UNKNOWN,
 } TerminalCommands;
 
-const char* terminal_cmd_str_map[3] = {"uptime", "shutdown", "cpuinfo"};
+const char* terminal_cmd_str_map[3] = {"uptime", "shutdown", "hwinfo"};
 
 int terminal_strcmnp(const char* a, const char* b) {
     while (*a != 0  && *b != 0) {
@@ -68,6 +68,16 @@ void terminal_interpret_command(const char* line) {
         uint32_t days = hours / 24;
         terminal_printf("  up %d day(s) %d hour(s) %d minute(s) %d second(s)\n",
                         days, hours, minutes, seconds_up);
+        terminal_puts(terminal_prompt);
+    } else if (cmd == TERM_HW_INFO) {
+        struct sbiret march_id = sbi_relay_get_marchid();
+        struct sbiret vendor_id = sbi_relay_get_mvendorid();
+        PlatformInfo pinfo = sys_platform_info();
+        terminal_printf("\tHart ID: %d\n\tMachine Architecture ID: %d\n\tVendor ID: %d\n",
+                        pinfo.core_id, march_id, vendor_id);
+        uint32_t mem_size_in_mib = pinfo.mem_size / (1 << 20);
+        terminal_printf("\tMemory base address: %p\n\tMemory size (MiB): %d\n",
+                        pinfo.mem_base, mem_size_in_mib);
         terminal_puts(terminal_prompt);
     } else if (cmd == TERM_SHUTDOWN) {
         terminal_puts("shutting down\n");
