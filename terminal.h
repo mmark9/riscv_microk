@@ -49,7 +49,8 @@ void terminal_su(uint8_t n);
 void terminal_sd(uint8_t n);
 #define terminal_puts(str) kputs(K_INFO, (str))
 #define terminal_printf(fmt, ...) kprintf(K_INFO, (fmt), __VA_ARGS__)
-#define terminal_clear() terminal_puts("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+#define TERM_CLEAR_STR "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+#define terminal_clear() terminal_printf("%s%s%s", TERM_CLEAR_STR, TERM_CLEAR_STR, TERM_CLEAR_STR)
 #define terminal_putchar(c) kputchar(c)
 
 #endif //RISCV_MICROK_TERMINAL_H
