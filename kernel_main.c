@@ -17,11 +17,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-const char* BANNER = " _____ ___  ___ ___ ___  __   __  _  _____ ___ _  _ ___ _    \n"
-                     " |_   _| _ \\/ __|_ _/ __|_\\ \\ / / | |/ / __| _ \\ \\| | __| |   \n"
-                     "   | | |   /\\__ \\| | (_|___\\ V /  | ' <| _||   / .` | _|| |__ \n"
-                     "   |_| |_|_\\|___/___\\___|   \\_/   |_|\\_\\___|_|_\\_|\\_|___|____|\n"
-                     "                                                              \n";
+const char* BANNER = " _____    _                           _____ _____ \n"
+                     "|_   _|  (_)                         |  _  /  ___|\n"
+                     "  | |_ __ _ _ __ ___ _ __ ___   ___  | | | \\ `--. \n"
+                     "  | | '__| | '__/ _ \\ '_ ` _ \\ / _ \\ | | | |`--. \\\n"
+                     "  | | |  | | | |  __/ | | | | |  __/ \\ \\_/ /\\__/ /\n"
+                     "  \\_/_|  |_|_|  \\___|_| |_| |_|\\___|  \\___/\\____/ \n"
+                     "                                                  \n";
 
 void print_banner() {
     kputs(K_INFO, "\n\n");
@@ -37,8 +39,10 @@ void kernel_main(
 		void* config,
 		bool use_dev_tree,
 		KernelLinkerConfig linker_config) {
+    PlatformInfo info;
     print_banner();
     sys_set_core_id(hart_id);
+    info.core_id = hart_id;
     struct sbiret impl_id = sbi_relay_get_impl_id();
     struct sbiret march_id = sbi_relay_get_marchid();
     struct sbiret vendor_id = sbi_relay_get_mvendorid();
@@ -46,8 +50,6 @@ void kernel_main(
             "system: running on core %d | march_id = %d "
             "| vendor_id = %d | impl_id = %d\n", hart_id,
             march_id.value, vendor_id.value, impl_id.value);
-    kprintf(K_INFO,
-            "boot: kernel image size %d\n", linker_config.kernel_size_in_bytes);
     // for now map 132 MiB
     uint32_t identity_map_size = (0x1 << 22U) * 8;
     // map 8 MiB for kernel area initially
@@ -66,9 +68,8 @@ void kernel_main(
     uint64_t mem_range = memory_range_from_device_tree(config);
     uint32_t mem_base = mem_range >> 32;
     uint32_t mem_size = UINT32_MAX & mem_range;
-    kprintf(K_INFO,
-            "system: memory_start = %p | memory_size = %u\n",
-            mem_base, mem_size);
+    info.mem_base = mem_base;
+    info.mem_size = mem_size;
     pf_bitmap_init(mem_base, mem_size);
     kputs(K_INFO, "system: setting up frame bitmap...\n");
     pf_bitmap_process_linker_config(&linker_config);
@@ -92,9 +93,10 @@ void kernel_main(
     kputs(K_INFO, "system: setting up system calls\n");
     syscall_setup_table();
     kputs(K_INFO, "system: starting first thread\n");
+    sys_set_platform_info(&info);
     sched_init_thread(&thread1, thread_terminal_thread);
     sched_init_thread(&thread2, thread_uart_reader);
-    //sched_init_thread(&thread3, thread_ipc_recv_func);
+    //sched_init_thread(&thread3, thread_transient_task);
     sched_enqueue(&thread1);
     sched_enqueue(&thread2);
     //sched_enqueue(&thread3);
