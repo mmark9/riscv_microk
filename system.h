@@ -46,5 +46,7 @@ bool sys_supervisor_external_interrupts_enabled();
 int32_t sys_core_id();
 void sys_set_core_id(int32_t core_id);
 void sys_return_from_blocked_status();
+void sys_trigger_supervisor_software_interrupt();
+void sys_clear_supervisor_software_interrupt();
 
 #endif //RISCV_MICROK_SYSTEM_H

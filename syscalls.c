@@ -83,7 +83,7 @@ int32_t sys_do_yield() {
     : "r" (sys_call_code)
     : "t0"
     );
-    sys_ebreak();
+    sys_trigger_supervisor_software_interrupt();
     return 0;
 }
 
@@ -95,7 +95,7 @@ int32_t sys_do_exit(uint32_t code) {
     : "r" (sys_call_code), "r" (code)
     : "t0", "a0"
     );
-    sys_ebreak();
+    sys_trigger_supervisor_software_interrupt();
     return 0;
 }
 
@@ -107,7 +107,7 @@ int32_t sys_do_ipc_send_async(struct ipc_msg* msg) {
     : "r" (sys_call_code), "r" (msg)
     : "t0", "a0"
     );
-    sys_ebreak();
+    sys_trigger_supervisor_software_interrupt();
     // return code will be in a0
     int32_t ret_code = 0;
     __asm__("mv t0, %0;"
@@ -127,7 +127,7 @@ int32_t sys_do_ipc_recv_async(struct ipc_msg* msg_out) {
     : "r" (sys_call_code), "r" (msg_out)
     : "t0", "a0"
     );
-    sys_ebreak();
+    sys_trigger_supervisor_software_interrupt();
     int32_t ret_code = 0;
     __asm__("mv t0, %0;"
             "sw a0, 0(t0);"

@@ -141,6 +141,14 @@ void sys_set_platform_info(PlatformInfo* info) {
     hw_info.core_id = info->core_id;
     hw_info.mem_size = info->mem_size;
 }
+void sys_trigger_supervisor_software_interrupt() {
+    uint64_t tmp = 0x2;
+    __asm__("csrs sip,%0;" :: "r"(tmp) :);
+}
+void sys_clear_supervisor_software_interrupt() {
+    uint64_t tmp = 0x2;
+    __asm__("csrc sip,%0;" :: "r"(tmp) :);
+}
 
 PlatformInfo sys_platform_info() {
     return hw_info;
