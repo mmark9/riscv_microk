@@ -5,7 +5,71 @@
 .equ VIRTUAL_MEMORY_SIZE, 0x8000000000
 .equ FIRMWARE_LOAD_ADDRESS, 0x80000000
 .equ KERNEL_LOAD_ADDRESS, 0x80800000
+.equ UART_TX_ADDR, 0x000C0020
 .globl KERNEL_VIRTUAL_BASE
+
+#strings
+.section .boot_rodata, "a"
+page_setup_str_str:
+.string "kernel-boot: hit label page_setup_str\n"
+paging_str_str:
+.string "kernel-boot: hit label paging_str\n"
+fw_stack_top_str:
+.string "kernel-boot: hit label fw_stack_top\n"
+fw_stack_bottom_str:
+.string "kernel-boot: hit label fw_stack_bottom\n"
+l2_table_str:
+.string "kernel-boot: hit label l2_table\n"
+l1_table_low_str:
+.string "kernel-boot: hit label l1_table_low\n"
+l1_table_high_str:
+.string "kernel-boot: hit label l1_table_high\n"
+l0_tables_low_str:
+.string "kernel-boot: hit label l0_tables_low\n"
+l0_tables_high_str:
+.string "kernel-boot: hit label l0_tables_high\n"
+linker_config_str:
+.string "kernel-boot: hit label linker_config\n"
+boot_entry_str:
+.string "kernel-boot: hit label boot_entry\n"
+setup_constants_str:
+.string "kernel-boot: hit label setup_constants\n"
+setup_exceptions_str:
+.string "kernel-boot: hit label setup_exceptions\n"
+recursive_map_lv2_str:
+.string "kernel-boot: hit label recursive_map_lv2\n"
+lv2_mapping_str:
+.string "kernel-boot: hit label lv2_mapping\n"
+lv2_identity_map_low_str:
+.string "kernel-boot: hit label lv2_identity_map_low\n"
+lv2_identity_map_high_str:
+.string "kernel-boot: hit label lv2_identity_map_high\n"
+lower_half_map_str:
+.string "kernel-boot: hit label lower_half_map\n"
+higher_half_map_str:
+.string "kernel-boot: hit label higher_half_map\n"
+level_0_map_low_str:
+.string "kernel-boot: hit label level_0_map_low\n"
+level_0_map_high_str:
+.string "kernel-boot: hit label level_0_map_high\n"
+lv1_link_lv0_tables_str:
+.string "kernel-boot: hit label lv1_link_lv0_tables\n"
+lv1_link_start_str:
+.string "kernel-boot: hit label lv1_link_start\n"
+lv1_link_continue_str:
+.string "kernel-boot: hit label lv1_link_continue\n"
+lv0_table_fill_str:
+.string "kernel-boot: hit label lv0_table_fill\n"
+lv0_table_fill_start_str:
+.string "kernel-boot: hit label lv0_table_fill_start\n"
+lv0_table_fill_continue_str:
+.string "kernel-boot: hit label lv0_table_fill_continue\n"
+enable_paging_str:
+.string "kernel-boot: hit label enable_paging\n"
+jump_to_higher_half_str:
+.string "kernel-boot: hit label jump_to_higher_half\n"
+kernel_marker:
+.string "kernel-boot: test marker\n"
 
 # Constants set by the linker
 .extern LOAD_ADDRESS
@@ -133,19 +197,29 @@ boot_entry:
 	xor t4, t4, t4
 	xor t5, t5, t5
 	xor t6, t6, t6
+	la a4, boot_entry_str
+	jal a7,early_puts
 setup_constants:
+    la a4,setup_constants_str
+    jal a7,early_puts
     # tp = 2MiB in PPN
     li tp,0x200
     # gp = 1GiB
     li gp,0x1
     slli gp,gp,0x1e
 setup_exceptions:
+    la a4,setup_exceptions_str
+    jal a7,early_puts
+
     la t0, trap_boot_exceptions
     csrw stvec, t0
 recursive_map_lv2:
     # to enable editing page tables
     # after sditching satp MODE to sv39
     # we use recursive mapping entries
+    la a4,recursive_map_lv2_str
+    jal a7,early_puts
+
     la s0,l2_table
     srli s0,s0,12
     slli s0,s0,10
@@ -160,8 +234,13 @@ recursive_map_lv2:
     sd s2,8(s3)
 lv2_mapping:
     # now set pte entries in lv2 table
+    la a4,lv2_mapping_str
+    jal a7,early_puts
+
     la s0,l2_table
 lv2_identity_map_low:
+    la a4,lv2_identity_map_low
+    jal a7,early_puts
     # setup PTE to point to l1 table
     la s6,l1_table_low
     srli s6,s6,0xc
@@ -182,6 +261,9 @@ lv2_identity_map_low:
     # set the entry for the identity mapping
     sd t0,0(s5)
 lv2_identity_map_high:
+    la a4,lv2_identity_map_high_str
+    jal a7,early_puts
+
     la s6,l1_table_high
     srli s6,s6,0xc
     # s6 = PPN of l1_table
@@ -201,14 +283,20 @@ lv2_identity_map_high:
     # s5 now points to higher half table slot
     sd t0,0(s5)
 lower_half_map:
+    la a4,lower_half_map_str
+    jal a7,early_puts
+
     la s0,l0_tables_low
     li s1,0x8
     li a3,FIRMWARE_LOAD_ADDRESS
     la s5,l1_table_low
     jal lv1_link_lv0_tables
 higher_half_map:
+    la a4,higher_half_map
+    jal a7,early_puts
+
     la s0,l0_tables_high
-    li s1,0x10
+    li s1,0x80
     li a3,KERNEL_VIRTUAL_BASE
     la s5,l1_table_high
     jal lv1_link_lv0_tables
@@ -216,6 +304,9 @@ higher_half_map:
    # s1 = how many level0 entries
    # a3 = physical address pointer
 level_0_map_low:
+    la a4,level_0_map_low_str
+    jal a7,early_puts
+
     la s0,l0_tables_low
     li t0,512
     li t1,0x8
@@ -226,6 +317,9 @@ level_0_map_low:
     # s1 = # pages * 512
     jal lv0_table_fill
 level_0_map_high:
+    la a4,level_0_map_high_str
+    jal a7,early_puts
+
     la s0,l0_tables_high
     li t0,512
     li t1,0x10
@@ -237,6 +331,9 @@ level_0_map_high:
     jal lv0_table_fill
     j enable_paging
 lv1_link_lv0_tables:
+    la a4,lv1_link_lv0_tables_str
+    jal a7,early_puts
+
     # inputs:
     # s0 = level 0 table pointer
     # s1 = number of level 0 mappings = number of 2 MiB regions
@@ -272,10 +369,16 @@ lv1_link_lv0_tables:
 	li s4, 0x1000
 
 lv1_link_start:
+    la a4,lv1_link_start_str
+    jal a7,early_puts
+
     blt s3,s1,lv1_link_continue
     # jump back
     jr ra
 lv1_link_continue:
+    la a4,lv1_link_continue
+    jal a7,early_puts
+
     mv s6,s0
     # divide by PAGE_SIZE = 4096
     srli s6,s6,0xc
@@ -291,6 +394,9 @@ lv1_link_continue:
     addi s3,s3,0x1
     j lv1_link_start
 lv0_table_fill:
+    la a4,lv0_table_fill_str
+    jal a7,early_puts
+
     # inputs:
     # s0 = l0_tables_pointer
     # s1 = how many level0 entries
@@ -313,9 +419,15 @@ lv0_table_fill:
     mv s2,t0
     # s2 should be zero
 lv0_table_fill_start:
+    #la a4,lv0_table_fill_start_str
+    #jal a7, early_puts
+
     blt s2,s1,lv0_table_fill_continue
     jr ra
 lv0_table_fill_continue:
+    #la a4,lv0_table_fill_continue_str
+    #jal a7,early_puts
+
     mv s5,a3
     # divide by PAGE_SIZE = 4096
     srli s5,s5,0xc
@@ -331,6 +443,9 @@ lv0_table_fill_continue:
     addi s2,s2,0x1
     j lv0_table_fill_start
 enable_paging:
+    la a4,enable_paging_str
+    jal a7,early_puts
+
 	# t0 = used to copy to satp reg
 	xor t0, t0, t0
 	# Set mode = 8 (sv39) and ASID = 0
@@ -350,11 +465,19 @@ enable_paging:
 	# set PPN in satp buffer (t3)
 	add t0, t0, t3
 
+	la a4,kernel_marker
+    jal a7,early_puts
 	# flush the TLB because why not
 	sfence.vma zero, zero
 	# set satp to new value to enable paging
+	la a4,kernel_marker
+    jal a7,early_puts
 	csrw satp, t0
+	#la a4,kernel_marker
+    #jal a7,early_puts
 jump_to_higher_half:
+    #la a4,jump_to_higher_half_str
+    #jal a7,early_puts
     # long jump to start filling TLB
     # a0 = boot hart id
     # a1 = device tree pointer or config string
@@ -365,6 +488,20 @@ jump_to_higher_half:
     la t0, kernel_boot
 	jr t0
 
+early_puts:
+    # a4 = string
+    # a5 = character
+    # a6 = UART TX ADDR
+    # a7 = holds return address
+    li a6,UART_TX_ADDR
+early_puts_cont:
+    lb a5,0(a4)
+    bnez a5,early_putc
+    jr a7
+early_putc:
+    sb a5,0(a6)
+    addi a4,a4,0x1
+    beqz zero,early_puts_cont
 
 .align 0x2
 # TODO: handle boot exceptions better
